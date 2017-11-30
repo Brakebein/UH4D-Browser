@@ -1,0 +1,319 @@
+viewport {
+  display: block;
+  height: 100%;
+  background: #666;
+  position: relative;
+  overflow: hidden; }
+  viewport, viewport * {
+    user-select: none; }
+  viewport > canvas.cursor_pointer {
+    cursor: pointer; }
+  viewport > canvas.cursor_orbit {
+    cursor: url(../../img/cursor/cursor_orbit.gif), auto !important; }
+  viewport > canvas.cursor_zoom {
+    cursor: url(../../img/cursor/cursor_zoom.gif), auto; }
+  viewport > canvas.cursor_pan {
+    cursor: url(../../img/cursor/cursor_pan.gif), auto; }
+  viewport > .viewport-extras {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; }
+    viewport > .viewport-extras > * {
+      pointer-events: auto; }
+  viewport > .select-rectangle {
+    position: absolute;
+    border: 1px dashed #ffff00;
+    background-color: rgba(255, 255, 0, 0.05);
+    pointer-events: none; }
+
+viewport .ctrl-container, viewport-object-tree .ctrl-container {
+  position: absolute;
+  pointer-events: none;
+  display: flex; }
+  viewport .ctrl-container > div, viewport-object-tree .ctrl-container > div {
+    pointer-events: auto; }
+  viewport .ctrl-container.ctrl-center, viewport-object-tree .ctrl-container.ctrl-center {
+    width: 100%;
+    justify-content: center; }
+  viewport .ctrl-container.ctrl-top, viewport-object-tree .ctrl-container.ctrl-top {
+    top: 0; }
+    viewport .ctrl-container.ctrl-top > div, viewport-object-tree .ctrl-container.ctrl-top > div {
+      background-color: rgba(51, 51, 51, 0.8);
+      border: 1px solid #999;
+      color: #fafafa;
+      font-size: 12px;
+      border-top: none;
+      border-radius: 0 0 10px 10px; }
+  viewport .ctrl-container.ctrl-top-left, viewport-object-tree .ctrl-container.ctrl-top-left {
+    top: 0;
+    left: 0; }
+    viewport .ctrl-container.ctrl-top-left > div, viewport-object-tree .ctrl-container.ctrl-top-left > div {
+      background-color: rgba(51, 51, 51, 0.8);
+      border: 1px solid #999;
+      color: #fafafa;
+      font-size: 12px;
+      border-top: none;
+      border-left: none;
+      border-radius: 0 0 10px 0; }
+  viewport .ctrl-container.ctrl-bottom, viewport-object-tree .ctrl-container.ctrl-bottom {
+    bottom: 0; }
+    viewport .ctrl-container.ctrl-bottom > div, viewport-object-tree .ctrl-container.ctrl-bottom > div {
+      background-color: rgba(51, 51, 51, 0.8);
+      border: 1px solid #999;
+      color: #fafafa;
+      font-size: 12px;
+      border-bottom: none;
+      border-radius: 10px 10px 0 0; }
+viewport .ctrl-group, viewport-object-tree .ctrl-group {
+  float: left;
+  height: 100%;
+  padding: 0 4px;
+  border-left: 1px solid #999; }
+  viewport .ctrl-group:first-of-type, viewport-object-tree .ctrl-group:first-of-type {
+    border: none; }
+  viewport .ctrl-group.ctrl-group-text, viewport-object-tree .ctrl-group.ctrl-group-text {
+    padding: 3px 4px; }
+  viewport .ctrl-group input, viewport-object-tree .ctrl-group input {
+    margin: 2px 0;
+    padding: 0;
+    height: 22px; }
+    viewport .ctrl-group input.error, viewport-object-tree .ctrl-group input.error {
+      border-color: #f00; }
+    viewport .ctrl-group input[disabled], viewport-object-tree .ctrl-group input[disabled] {
+      cursor: default; }
+  viewport .ctrl-group select, viewport-object-tree .ctrl-group select {
+    padding: 0;
+    margin: 2px 0;
+    height: 22px; }
+  viewport .ctrl-group .btn, viewport-object-tree .ctrl-group .btn {
+    height: 26px;
+    padding: 1px 5px;
+    line-height: 1.5;
+    font-size: 12px; }
+viewport .ctrl-btn, viewport-object-tree .ctrl-btn {
+  color: #ffffff;
+  height: 100%;
+  border: 1px solid transparent;
+  margin: 0 1px;
+  padding: 0;
+  background-color: transparent;
+  -moz-border-radius: 3px;
+  border-radius: 3px; }
+  viewport .ctrl-btn:hover, viewport-object-tree .ctrl-btn:hover {
+    background-color: #555; }
+  viewport .ctrl-btn:focus, viewport-object-tree .ctrl-btn:focus {
+    outline: none; }
+  viewport .ctrl-btn[disabled], viewport-object-tree .ctrl-btn[disabled] {
+    filter: alpha(opacity=30);
+    opacity: 0.3; }
+    viewport .ctrl-btn[disabled]:hover, viewport-object-tree .ctrl-btn[disabled]:hover {
+      border: 1px solid #fff; }
+  viewport .ctrl-btn:active, viewport .ctrl-btn.active, viewport-object-tree .ctrl-btn:active, viewport-object-tree .ctrl-btn.active {
+    background-color: #555;
+    border: 1px solid #999;
+    border-right-color: #ddd;
+    border-bottom-color: #ddd; }
+viewport .ctrl-slider, viewport-object-tree .ctrl-slider {
+  padding: 3px;
+  display: inline-block; }
+  viewport .ctrl-slider > *, viewport-object-tree .ctrl-slider > * {
+    vertical-align: middle; }
+  viewport .ctrl-slider > input[type=range], viewport-object-tree .ctrl-slider > input[type=range] {
+    width: 200px;
+    margin: 0 5px;
+    display: inline-block; }
+
+viewport-navigation {
+  transition: top 0.5s; }
+  viewport-navigation > .ctrl-container > div {
+    height: 33px;
+    padding: 3px 6px 3px 3px;
+    z-index: 60; }
+  viewport-navigation > .ctrl-container {
+    transition: top linear 0.5s; }
+  viewport-navigation[disabled] > .ctrl-container {
+    top: -33px; }
+  viewport-navigation .ctrl-group:first-of-type {
+    border: none; }
+  viewport-navigation .ctrl-group > .btn-group {
+    margin-top: 2px; }
+
+viewport-axis {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  left: 10px;
+  bottom: 10px; }
+
+viewport-loadprogress > .loadprogress-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 5px;
+  background-color: #fc4e2a; }
+viewport-loadprogress > .loadprogress-label {
+  position: absolute;
+  left: 10px;
+  bottom: 6px;
+  font-size: 8pt;
+  color: #fafafa; }
+viewport-loadprogress > .loadprogress-bar.ng-hide, viewport-loadprogress > .loadprogress-label.ng-hide {
+  opacity: 0; }
+viewport-loadprogress > .loadprogress-bar.ng-hide-add, viewport-loadprogress > .loadprogress-label.ng-hide-add {
+  transition: opacity 2s linear 2s; }
+
+viewport-object-tree > .list-header, viewport-plan-list > .list-header, viewport-image-list > .list-header {
+  margin: 20px 0 5px; }
+  viewport-object-tree > .list-header:first-child, viewport-plan-list > .list-header:first-child, viewport-image-list > .list-header:first-child {
+    margin-top: 5px; }
+  viewport-object-tree > .list-header > *, viewport-plan-list > .list-header > *, viewport-image-list > .list-header > * {
+    display: block; }
+    viewport-object-tree > .list-header > * > *, viewport-plan-list > .list-header > * > *, viewport-image-list > .list-header > * > * {
+      display: inline-block;
+      padding: 5px;
+      background-color: #ddd;
+      border-bottom: 1px dotted #aaa;
+      border-top-right-radius: 5px; }
+    viewport-object-tree > .list-header > *:last-child > *, viewport-plan-list > .list-header > *:last-child > *, viewport-image-list > .list-header > *:last-child > * {
+      border: none;
+      border-radius: 0 5px 5px; }
+    viewport-object-tree > .list-header > *:first-child > *, viewport-plan-list > .list-header > *:first-child > *, viewport-image-list > .list-header > *:first-child > * {
+      border-top-left-radius: 5px; }
+    viewport-object-tree > .list-header > *.list-header-caption > *, viewport-plan-list > .list-header > *.list-header-caption > *, viewport-image-list > .list-header > *.list-header-caption > * {
+      font-size: 14px;
+      font-weight: bold; }
+    viewport-object-tree > .list-header > *.list-header-slim > *, viewport-plan-list > .list-header > *.list-header-slim > *, viewport-image-list > .list-header > *.list-header-slim > * {
+      padding: 3px; }
+    viewport-object-tree > .list-header > *.list-header-stretch > *, viewport-plan-list > .list-header > *.list-header-stretch > *, viewport-image-list > .list-header > *.list-header-stretch > * {
+      display: flex; }
+      viewport-object-tree > .list-header > *.list-header-stretch > * > *, viewport-plan-list > .list-header > *.list-header-stretch > * > *, viewport-image-list > .list-header > *.list-header-stretch > * > * {
+        padding: 0 4px;
+        border-left: 1px solid #999; }
+        viewport-object-tree > .list-header > *.list-header-stretch > * > *:first-child, viewport-plan-list > .list-header > *.list-header-stretch > * > *:first-child, viewport-image-list > .list-header > *.list-header-stretch > * > *:first-child {
+          border: none; }
+  viewport-object-tree > .list-header .toggle, viewport-plan-list > .list-header .toggle, viewport-image-list > .list-header .toggle {
+    width: 16px;
+    top: 2px;
+    cursor: pointer;
+    margin: 0 5px 0 1px; }
+    viewport-object-tree > .list-header .toggle.glyphicon-eye-open, viewport-plan-list > .list-header .toggle.glyphicon-eye-open, viewport-image-list > .list-header .toggle.glyphicon-eye-open {
+      color: #555; }
+    viewport-object-tree > .list-header .toggle.glyphicon-eye-close, viewport-plan-list > .list-header .toggle.glyphicon-eye-close, viewport-image-list > .list-header .toggle.glyphicon-eye-close {
+      color: #aaa; }
+viewport-object-tree .list-item, viewport-plan-list .list-item, viewport-image-list .list-item {
+  padding: 3px;
+  font-size: 11px;
+  display: flex; }
+  viewport-object-tree .list-item:hover, viewport-plan-list .list-item:hover, viewport-image-list .list-item:hover {
+    background-color: #eee; }
+  viewport-object-tree .list-item.active, viewport-plan-list .list-item.active, viewport-image-list .list-item.active {
+    background-color: #d9f0a3; }
+  viewport-object-tree .list-item.not-visible, viewport-plan-list .list-item.not-visible, viewport-image-list .list-item.not-visible {
+    opacity: 0.7; }
+  viewport-object-tree .list-item > *, viewport-plan-list .list-item > *, viewport-image-list .list-item > * {
+    margin: 0 5px;
+    color: #555;
+    cursor: pointer; }
+    viewport-object-tree .list-item > *.toggle, viewport-plan-list .list-item > *.toggle, viewport-image-list .list-item > *.toggle {
+      flex: 0 0 15px;
+      top: 2px;
+      font-size: 12px; }
+      viewport-object-tree .list-item > *.toggle.glyphicon-eye-open, viewport-plan-list .list-item > *.toggle.glyphicon-eye-open, viewport-image-list .list-item > *.toggle.glyphicon-eye-open {
+        color: #555; }
+      viewport-object-tree .list-item > *.toggle.glyphicon-eye-close, viewport-plan-list .list-item > *.toggle.glyphicon-eye-close, viewport-image-list .list-item > *.toggle.glyphicon-eye-close {
+        color: #888; }
+    viewport-object-tree .list-item > *.list-expand, viewport-plan-list .list-item > *.list-expand, viewport-image-list .list-item > *.list-expand {
+      flex: 0 0 15px;
+      border-left: 1px solid #999;
+      text-align: right;
+      font-size: 8px;
+      padding-top: 1px; }
+    viewport-object-tree .list-item > *.list-label, viewport-plan-list .list-item > *.list-label, viewport-image-list .list-item > *.list-label {
+      flex: 1 1 auto;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis; }
+    viewport-object-tree .list-item > *.list-ctrls, viewport-plan-list .list-item > *.list-ctrls, viewport-image-list .list-item > *.list-ctrls {
+      flex: 0 0 auto; }
+      viewport-object-tree .list-item > *.list-ctrls > *:not(:hover), viewport-plan-list .list-item > *.list-ctrls > *:not(:hover), viewport-image-list .list-item > *.list-ctrls > *:not(:hover) {
+        color: #888; }
+
+viewport-spatialize-manual.ng-enter {
+  animation: fadeIn 0.5s; }
+viewport-spatialize-manual.ng-leave {
+  animation: fadeOut 0.5s; }
+viewport-spatialize-manual > .ctrl-container > div {
+  height: 33px;
+  padding: 3px 6px 3px; }
+viewport-spatialize-manual > .image-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: auto 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none; }
+
+viewport-snapshot > .ctrl-container > div {
+  height: 33px;
+  padding: 3px 6px 3px;
+  z-index: 60; }
+  viewport-snapshot > .ctrl-container > div .lineWidth {
+    display: inline-block;
+    vertical-align: middle;
+    width: 30px;
+    height: 20px; }
+    viewport-snapshot > .ctrl-container > div .lineWidth > div {
+      width: 30px;
+      background-color: #ddd; }
+  viewport-snapshot > .ctrl-container > div .minicolors {
+    display: inline-block;
+    margin: 0 5px; }
+    viewport-snapshot > .ctrl-container > div .minicolors > span {
+      width: 22px;
+      height: 22px; }
+viewport-snapshot > .pin-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 30; }
+  viewport-snapshot > .pin-layer.active {
+    z-index: 40; }
+viewport-snapshot > .paint-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 30; }
+  viewport-snapshot > .paint-layer.active {
+    z-index: 40; }
+  viewport-snapshot > .paint-layer > div {
+    position: relative;
+    width: 100%;
+    height: 100%; }
+    viewport-snapshot > .paint-layer > div div, viewport-snapshot > .paint-layer > div canvas {
+      width: 100%;
+      height: 100%; }
+viewport-snapshot > .border-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #ff0;
+  pointer-events: none;
+  z-index: 20;
+  transition: border-color 0.5s; }
+
+viewport-snapshot-view > .ctrl-container > div {
+  height: 33px;
+  padding: 3px 6px 3px; }
+viewport-snapshot-view > .screen-layer, viewport-snapshot-view > .paint-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: auto 100%;
+  background-position: center;
+  background-repeat: no-repeat; }
+
+/*# sourceMappingURL=viewport.css.map */

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>UrbanHistory4D</title>
+
+	<!-- bower:css -->
+	<!-- endbower -->
+
+	<link rel="stylesheet" href="style/bootstrap.css" />
+	<link rel="stylesheet" href="style/main.css" />
+	<link rel="stylesheet" href="app/search/search.css" />
+
+	<link href="components/dokuvis.viewport/viewport.css" rel="stylesheet">
+
+</head>
+<body ng-app="uh4dApp">
+
+	<div ui-view="header"></div>
+
+	<div ui-view="root"></div>
+
+	<div ui-view="footer" class="bg-dark"></div>
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+	<!-- bower:js -->
+	<script src="bower_components/angular/angular.js"></script>
+	<script src="bower_components/angular-resource/angular-resource.js"></script>
+	<script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+	<script src="bower_components/angular-animate/angular-animate.js"></script>
+	<script src="bower_components/angular-translate/angular-translate.js"></script>
+	<script src="bower_components/angular-strap/dist/angular-strap.js"></script>
+	<script src="bower_components/angular-strap/dist/angular-strap.tpl.js"></script>
+	<script src="bower_components/tween.js/src/Tween.js"></script>
+	<!-- endbower -->
+
+	<script type="text/javascript" src="lib/ng-debounce-throttle.js"></script>
+
+	<script type="text/javascript" src="lib/threejs/three-r87.js"></script>
+	<script type="text/javascript" src="lib/threejs/OrbitControls.js"></script>
+	<script type="text/javascript" src="lib/threejs/CombinedCamera.js"></script>
+	<script type="text/javascript" src="lib/threejs/ctm/lzma.js"></script>
+	<script type="text/javascript" src="lib/threejs/ctm/ctm.js"></script>
+	<script type="text/javascript" src="lib/threejs/ctm/CTMLoader.js"></script>
+	<script type="text/javascript" src="lib/threejs/XRayShader.js"></script>
+
+	<script type="text/javascript" src="lib/threejs/BufferGeometryMerge.js"></script>
+
+	<script type="text/javascript" src="lib/dv3d/dv3d.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Gizmo.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Measure.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Pin.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Plan.js"></script>
+	<script type="text/javascript" src="lib/dv3d/ImagePane.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Collection.js"></script>
+	<script type="text/javascript" src="lib/dv3d/ObjectCollection.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Layer.js"></script>
+	<script type="text/javascript" src="lib/dv3d/Entry.js"></script>
+	<script type="text/javascript" src="lib/dv3d/ObjectEntry.js"></script>
+	<script type="text/javascript" src="lib/dv3d/SphereMarker.js"></script>
+	<script type="text/javascript" src="lib/dv3d/TorusMarker.js"></script>
+
+	<script src="app/app.js"></script>
+	<script src="app/header/header.js"></script>
+	<script src="app/search/search.js"></script>
+
+	<script src="app/webglInterface.js"></script>
+	<script src="app/SpatializeInterface.js"></script>
+
+	<script type="text/javascript" src="components/dokuvis.utils/utils.js"></script>
+	<script type="text/javascript" src="components/dokuvis.viewport/viewport.core.js"></script>
+	<script type="text/javascript" src="components/dokuvis.viewport/viewport.factories.js"></script>
+	<script type="text/javascript" src="components/dokuvis.viewport/viewport.extras.js"></script>
+	<script type="text/javascript" src="components/dokuvis.viewport/viewport.display.js"></script>
+
+</body>
+</html>

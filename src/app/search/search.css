@@ -1,0 +1,22 @@
+search {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column; }
+  search > .search-bar {
+    flex: 0 0 auto;
+    padding: 0.25rem 1rem; }
+    search > .search-bar > nav.navbar > .container {
+      justify-content: center; }
+    search > .search-bar .search-input {
+      width: 600px; }
+  search > .search-explorer {
+    flex: 1 1 auto;
+    display: flex; }
+    search > .search-explorer > .viewport {
+      flex: 1 1 auto; }
+    search > .search-explorer > .search-results {
+      flex: 0 0 600px; }
+
+/*# sourceMappingURL=search.css.map */

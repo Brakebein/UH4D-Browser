@@ -1,0 +1,34 @@
+@import "../../style/variables"
+
+file-drop-area, [file-drop-area]
+	display: block
+	& > div
+		width: 100%
+		height: 100%
+		display: flex
+		align-items: center
+		justify-content: center
+		background-color: #f5f5f5
+		border: 5px dashed #ddd
+		border-radius: 5px
+		text-align: center
+		font-weight: bold
+		font-size: 16px
+		color: #ccc
+		fill: #ccc
+		cursor: pointer
+		transition: color 0.3s, fill 0.3s, border-color 0.3s
+
+		&:hover
+			color: #aaa
+			fill: #aaa
+			border-color: #bbb
+		&.nv-file-over
+			color: $dvGreenColor
+			fill: $dvGreenColor
+			border-color: $dvGreenColor
+		& > svg
+			flex: 0 0 40px
+			width: 40px
+			height: 40px
+			padding: 10px

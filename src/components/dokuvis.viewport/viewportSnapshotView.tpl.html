@@ -1,0 +1,28 @@
+<div class="screen-layer" ng-style="{'background-image': 'url(data/' + screen.path + screen.file + ')', opacity: screenOpacity}"></div>
+<div class="paint-layer" ng-style="{'background-image': 'url(data/' + screen.paint.path + screen.paint.file + ')', opacity: paintOpacity}"></div>
+
+<div class="ctrl-container ctrl-bottom ctrl-center">
+	<div>
+
+		<div class="ctrl-group">
+			<div class="ctrl-slider">
+				Screenshot
+				<input class="dvSlider" type="range" min="0" max="1" step="0.1" ng-model="screenOpacity"/>
+				{{ screenOpacity | number:1 }}
+			</div>
+		</div>
+
+		<div class="ctrl-group">
+			<div class="ctrl-slider">
+				Painting
+				<input class="dvSlider" type="range" min="0" max="1" step="0.1" ng-model="paintOpacity"/>
+				{{ paintOpacity | number:1 }}
+			</div>
+		</div>
+
+		<div class="ctrl-group">
+			<button class="btn btn-default" ng-click="closeSnapshotView()">Close</button>
+		</div>
+
+	</div>
+</div>

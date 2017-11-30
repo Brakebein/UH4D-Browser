@@ -1,0 +1,29 @@
+<div class="image-layer"
+	 ng-style="{'background-image': 'url(data/' + source.file.path + source.file.preview + ')', opacity: opacity / 100}"></div>
+
+<div class="ctrl-container ctrl-bottom ctrl-center">
+	<div>
+
+		<div class="ctrl-group">
+			<div class="ctrl-slider">
+				<span>Deckkraft</span>
+				<input class="dvSlider" type="range" min="0" max="100" step="5" ng-model="opacity"/>
+				<span>{{ opacity }}</span>
+			</div>
+		</div>
+
+		<div class="ctrl-group">
+			<div class="ctrl-slider">
+				<span>FOV</span>
+				<input class="dvSlider" type="range" min="20" max="85" ng-model="fov" ng-change="changeFOV()"/>
+				<span>{{ fov }}</span>
+			</div>
+		</div>
+
+		<div class="ctrl-group">
+			<button class="btn btn-primary" ng-click="save()"><i class="fa fa-save"></i> {{'save'|translate}}</button>
+			<button class="btn btn-default" ng-click="closeSpatializeManual()" translate>abort</button>
+		</div>
+
+	</div>
+</div>

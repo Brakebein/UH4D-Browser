@@ -1,0 +1,83 @@
+<div class="list-header">
+	<!--<div class="list-header-caption">-->
+		<!--<span>3D-Objekte</span>-->
+	<!--</div>-->
+	<div>
+		<div>
+			<div class="btn-group btn-group-xs">
+				<button class="btn"
+						ng-class="{'btn-default': !showHierarchy, 'btn-primary': showHierarchy}"
+						ng-click="switchTo('hierarchy')">
+					{{'viewport_hierarchy' | translate}}
+				</button>
+				<button class="btn"
+						ng-class="{'btn-default': !showLayers, 'btn-primary': showLayers}"
+						ng-click="switchTo('layers')">
+					{{'viewport_layers' | translate}}
+				</button>
+			</div>
+		</div>
+	</div>
+	<div class="list-header-slim list-header-stretch">
+		<div>
+			<div>
+				<span class="toggle glyphicon"
+					  ng-class="{'glyphicon-eye-open': objects.visible, 'glyphicon-eye-close': !objects.visible}"
+					  ng-click="objects.toggle()"></span>
+			</div>
+			<div>
+				<div class="dvSlider-container dvSlider-slim">
+					Opacity
+					<input class="dvSlider dvSlider-dark" type="range" style="width: 100px" min="0.1" max="1" step="0.1"/>
+					1.0
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="list-content">
+
+	<p ng-hide="layers.length || hierarchy.length" translate>viewport_list_noobjects</p>
+
+	<div ng-if="showHierarchy">
+		<div ng-repeat="data in hierarchy | orderBy: 'label'"
+			 ng-init="depth = 0"
+			 ng-include="'components/dokuvis.viewport/treeItem.tpl.html'"></div>
+	</div>
+
+	<div ng-if="showLayers">
+		<div ng-repeat="layer in layers | orderBy: 'name'">
+			<div class="list-item" ng-class="{'not-visible': !layer.visible}">
+				<span class="toggle glyphicon"
+					  title="{{'viewport_list_toggle'|translate}}"
+					  ng-class="{'glyphicon-eye-open': layer.visible, 'glyphicon-eye-close': !layer.visible}"
+					  ng-click="layer.toggle()"></span>
+				<div class="list-expand"
+					 style="flex-basis: 15px;"
+					 ng-click="layer.expand = !layer.expand">
+					<span class="glyphicon"
+						  ng-class="{'glyphicon-plus': !layer.expand, 'glyphicon-minus': layer.expand}"></span>
+				</div>
+				<span class="list-label"><b>{{ layer.name }}</b></span>
+			</div>
+			<div class="list-children" ng-show="layer.expand">
+				<div ng-repeat="item in layer.list | orderBy: 'label'">
+					<div class="list-item" ng-class="{active: item.active, 'not-visible': !item.visible}">
+						<span class="toggle glyphicon"
+							  title="{{'viewport_list_toggle'|translate}}"
+							  ng-class="{'glyphicon-eye-open': item.visible, 'glyphicon-eye-close': !item.visible}"
+							  ng-click="item.toggle()"></span>
+						<div class="list-expand"
+							 style="flex-basis: 35px;"></div>
+						<span class="list-label" ng-click="item.visible && item.select($event)">{{ item.label }}</span>
+						<div class="list-ctrls">
+							<i class="glyphicon glyphicon-search" title="{{'viewport_list_focus'|translate}}" ng-click="item.focus()"></i>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>

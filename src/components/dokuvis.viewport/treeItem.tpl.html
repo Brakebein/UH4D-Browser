@@ -1,0 +1,23 @@
+<div class="list-item" ng-class="{active: data.active, 'not-visible': !data.visible}">
+	<span class="toggle glyphicon"
+		  title="{{'viewport_list_toggle'|translate}}"
+		  ng-class="{'glyphicon-eye-open': data.visible, 'glyphicon-eye-close': !data.visible}"
+		  ng-click="data.toggle()"></span>
+	<div class="list-expand"
+		 ng-style="{'flex-basis': depth * 20 + 15 + 'px'}"
+		 ng-click="data.expand = !data.expand">
+		<span ng-show="data.children.length"
+			  class="glyphicon"
+			  ng-class="{'glyphicon-plus': !data.expand, 'glyphicon-minus': data.expand}"></span>
+	</div>
+	<span class="list-label" ng-click="data.visible && data.select($event)">{{ data.label }}</span>
+	<div class="list-ctrls">
+		<i class="glyphicon glyphicon-search" title="{{'viewport_list_focus'|translate}}" ng-click="data.focus()"></i>
+	</div>
+</div>
+
+<div class="list-children" ng-show="data.expand && data.children.length">
+	<div ng-repeat="data in data.children | orderBy: 'name'"
+		 ng-init="depth = depth + 1"
+		 ng-include="'components/dokuvis.viewport/treeItem.tpl.html'"></div>
+</div>

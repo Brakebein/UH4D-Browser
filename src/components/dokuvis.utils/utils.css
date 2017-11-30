@@ -1,0 +1,33 @@
+file-drop-area, [file-drop-area] {
+  display: block; }
+  file-drop-area > div, [file-drop-area] > div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border: 5px dashed #ddd;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: #ccc;
+    fill: #ccc;
+    cursor: pointer;
+    transition: color 0.3s, fill 0.3s, border-color 0.3s; }
+    file-drop-area > div:hover, [file-drop-area] > div:hover {
+      color: #aaa;
+      fill: #aaa;
+      border-color: #bbb; }
+    file-drop-area > div.nv-file-over, [file-drop-area] > div.nv-file-over {
+      color: #5cb85c;
+      fill: #5cb85c;
+      border-color: #5cb85c; }
+    file-drop-area > div > svg, [file-drop-area] > div > svg {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      padding: 10px; }
+
+/*# sourceMappingURL=utils.css.map */
