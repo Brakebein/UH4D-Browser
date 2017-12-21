@@ -1,9 +1,13 @@
 angular.module('uh4dApp', [
 	'ui.router',
 	'ngAnimate',
+	'ngResource',
+	'ng-clamp',
 
 	'dokuvis.viewport',
-	'dokuvis.utils'
+	'dokuvis.utils',
+
+	'uh4d.images'
 ])
 
 .config(['$stateProvider', '$urlRouterProvider',

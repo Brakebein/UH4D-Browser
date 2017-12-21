@@ -1,0 +1,17 @@
+image-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column; }
+  image-list > .list-ctrls {
+    flex: 0 0 30px; }
+  image-list > .list-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    overflow-y: scroll; }
+    image-list > .list-body > .card {
+      width: 165px;
+      margin: 3px; }
+
+/*# sourceMappingURL=images.css.map */

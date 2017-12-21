@@ -1,0 +1,30 @@
+<div class="list-ctrls">
+	<a href="" ng-click="$ctrl.setListMode('list')"><i class="fa fa-th-list"></i></a>
+	<a href="" ng-click="$ctrl.setListMode('cards')"><i class="fa fa-th-large"></i></a>
+</div>
+
+<div class="list-body" ng-if="$ctrl.listMode === 'list'">
+
+	<ul class="list-unstyled">
+		<li class="media border border-primary border-bottom-0" ng-repeat="img in $ctrl.images" title="{{img.title}}">
+			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
+			<div class="media-body">
+				<div ng-clamp="2" ng-bind="img.title"></div>
+				<p><small>{{img.author}} - {{img.date}}</small></p>
+			</div>
+		</li>
+	</ul>
+
+</div>
+
+<div class="list-body" ng-if="$ctrl.listMode === 'cards'">
+
+	<div class="card border border-primary" ng-repeat="img in $ctrl.images" title="{{img.title}}">
+		<img class="card-img-top" ng-src="data/{{img.file.path + img.file.thumb}}"/>
+		<div class="card-body">
+			<div ng-clamp="3">{{img.title}}</div>
+			<p class="card-text">{{img.author}} - {{img.date}}</p>
+		</div>
+	</div>
+
+</div>

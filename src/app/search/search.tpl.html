@@ -5,9 +5,9 @@
 				<!--<label class="mr-sm-2">Search</label>-->
 				<div class="input-group">
 					<span class="input-group-addon">Search</span>
-					<input class="form-control" type="search" placeholder="Search...">
+					<input class="form-control" type="search" placeholder="Search..." ng-model="$ctrl.searchTerm" ng-keypress="$ctrl.onSearchTermEnter($event)">
 					<span class="input-group-btn">
-						<button class="btn btn-secondary">Go!</button>
+						<button class="btn btn-secondary" ng-click="$ctrl.performSearch()">Go!</button>
 					</span>
 				</div>
 			<!--</form>-->
@@ -25,6 +25,8 @@
 
 
 	<div class="search-results">
+
+		<image-list></image-list>
 
 	</div>
 
