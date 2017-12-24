@@ -1,19 +1,104 @@
+@import "../../../node_modules/bootswatch/dist/superhero/variables"
+@import "../../style/variables"
+
 image-list
 	height: 100%
 	display: flex
 	flex-direction: column
 
 	& > .list-ctrls
-		flex: 0 0 30px
+		flex: 0 0 auto
 
 	& > .list-body
 		flex: 1 1 auto
-		//height: 100%
-		display: flex
-		flex-wrap: wrap
-		justify-content: space-evenly
 		overflow-y: scroll
 
-		& > .card
-			width: 165px
-			margin: 3px
+		&.list-media
+			& > ul
+				width: 100%
+				//& > li:not(:last-child)
+				//	border-bottom: none !important
+				& > li.media
+					margin: 9px
+					&:hover
+						border-color: $primary !important
+					& > .media-body
+						margin: 4px 4px 4px 0
+						line-height: initial
+						font-size: 13px
+						& > .media-title
+							font-weight: bold
+							margin-bottom: 4px
+
+		&.list-card
+			display: flex
+			flex-wrap: wrap
+			justify-content: space-evenly
+			& > .card
+				width: 165px
+				margin: 3px
+				max-height: 250px
+				&:hover
+					border-color: $primary !important
+				& > .card-body
+					padding: 0.4em
+					line-height: initial
+					font-size: 11px
+					& > .card-text
+						font-size: 10px
+
+	& > .list-pagination
+		flex: 0 0 auto
+		& > ul
+			margin: 4px
+			& > li
+				& > a:focus
+					color: $pagination-color
+					background-color: $pagination-bg
+					border-color: $pagination-border-color
+				& > a:hover
+					color: $pagination-hover-color
+					background-color: $pagination-hover-bg
+					border-color: $pagination-hover-border-color
+
+// image modal
+$imageVWidth: 60%
+$imageBorder: 1px solid #333
+
+.image-modal-body
+	display: flex
+	flex-direction: row
+
+	.preview-container
+		flex: 1 1 auto
+		position: relative
+		& > div, & > image-viewer
+			position: absolute
+			left: 0
+			right: 0
+			top: 0
+			bottom: 0
+		img
+			max-width: 100%
+			max-height: 100%
+			border: $imageBorder
+
+	.info-container
+		flex: 0 0 (100% - $imageVWidth)
+		padding-left: 20px
+		display: flex
+		flex-direction: column
+
+		& > .title-section
+			flex: 0 0 auto
+			position: relative
+			word-wrap: break-word
+
+		& > .details-section
+			flex: 1 1 auto
+			width: 100%
+			overflow-y: auto
+
+	image-viewer
+		border: $imageBorder
+		background: $greyRadialBackground

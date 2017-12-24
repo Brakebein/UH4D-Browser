@@ -1,0 +1,53 @@
+<div class="modal-body image-modal-body">
+
+	<div class="preview-container">
+		<image-viewer src="'data/' + image.file.path + image.file.texture" options="{width: image.file.width, height: image.file.height}"></image-viewer>
+	</div>
+
+	<div class="info-container">
+		<div class="title-section">
+			<h3>{{image.title}}</h3>
+			<hr/>
+		</div>
+
+		<div class="details-section">
+			<div class="info-display">
+				<div ng-show="image.description">
+					<strong>Description</strong>
+					<p>{{image.description}}</p>
+				</div>
+				<div>
+					<strong>Author</strong>
+					<p>{{image.author || 'unbekannt'}}</p>
+				</div>
+				<div>
+					<strong>Date</strong>
+					<p>{{image.date || 'unbekannt'}}</p>
+				</div>
+				<div ng-show="image.owner">
+					<strong>Owner</strong>
+					<p>{{image.owner}}</p>
+				</div>
+				<div ng-show="image.misc">
+					<strong>Miscellaneous</strong>
+					<p>{{image.misc}}</p>
+				</div>
+				<div>
+					<strong>Tags</strong>
+					<p>{{image.tags.join(', ')}}</p>
+				</div>
+				<div>
+					<strong>Links</strong>
+					<p><a ng-href="{{image.permalink}}" target="_blank">{{image.permalink}}</a></p>
+					<p><a ng-href="data/{{image.file.path + image.file.original}}" target="_blank">Original file</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-secondary" ng-click="startSpatialize()">Verorten</button>
+	<button class="btn btn-secondary" ng-click="close()">Close</button>
+</div>

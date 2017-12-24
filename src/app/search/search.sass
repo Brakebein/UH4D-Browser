@@ -20,7 +20,20 @@ search
 		display: flex
 
 		& > .viewport
+			position: relative
 			flex: 1 1 auto
+			& > .viewport-load-panel
+				position: absolute
+				top: 0
+				bottom: 0
+				left: 0
+				right: 0
+				background-color: rgba(0,0,0,0.5)
+				display: flex
+				flex-direction: column
+				justify-content: center
+				align-items: center
+				cursor: pointer
 
 		& > .search-results
 			flex: 0 0 600px

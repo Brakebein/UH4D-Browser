@@ -1,22 +1,56 @@
 html, body {
-  height: 100%; }
+  height: 100%;
+  padding: 0;
+  margin: 0; }
 
-body {
+body > .main-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column; }
-  body > [ui-view="header"] {
+  body > .main-body > [ui-view="header"] {
     flex: 0 0 auto; }
-  body > [ui-view="footer"] {
+  body > .main-body > [ui-view="footer"] {
     flex: 0 0 auto; }
-  body > [ui-view="root"] {
+  body > .main-body > [ui-view="root"] {
     flex: 1;
     position: relative; }
-    body > [ui-view="root"] > ui-view {
+    body > .main-body > [ui-view="root"] > ui-view {
       position: absolute;
       top: 0;
       bottom: 0;
       left: 0;
       right: 0;
       overflow-y: auto; }
+
+.modal-backdrop.am-fade {
+  background-color: rgba(0, 0, 0, 0.2); }
+
+.modal-dialog.large {
+  max-width: 1200px; }
+.modal-dialog.large {
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px; }
+  .modal-dialog.large > .modal-content {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column; }
+    .modal-dialog.large > .modal-content > .modal-header, .modal-dialog.large > .modal-content > .modal-footer {
+      flex: 0 0 auto; }
+    .modal-dialog.large > .modal-content > .modal-body {
+      flex: 1 1 auto; }
+
+.alert {
+  position: absolute;
+  width: 600px;
+  max-width: 90%;
+  top: 100px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 1090; }
 
 /*# sourceMappingURL=main.css.map */

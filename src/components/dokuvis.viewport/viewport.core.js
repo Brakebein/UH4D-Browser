@@ -2422,8 +2422,8 @@ angular.module('dokuvis.viewport',[
 				obj.matrixAutoUpdate = false;
 
 				// set additional data
-				obj.name = entry.obj.content;
-				obj.userData.id = entry.obj.content;
+				obj.name = entry.obj.id;
+				obj.userData.id = entry.obj.id;
 				obj.userData.name = entry.obj.name;
 				obj.userData.type = entry.obj.type;
 				obj.userData.layer = entry.obj.layer;
@@ -2447,18 +2447,18 @@ angular.module('dokuvis.viewport',[
 
 				// load geometry / ctm file
 				if (entry.obj.type === 'object') {
-					var geomId = Array.isArray(entry.file.content) ?
-						entry.file.content.reduce(function (acc, next) { return acc + next;	}) :
-						entry.file.content;
+					var geomId = Array.isArray(entry.file.mesh) ?
+						entry.file.mesh.reduce(function (acc, next) { return acc + next;	}) :
+						entry.file.mesh;
 
 					// if geometry already exists, use this one
 					if (geomId in geometries)
 						ctmHandler(geometries[geomId].mesh);
 
 					// load multi-material objects
-					if (Array.isArray(entry.file.content)) {
+					if (Array.isArray(entry.file.mesh)) {
 						var geoParts = [];
-						entry.file.content.reduce(function (promise, file) {
+						entry.file.mesh.reduce(function (promise, file) {
 							return promise.then(function () {
 								var deferGeo = $q.defer();
 
@@ -2477,7 +2477,7 @@ angular.module('dokuvis.viewport',[
 
 					// load normal objects
 					else
-						ctmloader.load('data/' + entry.file.path + entry.file.content, ctmHandler, { useWorker: false });
+						ctmloader.load('data/' + entry.file.path + entry.file.mesh, ctmHandler, { useWorker: false });
 				}
 
 				defer.resolve();
@@ -2499,7 +2499,7 @@ angular.module('dokuvis.viewport',[
 							geometryParts[i].dispose();
 						}
 
-						if (!geometry.name) geometry.name = entry.file.content.reduce(function (acc, next) {
+						if (!geometry.name) geometry.name = entry.file.mesh.reduce(function (acc, next) {
 							return acc + next;
 						});
 					}
@@ -2507,7 +2507,7 @@ angular.module('dokuvis.viewport',[
 						geometry.clearGroups();
 						geometry.addGroup(0, geometry.index.count, 0);
 
-						if (!geometry.name) geometry.name = entry.file.content;
+						if (!geometry.name) geometry.name = entry.file.mesh;
 					}
 
 					// add to geometry list
@@ -2599,8 +2599,8 @@ angular.module('dokuvis.viewport',[
 
 			function prepareMaterial(m) {
 				// if material with id/name already exists, use existing instance
-				if (m.name in materials)
-					return materials[m.name];
+				if (m.id in materials)
+					return materials[m.id];
 
 				// else create new material instance
 				var material = new THREE.MeshLambertMaterial();
@@ -2635,7 +2635,7 @@ angular.module('dokuvis.viewport',[
 				material.side = THREE.DoubleSide;
 
 				// add to materials list
-				materials[m.name] = material;
+				materials[m.id] = material;
 
 				return material;
 			}

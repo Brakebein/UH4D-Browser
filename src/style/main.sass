@@ -1,21 +1,60 @@
 html, body
 	height: 100%
+	padding: 0
+	margin: 0
 
 body
-	display: flex
-	flex-direction: column
-
-	& > [ui-view="header"]
-		flex: 0 0 auto
-	& > [ui-view="footer"]
-		flex: 0 0 auto
-	& > [ui-view="root"]
-		flex: 1
+	& > .main-body
 		position: relative
-		& > ui-view
-			position: absolute
-			top: 0
-			bottom: 0
-			left: 0
-			right: 0
-			overflow-y: auto
+		width: 100%
+		height: 100%
+		display: flex
+		flex-direction: column
+
+		& > [ui-view="header"]
+			flex: 0 0 auto
+		& > [ui-view="footer"]
+			flex: 0 0 auto
+		& > [ui-view="root"]
+			flex: 1
+			position: relative
+			& > ui-view
+				position: absolute
+				top: 0
+				bottom: 0
+				left: 0
+				right: 0
+				overflow-y: auto
+
+// $modal custom
+.modal-backdrop.am-fade
+	background-color: rgba(0,0,0,0.2)
+
+.modal-dialog
+	&.large
+		max-width: 1200px
+
+	&.large
+		height: 100%
+		width: 100%
+		margin: 0 auto
+		padding: 30px
+		& > .modal-content
+			position: relative
+			height: 100%
+			display: flex
+			flex-direction: column
+			& > .modal-header, & > .modal-footer
+				flex: 0 0 auto
+			& > .modal-body
+				flex: 1 1 auto
+
+// $alert custom
+.alert
+	position: absolute
+	width: 600px
+	max-width: 90%
+	top: 100px
+	left: 50%
+	transform: translate(-50%,0)
+	z-index: 1090

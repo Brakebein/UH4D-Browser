@@ -6,6 +6,7 @@
 
 	<!-- bower:css -->
 	<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
+	<link rel="stylesheet" href="bower_components/angular-motion/dist/angular-motion.css" />
 	<!-- endbower -->
 
 	<link rel="stylesheet" href="style/bootstrap.css" />
@@ -18,11 +19,13 @@
 </head>
 <body ng-app="uh4dApp">
 
-	<div ui-view="header"></div>
+	<div class="main-body">
+		<div ui-view="header"></div>
 
-	<div ui-view="root"></div>
+		<div ui-view="root"></div>
 
-	<div ui-view="footer" class="bg-dark"></div>
+		<div ui-view="footer" class="bg-dark"></div>
+	</div>
 
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
@@ -38,6 +41,8 @@
 	<script src="bower_components/angular-strap/dist/angular-strap.tpl.js"></script>
 	<script src="bower_components/tween.js/src/Tween.js"></script>
 	<script src="bower_components/ng-clamp/ng-clamp.js"></script>
+	<script src="bower_components/jszip/dist/jszip.js"></script>
+	<script src="bower_components/jszip-utils/dist/jszip-utils.js"></script>
 	<!-- endbower -->
 
 	<script type="text/javascript" src="lib/ng-debounce-throttle.js"></script>
@@ -78,8 +83,10 @@
 	<script type="text/javascript" src="components/dokuvis.viewport/viewport.factories.js"></script>
 	<script type="text/javascript" src="components/dokuvis.viewport/viewport.extras.js"></script>
 	<script type="text/javascript" src="components/dokuvis.viewport/viewport.display.js"></script>
+	<script type="text/javascript" src="components/dokuvis.imageViewer/imageViewer.js"></script>
 
 	<script type="text/javascript" src="components/uh4d.images/images.js"></script>
+	<script type="text/javascript" src="components/uh4d.models/models.js"></script>
 
 </body>
 </html>

@@ -1,30 +1,59 @@
 <div class="list-ctrls">
-	<a href="" ng-click="$ctrl.setListMode('list')"><i class="fa fa-th-list"></i></a>
-	<a href="" ng-click="$ctrl.setListMode('cards')"><i class="fa fa-th-large"></i></a>
+	{{$ctrl.images.length}} results
+	<div class="btn-group btn-group-sm">
+		<button class="btn btn-sm" ng-class="$ctrl.listMode === 'list' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setListMode('list')"><i class="fa fa-th-list"></i></button>
+		<button class="btn btn-sm" ng-class="$ctrl.listMode === 'cards' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setListMode('cards')"><i class="fa fa-th-large"></i></button>
+	</div>
 </div>
 
-<div class="list-body" ng-if="$ctrl.listMode === 'list'">
+<div class="list-body list-media" ng-if="$ctrl.listMode === 'list'">
 
 	<ul class="list-unstyled">
-		<li class="media border border-primary border-bottom-0" ng-repeat="img in $ctrl.images" title="{{img.title}}">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:20:($ctrl.page*20)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 			<div class="media-body">
-				<div ng-clamp="2" ng-bind="img.title"></div>
-				<p><small>{{img.author}} - {{img.date}}</small></p>
+				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
+				<p class="mb-0"><i>{{img.author || 'unbekannt'}} - {{img.date || 'unbekannt'}}</i></p>
 			</div>
 		</li>
 	</ul>
 
 </div>
 
-<div class="list-body" ng-if="$ctrl.listMode === 'cards'">
+<div class="list-body list-card" ng-if="$ctrl.listMode === 'cards'">
 
-	<div class="card border border-primary" ng-repeat="img in $ctrl.images" title="{{img.title}}">
+	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:20:($ctrl.page*20)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 		<img class="card-img-top" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 		<div class="card-body">
 			<div ng-clamp="3">{{img.title}}</div>
-			<p class="card-text">{{img.author}} - {{img.date}}</p>
+			<p class="card-text"><i>{{img.author || 'unbekannt'}} - {{img.date || 'unbekannt'}}</i></p>
 		</div>
 	</div>
 
+</div>
+
+<div class="list-pagination bg-light d-flex justify-content-center">
+	<ul class="pagination pagination-sm">
+		<li class="page-item" ng-class="{disabled: $ctrl.page === 0}">
+			<a class="page-link" href="" ng-click="$ctrl.setPage('prev')">&laquo;</a>
+		</li>
+		<li class="page-item" ng-class="{active: $ctrl.pages[0].active}">
+			<a class="page-link" href="" ng-click="$ctrl.setPage(0)">1</a>
+		</li>
+		<li class="page-item disabled" ng-show="$ctrl.page > 3">
+			<a class="page-link">...</a>
+		</li>
+		<li class="page-item" ng-repeat="p in $ctrl.pages | limitTo:$ctrl.limit:$ctrl.skip track by $index" ng-class="{active: p.active}">
+			<a class="page-link" href="" ng-click="$ctrl.setPage(p.value)">{{p.value + 1}}</a>
+		</li>
+		<li class="page-item disabled" ng-show="$ctrl.page < $ctrl.pages.length - 4">
+			<a class="page-link">...</a>
+		</li>
+		<li class="page-item" ng-show="$ctrl.pages.length > 1" ng-class="{active: $ctrl.pages[$ctrl.pages.length - 1].active}">
+			<a class="page-link" href="" ng-click="$ctrl.setPage($ctrl.pages.length - 1)">{{$ctrl.pages.length}}</a>
+		</li>
+		<li class="page-item" ng-class="{disabled: $ctrl.page === $ctrl.pages.length - 1}">
+			<a class="page-link" href="" ng-click="$ctrl.setPage('next')">&raquo;</a>
+		</li>
+	</ul>
 </div>
