@@ -170,12 +170,14 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 	},
 
 	withinLODRange: function (point) {
+		if (!this.image) return;
 		var elements = this.image.matrixWorld.elements;
 		var lod = new THREE.Sphere(new THREE.Vector3(elements[12], elements[13], elements[14]), this.scale.z * 3);
 		return lod.containsPoint(point);
 	},
 
 	updateTexture: function (highres) {
+		if (!this.image) return;
 		if (highres || !this.previewTexture) {
 			if (this.image.material.map === this.texture) return;
 			this.image.material.map = this.texture;
