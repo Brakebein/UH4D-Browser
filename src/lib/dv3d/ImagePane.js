@@ -199,8 +199,12 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			this.pyramid.material.dispose();
 			this.pyramid.geometry.dispose();
 		}
+		if (this.texture)
+			this.texture.dispose();
+		if (this.previewTexture)
+			this.previewTexture.dispose();
 		if (this.image) {
-			this.image.material.map.dispose();
+			// this.image.material.map.dispose();
 			this.image.material.dispose();
 			this.image.geometry.dispose();
 		}

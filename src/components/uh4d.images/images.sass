@@ -20,6 +20,7 @@ image-list
 				//	border-bottom: none !important
 				& > li.media
 					margin: 9px
+					position: relative
 					&:hover
 						border-color: $primary !important
 					& > .media-body
@@ -38,6 +39,7 @@ image-list
 				width: 165px
 				margin: 3px
 				max-height: 250px
+				position: relative
 				&:hover
 					border-color: $primary !important
 				& > .card-body
@@ -46,6 +48,15 @@ image-list
 					font-size: 11px
 					& > .card-text
 						font-size: 10px
+
+		.spatial-flag
+			position: absolute
+			right: 5px
+			bottom: 5px
+			cursor: pointer
+			color: $secondary
+			&:hover
+				color: $gray-100
 
 	& > .list-pagination
 		flex: 0 0 auto

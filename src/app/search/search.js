@@ -12,10 +12,10 @@ angular.module('uh4dApp')
 			if ($uiRouterGlobals.params.query) {
 				ctrl.searchTerm = $uiRouterGlobals.params.query;
 				ctrl.performSearch();
-				ctrl.showLoadPanel = true;
 			}
 			else {
 				ctrl.searchTerm = '';
+				ctrl.performSearch();
 			}
 		};
 
@@ -31,6 +31,7 @@ angular.module('uh4dApp')
 				.then(function (values) {
 					console.log(values);
 					imageQuerySuccess(values);
+					updateSpatialImages(values);
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.query', reason);
@@ -41,7 +42,7 @@ angular.module('uh4dApp')
 			DigitalObject.query().$promise
 				.then(function (values) {
 					console.log(values);
-					ctrl.showLoadPanel = false;
+					$rootScope.showModelLoadPanel = false;
 					modelQuerySuccess(values);
 				})
 				.catch(function (reason) {
@@ -55,6 +56,23 @@ angular.module('uh4dApp')
 
 		function modelQuerySuccess(values, keepScene) {
 			$rootScope.$broadcast('modelQuerySuccess', values, keepScene === true);
+		}
+
+		function spatialImageLoad(values) {
+			$rootScope.$broadcast('spatialImageLoad', values, true);
+		}
+
+		$rootScope.$on('spatializeManualSuccess', function () {
+			ctrl.performSearch();
+		});
+
+		function updateSpatialImages(values) {
+			var spatials = [];
+			values.forEach(function (v) {
+				if (v.spatial)
+					spatials.push(v);
+			});
+			spatialImageLoad(spatials);
 		}
 
 	}]

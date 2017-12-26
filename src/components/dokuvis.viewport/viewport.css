@@ -56,6 +56,17 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container {
       border-top: none;
       border-left: none;
       border-radius: 0 0 10px 0; }
+  viewport .ctrl-container.ctrl-top-right, viewport-object-tree .ctrl-container.ctrl-top-right {
+    top: 0;
+    right: 0; }
+    viewport .ctrl-container.ctrl-top-right > div, viewport-object-tree .ctrl-container.ctrl-top-right > div {
+      background-color: rgba(51, 51, 51, 0.8);
+      border: 1px solid #999;
+      color: #fafafa;
+      font-size: 12px;
+      border-top: none;
+      border-right: none;
+      border-radius: 0 0 0 10px; }
   viewport .ctrl-container.ctrl-bottom, viewport-object-tree .ctrl-container.ctrl-bottom {
     bottom: 0; }
     viewport .ctrl-container.ctrl-bottom > div, viewport-object-tree .ctrl-container.ctrl-bottom > div {

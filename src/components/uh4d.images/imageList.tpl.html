@@ -12,6 +12,7 @@
 		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:20:($ctrl.page*20)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 			<div class="media-body">
+				<div class="spatial-flag" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"><i class="fa fa-cube"></i></div>
 				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
 				<p class="mb-0"><i>{{img.author || 'unbekannt'}} - {{img.date || 'unbekannt'}}</i></p>
 			</div>
@@ -25,6 +26,7 @@
 	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:20:($ctrl.page*20)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 		<img class="card-img-top" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 		<div class="card-body">
+			<div class="spatial-flag" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"><i class="fa fa-cube"></i></div>
 			<div ng-clamp="3">{{img.title}}</div>
 			<p class="card-text"><i>{{img.author || 'unbekannt'}} - {{img.date || 'unbekannt'}}</i></p>
 		</div>

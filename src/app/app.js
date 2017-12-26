@@ -93,9 +93,10 @@ angular.module('uh4dApp', [
 	}
 ])
 
-.run(['$state',
-	function ($state) {
+.run(['$rootScope', '$state',
+	function ($rootScope, $state) {
 
+		$rootScope.showModelLoadPanel = true;
 		//$state.go('root.home');
 
 	}

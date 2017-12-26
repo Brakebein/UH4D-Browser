@@ -24,7 +24,7 @@ angular.module('uh4d.images', [
 
 .component('imageList', {
 	templateUrl: 'components/uh4d.images/imageList.tpl.html',
-	controller: ['$scope', '$state', 'Image', 'Utilities', function ($scope, $state, Image, Utilities) {
+	controller: ['$scope', '$state', 'Image', 'Utilities', 'viewportCache', function ($scope, $state, Image, Utilities, viewportCache) {
 
 		var ctrl = this;
 
@@ -84,6 +84,16 @@ angular.module('uh4d.images', [
 				ctrl.skip += 1;
 			}
 		};
+
+		ctrl.focusImage = function (event, spatial) {
+			event.stopPropagation();
+			if (!spatial) return;
+
+			var entry = viewportCache.spatialImages.getByName(spatial.id);
+			console.log(entry);
+			if (entry)
+				entry.focus();
+		}
 
 	}]
 })

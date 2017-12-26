@@ -283,6 +283,7 @@ angular.module('dokuvis.viewport')
 					scope.source.$spatialize({ method: 'manual' })
 						.then(function (result) {
 							console.log(result);
+							spatializeManualSuccess(result);
 							scope.closeSpatializeManual();
 						})
 						.catch(function (reason) {
@@ -370,4 +371,21 @@ angular.module('dokuvis.viewport')
 		}
 	};
 
-});
+})
+
+.directive('viewportImageControls', ['viewportCache', function (viewportCache) {
+
+	return {
+		templateUrl: 'components/dokuvis.viewport/viewportImageCtrls.tpl.html',
+		restrict: 'E',
+		link: function (scope) {
+			scope.opacity = 100;
+
+			scope.setOpacity = function () {
+				viewportCache.spatialImages.setOpacity(scope.opacity/100);
+			};
+
+		}
+	};
+
+}]);

@@ -166,7 +166,8 @@ angular.module('dokuvis.viewport',[
 
 				// Camera
 				camera = new THREE.CombinedCamera(SCREEN_WIDTH, SCREEN_HEIGHT, 35, NEAR, FAR, NEAR, FAR);
-				camera.position.set(-100, 60, 100);
+				if (viewportCache.viewpoint) camera.position = viewportCache.viewpoint.cameraPosition.clone();
+				else camera.position.set(-100, 60, 100);
 
 				// Scene
 				scene = viewportCache.scene;
@@ -187,10 +188,12 @@ angular.module('dokuvis.viewport',[
 				// Controls (for navigation)
 				controls = new THREE.OrbitControls(camera, renderer.domElement);
 				controls.zoomSpeed = 1.0;
+				if (viewportCache.viewpoint) controls.center = viewportCache.viewpoint.controlsPosition.clone();
 				camera.target = controls.center;
 				controls.addEventListener('change', function () {
 					animateThrottle20();
 					viewportCameraMove(camera);
+					//navigationEnd();
 				});
 
 				// Light
@@ -1567,6 +1570,7 @@ angular.module('dokuvis.viewport',[
 					}
 				}
 
+
 				//if(!mouseDownCoord.equals(new THREE.Vector2(event.clientX, event.clientY))) return;
 
 				// 	//if(!mouseDownCoord.equals(new THREE.Vector2(event.clientX, event.clientY))) return;
@@ -1655,17 +1659,25 @@ angular.module('dokuvis.viewport',[
 						isRotatingView = isPanningView = isZoomingView = false;
 					}
 				}
+
 			}
 
 			function navigationEnd() {
-				var camMatrix = camera.matrixWorld.toArray();
-				var json = angular.toJson(camMatrix);
+				viewportCache.viewpoint = {
+					cameraPosition: camera.position.clone(),
+					controlsPosition: controls.center.clone()
+				};
+				console.log(viewportCache.viewpoint);
+
+				//var camMatrix = camera.matrixWorld.toArray();
+
+				//var json = angular.toJson(camMatrix);
 				//console.log(json);
 				//var base64 = btoa(json);
 				//console.log(base64);
-				var uri = encodeURIComponent(json);
+				//var uri = encodeURIComponent(json);
 				//console.log(uri);
-				$state.go('.', { camera: uri })
+				//$state.go('.', { camera: uri })
 			}
 
 			// mousewheel event handler
@@ -1983,7 +1995,13 @@ angular.module('dokuvis.viewport',[
 			///// SPATIAL IMAGES
 
 			// listen to spatialImageLoad event
-			scope.$on('spatialImageLoad', function (event, images) {
+			scope.$on('spatialImageLoad', function (event, images, reset) {
+				if (reset === true) {
+					[].concat(spatialImages.list).forEach(function (image) {
+						spatialImages.remove(image);
+						image.dispose();
+					});
+				}
 				if (Array.isArray(images)) {
 					images.forEach(function (img) {
 						loadSpatialImage(img);
@@ -2036,7 +2054,7 @@ angular.module('dokuvis.viewport',[
 
 				scene.add(imagepane);
 
-				imagepane.name = img.spatial.content;
+				imagepane.name = img.spatial.id;
 				imagepane.userData.source = img;
 				imagepane.userData.type = 'image';
 
@@ -2089,7 +2107,7 @@ angular.module('dokuvis.viewport',[
 			}
 			webglInterface.callFunc[cfId].setImageView = setImageView;
 
-			if(scope.hud.spatialize) {
+			if (scope.hud.spatialize) {
 				SpatializeInterface.callFunc[cfId].loadSpatializeImage = loadSpatializeImage;
 				SpatializeInterface.callFunc[cfId].setImageView = setImageView;
 				scope.spatialize = {
@@ -3107,6 +3125,12 @@ angular.module('dokuvis.viewport',[
 			// focus selected objects
 			function focusSelection(array) {
 				if (array.length < 1) return;
+
+				if (array.length === 1 && array[0] instanceof DV3D.ImageEntry) {
+					setImageView(array[0].object);
+					return;
+				}
+
 				var cc = [];
 				function collectChildren(children) {
 					for (var i = 0; i < children.length; i++) {
