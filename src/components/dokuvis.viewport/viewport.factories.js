@@ -37,7 +37,12 @@ angular.module('dokuvis.viewport')
 			shading: shadings[0].value,
 			camera: cameras[0].value,
 
-			showEdges: true
+			showEdges: true,
+
+			images: {
+				opacity: 1.0,
+				scale: 10
+			}
 		};
 
 	}

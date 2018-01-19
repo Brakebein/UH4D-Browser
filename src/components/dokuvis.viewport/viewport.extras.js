@@ -257,27 +257,68 @@ angular.module('dokuvis.viewport')
 			restrict: 'E',
 			link: function (scope, element) {
 
-				var camera = null;
-
 				scope.opacity = 50;
-				scope.fov = scope.setCameraFOV().fov;
+				scope.moveStep = 0.2;
 
-				scope.$on('viewportCameraMove', function (event, cam) {
-					scope.fov = cam.fov;
-					camera = cam;
-				});
+				scope.transformView = function (dir) {
+					var up = new THREE.Vector3(0,1,0).applyQuaternion(scope.camera.quaternion);
+					var forward = new THREE.Vector3().subVectors(scope.controls.center, scope.camera.position).normalize();
+
+					var cameraV, centerV;
+
+					switch (dir) {
+						case 'up':
+							cameraV = new THREE.Vector3(0,scope.moveStep,0);
+							centerV = up;
+							break;
+						case 'down':
+							cameraV = new THREE.Vector3(0,-scope.moveStep,0);
+							centerV = up.negate();
+							break;
+						case 'left':
+							cameraV = new THREE.Vector3(-scope.moveStep,0,0);
+							centerV = up.cross(forward);
+							break;
+						case 'right':
+							cameraV = new THREE.Vector3(scope.moveStep,0,0);
+							centerV = up.cross(forward).negate();
+							break;
+						case 'forward':
+							cameraV = new THREE.Vector3(0,0,-scope.moveStep);
+							break;
+						case 'backward':
+							cameraV = new THREE.Vector3(0,0,scope.moveStep);
+							break;
+						case 'tilt-up':
+							centerV = new THREE.Vector3(0,scope.moveStep,0);
+							break;
+						case 'tilt-down':
+							centerV = new THREE.Vector3(0,-scope.moveStep,0);
+							break;
+					}
+
+					if (cameraV)
+						scope.camera.translateOnAxis(cameraV, scope.moveStep);
+					if (centerV) {
+						centerV.setLength(scope.moveStep);
+						scope.controls.center.add(centerV);
+					}
+
+					scope.animate();
+				};
 
 				scope.changeFOV = function () {
-					camera = scope.setCameraFOV(scope.fov);
+					scope.camera.updateProjectionMatrix();
+					scope.animate();
 				};
 
 				scope.save = function () {
-					if (!scope.source) return;
+					if (!scope.source || !scope.camera) return;
 
 					scope.source.spatialize = {
-						matrix: camera.matrixWorld.toArray(),
+						matrix: scope.camera.matrixWorld.toArray(),
 						offset: [0,0],
-						ck: 1 / Math.tan((camera.fov / 2) * THREE.Math.DEG2RAD) * 0.5
+						ck: 1 / Math.tan((scope.camera.fov / 2) * THREE.Math.DEG2RAD) * 0.5
 					};
 
 					scope.source.$spatialize({ method: 'manual' })
@@ -373,16 +414,25 @@ angular.module('dokuvis.viewport')
 
 })
 
-.directive('viewportImageControls', ['viewportCache', function (viewportCache) {
+.directive('viewportImageControls', ['viewportCache', 'viewportSettings', function (viewportCache, viewportSettings) {
 
 	return {
 		templateUrl: 'components/dokuvis.viewport/viewportImageCtrls.tpl.html',
 		restrict: 'E',
 		link: function (scope) {
-			scope.opacity = 100;
+			scope.opacity = viewportSettings.images.opacity * 100;
+			scope.scale = viewportSettings.images.scale;
 
 			scope.setOpacity = function () {
-				viewportCache.spatialImages.setOpacity(scope.opacity/100);
+				viewportCache.spatialImages.setOpacity(scope.opacity / 100);
+				viewportSettings.images.opacity = scope.opacity / 100;
+			};
+
+			scope.setScale = function () {
+				viewportCache.spatialImages.forEach(function (image) {
+					image.setScale(scope.scale);
+				});
+				viewportSettings.images.scale = scope.scale;
 			};
 
 		}

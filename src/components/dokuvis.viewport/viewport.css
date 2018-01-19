@@ -33,6 +33,11 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container {
   display: flex; }
   viewport .ctrl-container > div, viewport-object-tree .ctrl-container > div {
     pointer-events: auto; }
+    viewport .ctrl-container > div > .row, viewport-object-tree .ctrl-container > div > .row {
+      justify-content: center;
+      margin: 0 0 3px; }
+      viewport .ctrl-container > div > .row:last-of-type, viewport-object-tree .ctrl-container > div > .row:last-of-type {
+        margin: 0; }
   viewport .ctrl-container.ctrl-center, viewport-object-tree .ctrl-container.ctrl-center {
     width: 100%;
     justify-content: center; }
@@ -126,7 +131,7 @@ viewport .ctrl-btn, viewport-object-tree .ctrl-btn {
     border-right-color: #ddd;
     border-bottom-color: #ddd; }
 viewport .ctrl-slider, viewport-object-tree .ctrl-slider {
-  padding: 3px;
+  padding: 2px;
   display: inline-block; }
   viewport .ctrl-slider > *, viewport-object-tree .ctrl-slider > * {
     vertical-align: middle; }
@@ -257,7 +262,6 @@ viewport-spatialize-manual.ng-enter {
 viewport-spatialize-manual.ng-leave {
   animation: fadeOut 0.5s; }
 viewport-spatialize-manual > .ctrl-container > div {
-  height: 33px;
   padding: 3px 6px 3px; }
 viewport-spatialize-manual > .image-layer {
   position: absolute;
@@ -267,6 +271,9 @@ viewport-spatialize-manual > .image-layer {
   background-position: center;
   background-repeat: no-repeat;
   pointer-events: none; }
+
+viewport-image-controls > .ctrl-container > div {
+  padding: 3px 6px 3px; }
 
 viewport-snapshot > .ctrl-container > div {
   height: 33px;

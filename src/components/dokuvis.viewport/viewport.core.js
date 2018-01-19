@@ -214,6 +214,7 @@ angular.module('dokuvis.viewport',[
 				canvas.on('mousedown', mousedown);
 				canvas.on('mousemove', mousemove);
 				canvas.on('mouseup', mouseup);
+				canvas.on('dblclick', dblclick);
 				element.on('mouseleave', mouseleave);
 				canvas.on('wheel', mousewheel);
 
@@ -533,15 +534,20 @@ angular.module('dokuvis.viewport',[
 					}
 				}
 
-				TWEEN.update();
 				if (controls) controls.update();
 
 				//updatePointCloudsThrottle();
 
-				// update image resolution
-				spatialImages.forEach(function (img) {
-					img.object.updateTexture(img.object.withinLODRange(camera.position));
-				}, true);
+
+				if (isAnimating) {
+					TWEEN.update();
+				}
+				else {
+					// update image resolution
+					spatialImages.forEach(function (img) {
+						img.object.updateTexture(img.object.withinLODRange(camera.position));
+					}, true);
+				}
 
 				// position light depending on camera
 				if (dlight) {
@@ -628,7 +634,7 @@ angular.module('dokuvis.viewport',[
 			/**
 			 * Selection by a simple click.
 			 * @param mouse {THREE.Vector2} mouse position (in viewport coordinates)
-			 * @param ctrlKey {boolean} if ctrlKey is pressed
+			 * @param ctrlKey {boolean=false} if ctrlKey is pressed
 			 */
 			function selectRay(mouse, ctrlKey) {
 				var testObjects = [];
@@ -652,7 +658,6 @@ angular.module('dokuvis.viewport',[
 
 				if (intersection) {
 					$log.debug(intersection);
-					$log.debug(objects.get(intersection.object.id));
 
 					if (intersection.object.entry instanceof DV3D.Entry)
 						setSelected(intersection.object.entry, ctrlKey);
@@ -669,7 +674,7 @@ angular.module('dokuvis.viewport',[
 			 * Selection by drawing a rectangle.
 			 * @param mStart {THREE.Vector2} mouse position at start (in viewport coordinates)
 			 * @param mEnd {THREE.Vector2} mouse position at end (in viewport coordinates)
-			 * @param ctrlKey {boolean} if ctrlKey is pressed
+			 * @param ctrlKey {boolean=false} if ctrlKey is pressed
 			 */
 			function selectArea(mStart, mEnd, ctrlKey) {
 				// viewport coordinates into world coordinates in front of camera
@@ -1512,6 +1517,8 @@ angular.module('dokuvis.viewport',[
 
 			// mouseup event handler
 			function mouseup(event) {
+				if (isMouseDown === -1) return;
+
 				isMouseDown = -1;
 				var mouse = mouseToViewportCoords(event);
 
@@ -1623,6 +1630,14 @@ angular.module('dokuvis.viewport',[
 				// 	}
 				//}
 
+			}
+
+			function dblclick(event) {
+				// console.log(selected);
+				if (selected[0]) {
+					if (selected[0] instanceof DV3D.ImageEntry)
+						$state.go('.image', {imageId: selected[0].source.id});
+				}
 			}
 
 			// mouseleave event handler
@@ -1966,6 +1981,9 @@ angular.module('dokuvis.viewport',[
 
 					var elScope = scope.$new(false);
 					elScope.source = src;
+					elScope.camera = camera;
+					elScope.controls = controls;
+					elScope.animate = animateThrottle20;
 
 					spatializeManualElement = $compile('<viewport-spatialize-manual></viewport-spatialize-manual>')(elScope);
 					$animate.enter(spatializeManualElement, element);
@@ -1997,7 +2015,9 @@ angular.module('dokuvis.viewport',[
 			// listen to spatialImageLoad event
 			scope.$on('spatialImageLoad', function (event, images, reset) {
 				if (reset === true) {
+					setSelected(null);
 					[].concat(spatialImages.list).forEach(function (image) {
+						scene.remove(image.object);
 						spatialImages.remove(image);
 						image.dispose();
 					});
@@ -2042,9 +2062,12 @@ angular.module('dokuvis.viewport',[
 					ck: img.spatial.ck,
 					offset: img.spatial.offset,
 					preview: 'data/' + img.file.path + img.file.texturePreview
-				}, 10);
+				});
 
 				imagepane.onComplete = function () {
+					if (viewportSettings.images.opacity !== 1.0)
+						entry.setOpacity(viewportSettings.images.opacity);
+					entry.setScale(viewportSettings.images.scale);
 					animateAsync();
 					defer.resolve(entry);
 				};

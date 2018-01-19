@@ -156,14 +156,17 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 	 * Set the scale of all entries.
 	 * @param value {number} New scale value
 	 */
-	setScale: function (value) {
-		value = +value;
-		if (typeof value === 'number') this.scale = value;
-		for (var key in this.list) {
-			// TODO: differentiate between plans, images, objects
-			this.list[key].object.setScale(this.scale);
-		}
-	}
+	// setScale: function (value) {
+	// 	value = +value;
+	// 	if (typeof value === 'number') this.scale = value;
+	// 	this.list.forEach(function (item) {
+	// 		item.setS
+	// 	});
+	// 	for (var key in this.list) {
+	// 		// TODO: differentiate between plans, images, objects
+	// 		this.list[key].object.setScale(this.scale);
+	// 	}
+	// }
 
 });
 

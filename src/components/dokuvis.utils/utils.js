@@ -20,10 +20,11 @@ angular.module('dokuvis.utils', [
  * @name Utilities
  * @module dokuvis.utils
  * @author Brakebein
+ * @requires https://docs.angularjs.org/api/ng/service/$timeout $timeout
  * @requires http://mgcrea.github.io/angular-strap/#/alerts $alert
  */
-.factory('Utilities', ['$alert',
-	function ($alert) {
+.factory('Utilities', ['$timeout', '$alert',
+	function ($timeout, $alert) {
 
 		var f = {};
 
@@ -47,6 +48,36 @@ angular.module('dokuvis.utils', [
 			}
 			// condition finally met. callback() can be executed
 			callback(params);
+		};
+
+		/**
+		 * Determine if a single or double click has been performed and call either function/event handler.
+		 * @param singleClick {function} Event handler for single click.
+		 * @param dblClick {function} Event handler for double click.
+		 * @return {*}
+		 */
+		f.dblclickSwitch = function (singleClick, dblClick) {
+			return (function () {
+				var alreadyclicked;
+				var timeout;
+
+				return function (event) {
+					if (alreadyclicked) {
+						// double click
+						alreadyclicked = false;
+						timeout && $timeout.cancel(timeout);
+						dblClick && dblClick(event);
+					}
+					else {
+						// single click
+						alreadyclicked = true;
+						timeout = $timeout(function () {
+							alreadyclicked = false;
+							singleClick && singleClick(event);
+						}, 300, false);
+					}
+				};
+			})();
 		};
 
 		///// ALERTS

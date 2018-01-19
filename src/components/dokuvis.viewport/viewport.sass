@@ -42,6 +42,12 @@ viewport, viewport-object-tree
 		display: flex
 		& > div
 			pointer-events: auto
+			& > .row
+				justify-content: center
+				margin: 0 0 3px
+				&:last-of-type
+					margin: 0
+
 		&.ctrl-center
 			width: 100%
 			justify-content: center
@@ -128,7 +134,7 @@ viewport, viewport-object-tree
 			border-bottom-color: #ddd
 
 	.ctrl-slider
-		padding: 3px
+		padding: 2px
 		display: inline-block
 		& > *
 			vertical-align: middle
@@ -279,7 +285,6 @@ viewport-spatialize-manual
 		animation: fadeOut 0.5s
 
 	& > .ctrl-container > div
-		height: 33px
 		padding: 3px 6px 3px
 
 	& > .image-layer
@@ -290,6 +295,10 @@ viewport-spatialize-manual
 		background-position: center
 		background-repeat: no-repeat
 		pointer-events: none
+
+viewport-image-controls
+	& > .ctrl-container > div
+		padding: 3px 6px 3px
 
 viewport-snapshot
 	& > .ctrl-container > div

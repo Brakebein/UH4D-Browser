@@ -143,6 +143,8 @@ DV3D.ImageEntry = function (obj, label) {
 	DV3D.Entry.call( this, obj, label );
 
 	this.source = obj.userData.source;
+
+	this.scale = 1;
 };
 DV3D.ImageEntry.prototype = Object.assign( Object.create( DV3D.Entry.prototype ), {
 
@@ -152,6 +154,12 @@ DV3D.ImageEntry.prototype = Object.assign( Object.create( DV3D.Entry.prototype )
 	// setImageView: function () {
 	// 	this.dispatchEvent({ type: 'focus' })
 	// }
+
+	setScale: function (value) {
+		if (typeof value === 'number') this.scale = value;
+		this.object.setScale(this.scale);
+		this.dispatchEvent({ type: 'change' });
+	}
 
 });
 // /**

@@ -81,7 +81,7 @@ DV3D.ImagePane = function ( imageUrl, params, scale ) {
 			scope.add( pane );
 			scope.add( line );
 			scope.add( clickBox );
-			scope.setScale(scale || 1.0);
+			// scope.setScale(scale || 1.0);
 
 			scope.image = pane;
 			scope.pyramid = line;
@@ -171,9 +171,11 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 
 	withinLODRange: function (point) {
 		if (!this.image) return;
-		var elements = this.image.matrixWorld.elements;
-		var lod = new THREE.Sphere(new THREE.Vector3(elements[12], elements[13], elements[14]), this.scale.z * 3);
-		return lod.containsPoint(point);
+		var distance = new THREE.Vector3().subVectors(point, this.position).length();
+		return distance < 30;
+		// var elements = this.image.matrixWorld.elements;
+		// var lod = new THREE.Sphere(new THREE.Vector3(elements[12], elements[13], elements[14]), this.scale.z * 3);
+		// return lod.containsPoint(point);
 	},
 
 	updateTexture: function (highres) {

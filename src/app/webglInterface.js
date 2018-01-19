@@ -73,7 +73,7 @@ angular.module('uh4dApp').factory('webglInterface', ['$rootScope', '$anchorScrol
 		
 		wi.plans = new DV3D.Collection();
 		wi.spatialImages = new DV3D.Collection();
-		wi.spatialImages.setScale(10);
+		//wi.spatialImages.setScale(10);
 
 		var layerDict = {};
 		
