@@ -47,7 +47,7 @@ DV3D.Entry = function (obj, label) {
 	this.opacity = 1.0;
 
 	obj.entry = this;
-	
+
 };
 
 Object.assign(DV3D.Entry.prototype, THREE.EventDispatcher.prototype, {
@@ -91,15 +91,23 @@ Object.assign(DV3D.Entry.prototype, THREE.EventDispatcher.prototype, {
 	setOpacity: function (value) {
 		if (typeof value !== 'undefined') this.opacity = value;
 		this.object.setOpacity(this.opacity);
+		this.update();
+	},
+
+	update: function () {
 		this.dispatchEvent({ type: 'change' });
 	},
 
 	/**
 	 * Remove any references to meshes and other entries, so this entry is ready for GC.
+	 * @param [disposeObject=true] {boolean} If true, object's geometry and material will be disposed. (Default: true)
 	 */
-	dispose: function () {
-		if (this.object.entry)
+	dispose: function (disposeObject) {
+		if (this.object.entry) {
+			if (disposeObject !== false)
+				this.object.dispose();
 			delete this.object.entry;
+		}
 		delete this.object;
 	}
 
@@ -125,12 +133,7 @@ DV3D.PlanEntry.prototype = Object.assign( Object.create( DV3D.Entry.prototype ),
 	}
 
 });
-// /**
-//  * Calls external function to set/tween orthogonal view to fit plan to viewport.
-//  */
-// DV3D.PlanEntry.prototype.setOrthoView = function () {
-// 	DV3D.callFunc.viewOrthoPlan(this.object);
-// };
+
 
 /**
  * Extended DV3D.Entry class for images.
@@ -158,13 +161,12 @@ DV3D.ImageEntry.prototype = Object.assign( Object.create( DV3D.Entry.prototype )
 	setScale: function (value) {
 		if (typeof value === 'number') this.scale = value;
 		this.object.setScale(this.scale);
-		this.dispatchEvent({ type: 'change' });
+		this.update();
+	},
+
+	updateTextureByDistance: function (vector, distance) {
+		if (this.object.updateTextureByDistance(vector, distance))
+			this.update();
 	}
 
 });
-// /**
-//  * Calls external function to set/tween camera to position and orientation of the ImagePane.
-//  */
-// DV3D.ImageEntry.prototype.setImageView = function () {
-// 	DV3D.callFunc.setImageView(this.object);
-// };

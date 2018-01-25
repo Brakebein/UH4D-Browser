@@ -150,7 +150,7 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 			item.setOpacity(value);
 		});
 		// TODO: dispatchEvent animate
-	},
+	}
 
 	/**
 	 * Set the scale of all entries.
