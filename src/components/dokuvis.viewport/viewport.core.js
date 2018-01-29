@@ -756,12 +756,15 @@ angular.module('dokuvis.viewport',[
 				onlySelect = onlySelect || false;
 				onlyDeselect = onlyDeselect || false;
 
+				var selectionChanged = false;
+
 				//dehighlight(); // TODO: revise dehighlight
 
 				// deselect all
 				if (selected.length && !onlySelect) {
 					selected.forEach(function (item) {
 						deselectEntry(item);
+						selectionChanged = true;
 					});
 
 					setGizmo();
@@ -772,6 +775,7 @@ angular.module('dokuvis.viewport',[
 				if (entry && !onlyDeselect && selected.indexOf(entry) === -1) {
 					selectEntry(entry);
 					selected.push(entry);
+					selectionChanged = true;
 
 					if (entry instanceof DV3D.PlanEntry)
 						setGizmo(entry.object, 'move');
@@ -781,6 +785,7 @@ angular.module('dokuvis.viewport',[
 				else if (entry && !onlyDeselect && selected.indexOf(entry) !== -1) {
 					deselectEntry(entry);
 					selected.splice(selected.indexOf(entry), 1);
+					selectionChanged = true;
 
 					if (gizmo) {
 						if (gizmo.object === entry.object)
@@ -788,16 +793,19 @@ angular.module('dokuvis.viewport',[
 					}
 				}
 
+				if (selectionChanged)
+					viewportSelectionChange();
+
 				$rootScope.$applyAsync();
 				animateAsync();
 			}
 
-			scope.$watch(function () {
-				return selected.length;
-			}, function () {
-				viewportSelectionChange();
-			});
-
+			/**
+			 * Event that gets fired, when an object has been selected or deselected.
+			 * @ngdoc event
+			 * @name viewport#viewportSelectionChange
+			 * @eventType broadcast on $rootScope
+			 */
 			function viewportSelectionChange() {
 				$rootScope.$broadcast('viewportSelectionChange', selected);
 			}
@@ -2051,7 +2059,7 @@ angular.module('dokuvis.viewport',[
 				else if(oldImg && !replace)
 					return $q.reject('Already loaded');
 
-				$log.debug(img);
+				//$log.debug(img);
 
 				var defer = $q.defer();
 
@@ -2088,24 +2096,27 @@ angular.module('dokuvis.viewport',[
 				entry.addEventListener('focus', focusHandler);
 
 				spatialImages.add(entry);
-				$log.debug('ImagePane', imagepane);
+				//$log.debug('ImagePane', imagepane);
 
 				return defer.promise;
 			}
 
 			/**
-			 * Sets camera to position and angle of the image pane object.<br/>
-			 * Called form webglInterface ImageEntry.
-			 * @param obj
+			 * Set camera to position and angle of the image pane object.
+			 * @param obj {DV3D.ImagePane} ImagePane object
 			 */
 			function setImageView(obj) {
+				// new controls/rotation anchor
 				var end =  new THREE.Vector3(0,0,-100);
 				end.applyQuaternion(obj.quaternion);
 				end.add(obj.position);
 
-				// var line = new THREE.Line3(obj.position, end);
-				// var plane = new THREE.Plane(new THREE.Vector3(0,1,0));
-				// var lookAt = plane.intersectLine(line);
+				// update near clipping plane
+				var imageDistance = Math.abs(obj.image.position.z * obj.scale.z);
+				if (camera.cameraP.near > imageDistance * 0.8) {
+					camera.cameraP.near = imageDistance * 0.8;
+					camera.updateProjectionMatrix();
+				}
 
 				new TWEEN.Tween(camera.position.clone())
 					.to(obj.position, 500)

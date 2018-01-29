@@ -69,6 +69,11 @@ viewport, viewport-object-tree
 			bottom: 0
 			& > div
 				+dark-panel('bottom')
+		&.ctrl-bottom-left
+			bottom: 0
+			left: 0
+			& > div
+				+dark-panel('bottom-left')
 
 
 
@@ -365,3 +370,10 @@ viewport-snapshot-view
 		background-size: auto 100%
 		background-position: center
 		background-repeat: no-repeat
+
+viewport-selection-display
+	& > .ctrl-container > div
+		padding: 3px 6px 3px
+
+		.list-entry
+			max-width: 400px

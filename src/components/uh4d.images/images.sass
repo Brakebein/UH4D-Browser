@@ -10,7 +10,7 @@ image-list
 		flex: 0 0 auto
 
 	& > .list-body
-		flex: 1 1 auto
+		flex: 1 1 0
 		overflow-y: scroll
 
 		&.list-media
@@ -113,3 +113,24 @@ $imageBorder: 1px solid #333
 	image-viewer
 		border: $imageBorder
 		background: $greyRadialBackground
+
+// compare modal
+.compare-modal-body
+	display: flex
+
+	.imageViewer-container
+		width: 100%
+		position: relative
+
+		& > image-viewer
+			border: $imageBorder
+			background: $greyRadialBackground
+			position: absolute
+			top: 0
+			bottom: 0
+			&:first-of-type
+				left: 0
+				right: 50%
+			&:last-of-type
+				left: 50%
+				right: 0

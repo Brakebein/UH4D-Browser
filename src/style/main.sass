@@ -30,11 +30,21 @@ body
 .modal-backdrop.am-fade
 	background-color: rgba(0,0,0,0.2)
 
+//@import "bootstrap.css"
+//.modal-component
+	@extend .modal
+
+.modal
+	overflow: auto
+	outline: none
+
 .modal-dialog
 	&.large
 		max-width: 1200px
+	&.xlarge
+		max-width: 100%
 
-	&.large
+	&.large, &.xlarge
 		height: 100%
 		width: 100%
 		margin: 0 auto

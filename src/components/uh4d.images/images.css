@@ -5,7 +5,7 @@ image-list {
   image-list > .list-ctrls {
     flex: 0 0 auto; }
   image-list > .list-body {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     overflow-y: scroll; }
     image-list > .list-body.list-media > ul {
       width: 100%; }
@@ -91,5 +91,23 @@ image-list {
   .image-modal-body image-viewer {
     border: 1px solid #333;
     background: radial-gradient(circle, #c4c4c4, #727272); }
+
+.compare-modal-body {
+  display: flex; }
+  .compare-modal-body .imageViewer-container {
+    width: 100%;
+    position: relative; }
+    .compare-modal-body .imageViewer-container > image-viewer {
+      border: 1px solid #333;
+      background: radial-gradient(circle, #c4c4c4, #727272);
+      position: absolute;
+      top: 0;
+      bottom: 0; }
+      .compare-modal-body .imageViewer-container > image-viewer:first-of-type {
+        left: 0;
+        right: 50%; }
+      .compare-modal-body .imageViewer-container > image-viewer:last-of-type {
+        left: 50%;
+        right: 0; }
 
 /*# sourceMappingURL=images.css.map */

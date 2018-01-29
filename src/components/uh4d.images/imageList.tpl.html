@@ -42,13 +42,13 @@
 		<li class="page-item" ng-class="{active: $ctrl.pages[0].active}">
 			<a class="page-link" href="" ng-click="$ctrl.setPage(0)">1</a>
 		</li>
-		<li class="page-item disabled" ng-show="$ctrl.page > 3">
+		<li class="page-item disabled" ng-show="$ctrl.pages.length > 6 && $ctrl.page > 3">
 			<a class="page-link">...</a>
 		</li>
 		<li class="page-item" ng-repeat="p in $ctrl.pages | limitTo:$ctrl.limit:$ctrl.skip track by $index" ng-class="{active: p.active}">
 			<a class="page-link" href="" ng-click="$ctrl.setPage(p.value)">{{p.value + 1}}</a>
 		</li>
-		<li class="page-item disabled" ng-show="$ctrl.page < $ctrl.pages.length - 4">
+		<li class="page-item disabled" ng-show="$ctrl.pages.length > 6 && $ctrl.page < $ctrl.pages.length - 4">
 			<a class="page-link">...</a>
 		</li>
 		<li class="page-item" ng-show="$ctrl.pages.length > 1" ng-class="{active: $ctrl.pages[$ctrl.pages.length - 1].active}">

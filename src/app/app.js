@@ -60,6 +60,11 @@ angular.module('uh4dApp', [
 					if (!trans.params().imageId)
 						return 'root.search';
 				},
+				params: {
+					imageId: {
+						dynamic: true
+					}
+				},
 				resolve: {
 					imageModalInstance: ['$modal', function ($modal) {
 						return $modal({
@@ -67,7 +72,7 @@ angular.module('uh4dApp', [
 							contentTemplate: 'components/uh4d.images/imageModal.tpl.html',
 							controller: 'imageModalCtrl',
 							show: false
-						})
+						});
 					}]
 				},
 				onEnter: ['imageModalInstance', function (imageModalInstance) {
@@ -76,12 +81,32 @@ angular.module('uh4dApp', [
 				onExit: ['imageModalInstance', function (imageModalInstance) {
 					imageModalInstance.hide();
 					imageModalInstance.destroy();
+				}]
+			})
+			.state({
+				name: 'root.search.compare',
+				url: '/compare?imageId1&imageId2',
+				redirectTo: function (trans) {
+					if (!trans.params().imageId1 || !trans.params().imageId2)
+						return 'root.search';
+				},
+				resolve: {
+					compareModalInstance: ['$modal', function ($modal) {
+						return $modal({
+							templateUrl: 'partials/modals/_modalXlarge.tpl.html',
+							contentTemplate: 'components/uh4d.images/compareModal.tpl.html',
+							controller: 'compareModalCtrl',
+							show: false
+						});
+					}]
+				},
+				onEnter: ['compareModalInstance', function (compareModalInstance) {
+					compareModalInstance.$promise.then(compareModalInstance.show);
 				}],
-				params: {
-					imageId: {
-						dynamic: true
-					}
-				}
+				onExit: ['compareModalInstance', function (compareModalInstance) {
+					compareModalInstance.hide();
+					compareModalInstance.destroy();
+				}]
 			});
 
 		// defaults

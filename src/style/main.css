@@ -27,21 +27,27 @@ body > .main-body {
 .modal-backdrop.am-fade {
   background-color: rgba(0, 0, 0, 0.2); }
 
+.modal {
+  overflow: auto;
+  outline: none; }
+
 .modal-dialog.large {
   max-width: 1200px; }
-.modal-dialog.large {
+.modal-dialog.xlarge {
+  max-width: 100%; }
+.modal-dialog.large, .modal-dialog.xlarge {
   height: 100%;
   width: 100%;
   margin: 0 auto;
   padding: 30px; }
-  .modal-dialog.large > .modal-content {
+  .modal-dialog.large > .modal-content, .modal-dialog.xlarge > .modal-content {
     position: relative;
     height: 100%;
     display: flex;
     flex-direction: column; }
-    .modal-dialog.large > .modal-content > .modal-header, .modal-dialog.large > .modal-content > .modal-footer {
+    .modal-dialog.large > .modal-content > .modal-header, .modal-dialog.large > .modal-content > .modal-footer, .modal-dialog.xlarge > .modal-content > .modal-header, .modal-dialog.xlarge > .modal-content > .modal-footer {
       flex: 0 0 auto; }
-    .modal-dialog.large > .modal-content > .modal-body {
+    .modal-dialog.large > .modal-content > .modal-body, .modal-dialog.xlarge > .modal-content > .modal-body {
       flex: 1 1 auto; }
 
 .alert {

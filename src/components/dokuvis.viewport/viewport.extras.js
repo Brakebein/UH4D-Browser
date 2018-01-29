@@ -438,4 +438,37 @@ angular.module('dokuvis.viewport')
 		}
 	};
 
+}])
+
+.directive('viewportSelectionDisplay', ['$state', function ($state) {
+
+	return {
+		templateUrl: 'components/dokuvis.viewport/viewportSelectionDisplay.tpl.html',
+		restrict: 'E',
+		link: function (scope) {
+
+			scope.imageList = [];
+			scope.objectList = [];
+
+			// listen to viewportSelectionChange event
+			scope.$on('viewportSelectionChange', function (event, selected) {
+				scope.imageList = selected.filter(function (item) {
+					return item instanceof DV3D.ImageEntry;
+				});
+				scope.objectList = selected.filter(function (item) {
+					return item instanceof DV3D.ObjectEntry;
+				});
+			});
+
+			scope.openCompareView = function () {
+				if (scope.imageList[0] && scope.imageList[1])
+					$state.go('.compare', {
+						imageId1: scope.imageList[0].source.id,
+						imageId2: scope.imageList[1].source.id
+					});
+			};
+
+		}
+	};
+
 }]);

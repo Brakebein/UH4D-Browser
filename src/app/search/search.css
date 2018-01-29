@@ -13,7 +13,8 @@ search {
       width: 600px; }
   search > .search-explorer {
     flex: 1 1 auto;
-    display: flex; }
+    display: flex;
+    overflow: hidden; }
     search > .search-explorer > .viewport {
       position: relative;
       flex: 1 1 auto; }
