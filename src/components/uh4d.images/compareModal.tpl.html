@@ -1,12 +1,12 @@
 <div class="modal-body compare-modal-body">
 
 	<div class="imageViewer-container">
-		<image-viewer src="'data/' + image1.file.path + image1.file.texture" options="{width: image1.file.width, height: image1.file.height}"></image-viewer>
-		<image-viewer src="'data/' + image2.file.path + image2.file.texture" options="{width: image2.file.width, height: image2.file.height}"></image-viewer>
+		<image-viewer src="'data/' + $ctrl.image1.file.path + $ctrl.image1.file.texture" options="{width: $ctrl.image1.file.width, height: $ctrl.image1.file.height}"></image-viewer>
+		<image-viewer src="'data/' + $ctrl.image2.file.path + $ctrl.image2.file.texture" options="{width: $ctrl.image2.file.width, height: $ctrl.image2.file.height}"></image-viewer>
 	</div>
 
 </div>
 
 <div class="modal-footer">
-	<button class="btn btn-secondary" ng-click="close()">Close</button>
+	<button class="btn btn-secondary" ng-click="$ctrl.close()">Close</button>
 </div>

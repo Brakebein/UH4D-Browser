@@ -3,6 +3,7 @@ angular.module('uh4dApp', [
 	'ngAnimate',
 	'ngResource',
 	'mgcrea.ngStrap',
+	'ui.bootstrap',
 	'ng-clamp',
 
 	'dokuvis.viewport',
@@ -13,8 +14,8 @@ angular.module('uh4dApp', [
 	'uh4d.models'
 ])
 
-.config(['$stateProvider', '$urlRouterProvider', '$modalProvider',
-	function ($stateProvider, $urlRouterProvider, $modalProvider) {
+.config(['$stateProvider', '$urlRouterProvider', '$modalProvider', '$uibModalProvider',
+	function ($stateProvider, $urlRouterProvider, $modalProvider, $uibModalProvider) {
 
 		$urlRouterProvider.otherwise('/');
 
@@ -66,21 +67,15 @@ angular.module('uh4dApp', [
 					}
 				},
 				resolve: {
-					imageModalInstance: ['$modal', function ($modal) {
-						return $modal({
-							templateUrl: 'partials/modals/_modalLarge.tpl.html',
-							contentTemplate: 'components/uh4d.images/imageModal.tpl.html',
-							controller: 'imageModalCtrl',
-							show: false
+					imageModalInstance: ['$uibModal', function ($uibModal) {
+						return $uibModal.open({
+							component: 'imageModal',
+							size: 'large'
 						});
 					}]
 				},
-				onEnter: ['imageModalInstance', function (imageModalInstance) {
-					imageModalInstance.$promise.then(imageModalInstance.show);
-				}],
 				onExit: ['imageModalInstance', function (imageModalInstance) {
-					imageModalInstance.hide();
-					imageModalInstance.destroy();
+					imageModalInstance.close();
 				}]
 			})
 			.state({
@@ -91,26 +86,37 @@ angular.module('uh4dApp', [
 						return 'root.search';
 				},
 				resolve: {
-					compareModalInstance: ['$modal', function ($modal) {
-						return $modal({
-							templateUrl: 'partials/modals/_modalXlarge.tpl.html',
-							contentTemplate: 'components/uh4d.images/compareModal.tpl.html',
-							controller: 'compareModalCtrl',
-							show: false
+					compareModalInstance: ['$uibModal', function ($uibModal) {
+						return $uibModal.open({
+							component: 'compareModal',
+							size: 'xlarge'
 						});
+						// return $modal({
+						// 	templateUrl: 'partials/modals/_modalXlarge.tpl.html',
+						// 	contentTemplate: 'components/uh4d.images/compareModal.tpl.html',
+						// 	controller: 'compareModalCtrl',
+						// 	show: false
+						// });
 					}]
 				},
-				onEnter: ['compareModalInstance', function (compareModalInstance) {
-					compareModalInstance.$promise.then(compareModalInstance.show);
-				}],
+				// onEnter: ['compareModalInstance', function (compareModalInstance) {
+				// 	compareModalInstance.$promise.then(compareModalInstance.show);
+				// }],
 				onExit: ['compareModalInstance', function (compareModalInstance) {
-					compareModalInstance.hide();
-					compareModalInstance.destroy();
+					compareModalInstance.close();
+					// compareModalInstance.hide();
+					// compareModalInstance.destroy();
 				}]
 			});
 
 		// defaults
 		angular.extend($modalProvider.defaults, {
+			backdrop: 'static',
+			keyboard: false
+		});
+
+		angular.extend($uibModalProvider.options, {
+			animation: false,
 			backdrop: 'static',
 			keyboard: false
 		});

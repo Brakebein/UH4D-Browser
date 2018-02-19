@@ -28,6 +28,8 @@ angular.module('uh4d.images', [
 
 		var ctrl = this;
 
+		ctrl.itemsPerPage = 20;
+
 		this.$onInit = function () {
 			console.log('imageList init');
 			ctrl.listMode = 'list';
@@ -48,13 +50,7 @@ angular.module('uh4d.images', [
 
 		$scope.$on('imageQuerySuccess', function (event, values) {
 			ctrl.images = values;
-
-			ctrl.pages = [];
-			ctrl.pages.push({active: true, value: 0});
-			for (var i = 1, l = Math.ceil(values.length / 20); i < l; i++) {
-				ctrl.pages.push({active: false, value: i});
-			}
-			ctrl.setPage(0);
+			ctrl.currentPage = 1;
 		});
 
 		ctrl.openImage = function (id) {
@@ -70,27 +66,6 @@ angular.module('uh4d.images', [
 			}
 		};
 
-		ctrl.setPage = function (value) {
-			if (value === 'prev') value = ctrl.page - 1;
-			else if (value === 'next') value = ctrl.page + 1;
-
-			if (ctrl.pages[ctrl.page])
-				ctrl.pages[ctrl.page].active = false;
-			ctrl.page = value;
-			ctrl.pages[ctrl.page].active = true;
-			ctrl.limit = Math.max(Math.min(ctrl.pages.length - 2, 5), 0);
-			ctrl.skip = Math.max(Math.min(ctrl.page - 2, ctrl.pages.length - 6), 1);
-			if (ctrl.pages.length > 6) {
-				if (ctrl.page < 3) {
-					ctrl.limit -= 1;
-				}
-				else if (ctrl.page > ctrl.pages.length - 4) {
-					ctrl.limit -= 1;
-					ctrl.skip += 1;
-				}
-			}
-		};
-
 		ctrl.focusImage = function (event, spatial) {
 			event.stopPropagation();
 			if (!spatial) return;
@@ -103,64 +78,62 @@ angular.module('uh4d.images', [
 
 	}]
 })
+	
+.component('imageModal', {
+	templateUrl: 'components/uh4d.images/imageModal.tpl.html',
+	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', function ($rootScope, $state, $timeout, Image, Utilities) {
 
-.controller('imageModalCtrl', ['$scope', '$rootScope', '$state', '$uiRouterGlobals', 'Image', 'Utilities',
-	function ($scope, $rootScope, $state, $uiRouterGlobals, Image, Utilities) {
+		var $ctrl = this;
 
-		$scope.image = null;
-
-		console.log($uiRouterGlobals.params);
+		$ctrl.$onInit = function () {
+			$timeout(function () {
+				getImage($state.params.imageId);
+			}, 0, false);
+		};
 
 		function getImage(id) {
+			if (!id) return;
 			Image.get({ id: id }).$promise
 				.then(function (value) {
 					console.log(value);
-					$scope.image = value;
+					$ctrl.image = value;
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.get', reason);
 				});
 		}
 
-		$scope.$watch(function () {
-			return $uiRouterGlobals.params.imageId;
-		}, function (value) {
-			if (value)
-				getImage(value);
-		});
-
-		$scope.startSpatialize = function () {
+		$ctrl.startSpatialize = function () {
 			$state.go('^');
-			spatializeManualStart($scope.image);
+			spatializeManualStart($ctrl.image);
 		};
 
 		function spatializeManualStart(image) {
 			$rootScope.$broadcast('spatializeManualStart', image);
 		}
 
-		$scope.close = function () {
+		$ctrl.close = function () {
 			$state.go('^');
 		};
-	}
-])
 
-.controller('compareModalCtrl', ['$scope', '$q', '$state', '$uiRouterGlobals', 'Image', 'Utilities', '$stateParams',
-	function ($scope, $q, $state, $uiRouterGlobals, Image, Utilities, $stateParams) {
+	}]
+})
 
-		console.log($uiRouterGlobals.params.imageId1);
-		console.log($uiRouterGlobals);
-		console.log($state.params.imageId1);
-		console.log($state);
-		console.log($stateParams);
-		console.log($stateParams.imageId1);
+.component('compareModal', {
+	templateUrl: 'components/uh4d.images/compareModal.tpl.html',
+	controller: ['$q', '$state', '$timeout', 'Image', 'Utilities', function ($q, $state, $timeout, Image, Utilities) {
 
-		$scope.image1 = null;
-		$scope.image2 = null;
+		var $ctrl = this;
 
-		console.log(this);
-		this.$onInit = function () {
-			console.log('init');
-			console.log($stateParams.imageId1);
+		$ctrl.$onInit = function () {
+			$timeout(function () {
+				getImage($state.params.imageId1).then(function (value) {
+					$ctrl.image1 = value;
+				});
+				getImage($state.params.imageId2).then(function (value) {
+					$ctrl.image2 = value;
+				});
+			}, 0, false);
 		};
 
 		function getImage(id) {
@@ -178,30 +151,9 @@ angular.module('uh4d.images', [
 			return defer.promise;
 		}
 
-		$scope.$watch(function () {
-			return $state.params.imageId1;
-		}, function (value) {
-			if (value) {
-				getImage($state.params.imageId1).then(function (value) {
-					$scope.image1 = value;
-				});
-				getImage($uiRouterGlobals.params.imageId2).then(function (value) {
-					$scope.image2 = value;
-				});
-			}
-		});
-
-		// init
-		// getImage($state.params.imageId1).then(function (value) {
-		// 	$scope.image1 = value;
-		// });
-		// getImage($uiRouterGlobals.params.imageId2).then(function (value) {
-		// 	$scope.image2 = value;
-		// });
-
-		$scope.close = function () {
+		$ctrl.close = function () {
 			$state.go('^');
 		};
 
-	}
-]);
+	}]
+});

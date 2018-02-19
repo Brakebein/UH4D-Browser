@@ -9,12 +9,12 @@
 <div class="list-body list-media" ng-if="$ctrl.listMode === 'list'">
 
 	<ul class="list-unstyled">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:20:($ctrl.page*20)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 			<div class="media-body">
 				<div class="spatial-flag" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"><i class="fa fa-cube"></i></div>
 				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
-				<p class="mb-0"><i>{{img.author || 'unbekannt'}} - {{img.date || 'unbekannt'}}</i></p>
+				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
 			</div>
 		</li>
 	</ul>
@@ -23,39 +23,28 @@
 
 <div class="list-body list-card" ng-if="$ctrl.listMode === 'cards'">
 
-	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:20:($ctrl.page*20)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 		<img class="card-img-top" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 		<div class="card-body">
 			<div class="spatial-flag" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"><i class="fa fa-cube"></i></div>
 			<div ng-clamp="3">{{img.title}}</div>
-			<p class="card-text"><i>{{img.author || 'unbekannt'}} - {{img.date || 'unbekannt'}}</i></p>
+			<p class="card-text"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
 		</div>
 	</div>
 
 </div>
 
 <div class="list-pagination bg-light d-flex justify-content-center">
-	<ul class="pagination pagination-sm">
-		<li class="page-item" ng-class="{disabled: $ctrl.page === 0}">
-			<a class="page-link" href="" ng-click="$ctrl.setPage('prev')">&laquo;</a>
-		</li>
-		<li class="page-item" ng-class="{active: $ctrl.pages[0].active}">
-			<a class="page-link" href="" ng-click="$ctrl.setPage(0)">1</a>
-		</li>
-		<li class="page-item disabled" ng-show="$ctrl.pages.length > 6 && $ctrl.page > 3">
-			<a class="page-link">...</a>
-		</li>
-		<li class="page-item" ng-repeat="p in $ctrl.pages | limitTo:$ctrl.limit:$ctrl.skip track by $index" ng-class="{active: p.active}">
-			<a class="page-link" href="" ng-click="$ctrl.setPage(p.value)">{{p.value + 1}}</a>
-		</li>
-		<li class="page-item disabled" ng-show="$ctrl.pages.length > 6 && $ctrl.page < $ctrl.pages.length - 4">
-			<a class="page-link">...</a>
-		</li>
-		<li class="page-item" ng-show="$ctrl.pages.length > 1" ng-class="{active: $ctrl.pages[$ctrl.pages.length - 1].active}">
-			<a class="page-link" href="" ng-click="$ctrl.setPage($ctrl.pages.length - 1)">{{$ctrl.pages.length}}</a>
-		</li>
-		<li class="page-item" ng-class="{disabled: $ctrl.page === $ctrl.pages.length - 1}">
-			<a class="page-link" href="" ng-click="$ctrl.setPage('next')">&raquo;</a>
-		</li>
-	</ul>
+
+	<ul uib-pagination
+		class="pagination-sm"
+		ng-model="$ctrl.currentPage"
+		total-items="$ctrl.images.length"
+		items-per-page="$ctrl.itemsPerPage"
+		max-size="5"
+		boundary-link-numbers="true"
+		previous-text="&laquo;"
+		next-text="&raquo;"
+		template-url="partials/overrides/uib.pagination.tpl.html"></ul>
+
 </div>

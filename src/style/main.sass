@@ -27,37 +27,43 @@ body
 				overflow-y: auto
 
 // $modal custom
-.modal-backdrop.am-fade
+.modal-backdrop
 	background-color: rgba(0,0,0,0.2)
 
-//@import "bootstrap.css"
-//.modal-component
-	@extend .modal
+.modal, .modal-backdrop
+	&.ng-enter, &.ng-leave
+		transition: opacity 0.3s
+	&.ng-enter, &.ng-leave.ng-leave-active
+		opacity: 0
+	&.ng-enter.ng-enter-active, &.ng-leave
+		opacity: 1
 
 .modal
 	overflow: auto
 	outline: none
 
 .modal-dialog
-	&.large
+	&.modal-large
 		max-width: 1200px
-	&.xlarge
+	&.modal-xlarge
 		max-width: 100%
 
-	&.large, &.xlarge
+	&.modal-large, &.modal-xlarge
 		height: 100%
 		width: 100%
 		margin: 0 auto
 		padding: 30px
 		& > .modal-content
-			position: relative
 			height: 100%
-			display: flex
-			flex-direction: column
-			& > .modal-header, & > .modal-footer
-				flex: 0 0 auto
-			& > .modal-body
-				flex: 1 1 auto
+			& > *
+				position: relative
+				height: 100%
+				display: flex
+				flex-direction: column
+				& > .modal-header, & > .modal-footer
+					flex: 0 0 auto
+				& > .modal-body
+					flex: 1 1 auto
 
 // $alert custom
 .alert

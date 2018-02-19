@@ -41,7 +41,7 @@ angular.module('dokuvis.viewport')
 
 			images: {
 				opacity: 1.0,
-				scale: 10
+				scale: 3
 			}
 		};
 

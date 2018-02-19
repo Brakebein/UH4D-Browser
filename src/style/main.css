@@ -24,31 +24,40 @@ body > .main-body {
       right: 0;
       overflow-y: auto; }
 
-.modal-backdrop.am-fade {
+.modal-backdrop {
   background-color: rgba(0, 0, 0, 0.2); }
+
+.modal.ng-enter, .modal.ng-leave, .modal-backdrop.ng-enter, .modal-backdrop.ng-leave {
+  transition: opacity 0.3s; }
+.modal.ng-enter, .modal.ng-leave.ng-leave-active, .modal-backdrop.ng-enter, .modal-backdrop.ng-leave.ng-leave-active {
+  opacity: 0; }
+.modal.ng-enter.ng-enter-active, .modal.ng-leave, .modal-backdrop.ng-enter.ng-enter-active, .modal-backdrop.ng-leave {
+  opacity: 1; }
 
 .modal {
   overflow: auto;
   outline: none; }
 
-.modal-dialog.large {
+.modal-dialog.modal-large {
   max-width: 1200px; }
-.modal-dialog.xlarge {
+.modal-dialog.modal-xlarge {
   max-width: 100%; }
-.modal-dialog.large, .modal-dialog.xlarge {
+.modal-dialog.modal-large, .modal-dialog.modal-xlarge {
   height: 100%;
   width: 100%;
   margin: 0 auto;
   padding: 30px; }
-  .modal-dialog.large > .modal-content, .modal-dialog.xlarge > .modal-content {
-    position: relative;
-    height: 100%;
-    display: flex;
-    flex-direction: column; }
-    .modal-dialog.large > .modal-content > .modal-header, .modal-dialog.large > .modal-content > .modal-footer, .modal-dialog.xlarge > .modal-content > .modal-header, .modal-dialog.xlarge > .modal-content > .modal-footer {
-      flex: 0 0 auto; }
-    .modal-dialog.large > .modal-content > .modal-body, .modal-dialog.xlarge > .modal-content > .modal-body {
-      flex: 1 1 auto; }
+  .modal-dialog.modal-large > .modal-content, .modal-dialog.modal-xlarge > .modal-content {
+    height: 100%; }
+    .modal-dialog.modal-large > .modal-content > *, .modal-dialog.modal-xlarge > .modal-content > * {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column; }
+      .modal-dialog.modal-large > .modal-content > * > .modal-header, .modal-dialog.modal-large > .modal-content > * > .modal-footer, .modal-dialog.modal-xlarge > .modal-content > * > .modal-header, .modal-dialog.modal-xlarge > .modal-content > * > .modal-footer {
+        flex: 0 0 auto; }
+      .modal-dialog.modal-large > .modal-content > * > .modal-body, .modal-dialog.modal-xlarge > .modal-content > * > .modal-body {
+        flex: 1 1 auto; }
 
 .alert {
   position: absolute;
