@@ -24,17 +24,29 @@ angular.module('uh4d.images', [
 
 .component('imageList', {
 	templateUrl: 'components/uh4d.images/imageList.tpl.html',
-	controller: ['$scope', '$state', 'Image', 'Utilities', 'viewportCache', function ($scope, $state, Image, Utilities, viewportCache) {
+	controller: ['$scope', '$state', 'Image', 'Utilities', 'viewportCache', '$debounce', 'ImageCollection', function ($scope, $state, Image, Utilities, viewportCache, $debounce, ImageCollection) {
 
 		var ctrl = this;
 
+
+
 		ctrl.itemsPerPage = 20;
 
-		this.$onInit = function () {
+		ctrl.$onInit = function () {
 			console.log('imageList init');
+			ctrl.listTab = 'selection';
 			ctrl.listMode = 'list';
+			ctrl.listOrderBy = {
+				prop: 'title',
+				desc: false
+			};
 			ctrl.page = 0;
-			//queryImages();
+			ctrl.selection = [];
+
+			ImageCollection.promise.then(function (collection) {
+				ctrl.collection = collection;
+				updateImageMeta();
+			});
 		};
 
 		function queryImages() {
@@ -51,7 +63,37 @@ angular.module('uh4d.images', [
 		$scope.$on('imageQuerySuccess', function (event, values) {
 			ctrl.images = values;
 			ctrl.currentPage = 1;
+			updateImageMeta();
 		});
+
+		var setSelection = $debounce(function (selected) {
+			ctrl.selection = selected
+				.filter(function (item) {
+					return item instanceof DV3D.ImageEntry;
+				})
+				.map(function (item) {
+					return item.source;
+				});
+		}, 200);
+
+		$scope.$on('viewportSelectionChange', function (event, selected) {
+			console.log(selected);
+			setSelection(selected);
+			// ctrl.selection = selected.filter(function (item) {
+			// 	return item instanceof DV3D.ImageEntry;
+			// });
+		});
+		
+		function updateImageMeta() {
+			if (!ctrl.images || !ctrl.images.length) return;
+
+			ctrl.images.forEach(function (item) {
+				if (ImageCollection.get(item.id))
+					item.inCollection = true;
+				else if (item.inCollection === true)
+					item.inCollection = false;
+			});
+		}
 
 		ctrl.openImage = function (id) {
 			$state.go('.image', {imageId: id});
@@ -64,6 +106,24 @@ angular.module('uh4d.images', [
 					ctrl.listMode = mode;
 					break;
 			}
+		};
+
+		ctrl.addToCollection = function (event, item) {
+			event.stopPropagation();
+
+			ImageCollection.add(item);
+			ctrl.collection = ImageCollection.get();
+			// if (ctrl.collection.indexOf(item) !== -1) return;
+			// ctrl.collection.push(item);
+			// item.inCollection = true;
+		};
+
+		ctrl.removeFromCollection = function (event, item) {
+			event.stopPropagation();
+
+			ImageCollection.remove(item);
+			ctrl.collection = ImageCollection.get();
+			updateImageMeta();
 		};
 
 		ctrl.focusImage = function (event, spatial) {
@@ -156,4 +216,107 @@ angular.module('uh4d.images', [
 		};
 
 	}]
-});
+})
+
+.service('ImageCollection', ['$window', '$q', 'Image', 'Utilities',
+	function ($window, $q, Image, Utilities) {
+
+		var scope = this;
+
+		var collection = [],
+			collectionIds = $window.localStorage['collectionIds'] ? angular.fromJson($window.localStorage['collectionIds']) : [];
+
+
+		// initialize
+		var promises = [],
+			defer = $q.defer();
+
+		collectionIds.forEach(function (id) {
+			promises.push(Image.get({ id: id }).$promise);
+		});
+
+		$q.all(promises).then(function (values) {
+			values.forEach(function (item) {
+				if (item) {
+					item.inCollection = true;
+					collection.push(item);
+				}
+			});
+			defer.resolve(collection);
+		});
+
+		this.promise = defer.promise;
+
+
+		// methods
+
+		this.get = function (id) {
+			if (id)
+				return collection.find(function (element) {
+					return element.id === id;
+				});
+			else
+				return collection;
+		};
+
+		this.add = function (item) {
+			if (!item) return;
+			var id = typeof item === 'string' ? item : item.id;
+
+			if (collectionIds.indexOf(id) !== -1) return;
+			collectionIds.push(id);
+
+			$window.localStorage['collectionIds'] = angular.toJson(collectionIds);
+
+			if (typeof item === 'string') {
+				getImage(id).then(function (value) {
+					if (value) {
+						value.inCollection = true;
+						collection.push(value);
+					}
+				});
+			}
+			else {
+				item.inCollection = true;
+				collection.push(item);
+			}
+		};
+
+		this.remove = function (item) {
+			if (!item) return;
+			var id = typeof item === 'string' ? item : item.id;
+
+			var index = collectionIds.indexOf(id);
+			if (index === -1) return;
+			collectionIds.splice(index, 1);
+
+			$window.localStorage['collectionIds'] = angular.toJson(collectionIds);
+
+			index = collection.findIndex(function (element) {
+				return element.id === id;
+			});
+
+			if (index !== -1)
+				collection.splice(index, 1);
+
+			if (item.inCollection)
+				item.inCollection = false;
+		};
+
+		function getImage(id) {
+			var defer = $q.defer();
+
+			Image.get({ id: id }).$promise
+				.then(function (value) {
+					defer.resolve(value);
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('Image.get() in ImageCollection', reason);
+					defer.resolve();
+				});
+
+			return defer.promise;
+		}
+
+	}
+]);

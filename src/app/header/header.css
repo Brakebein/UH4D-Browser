@@ -1,0 +1,6 @@
+header .search-bar {
+  flex: 1; }
+  header .search-bar > .input-group {
+    width: 100%; }
+
+/*# sourceMappingURL=header.css.map */

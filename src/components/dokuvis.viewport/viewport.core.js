@@ -166,7 +166,7 @@ angular.module('dokuvis.viewport',[
 
 				// Camera
 				camera = new THREE.CombinedCamera(SCREEN_WIDTH, SCREEN_HEIGHT, 35, NEAR, FAR, NEAR, FAR);
-				if (viewportCache.viewpoint) camera.position = viewportCache.viewpoint.cameraPosition.clone();
+				if (viewportCache.viewpoint) camera.position.copy(viewportCache.viewpoint.cameraPosition);
 				else camera.position.set(-100, 60, 100);
 
 				// Scene
@@ -188,7 +188,8 @@ angular.module('dokuvis.viewport',[
 				// Controls (for navigation)
 				controls = new THREE.OrbitControls(camera, renderer.domElement);
 				controls.zoomSpeed = 1.0;
-				if (viewportCache.viewpoint) controls.center = viewportCache.viewpoint.controlsPosition.clone();
+				// if (viewportCache.viewpoint) controls.center = viewportCache.viewpoint.controlsPosition.clone();
+				if (viewportCache.viewpoint) controls.center.copy(viewportCache.viewpoint.controlsCenter);
 				camera.target = controls.center;
 				controls.addEventListener('change', function () {
 					animateThrottle20();
@@ -523,6 +524,7 @@ angular.module('dokuvis.viewport',[
 			 */
 			function animate() {
 				if (isAnimating) {
+					TWEEN.update();
 					// only if there are active Tweens
 					if (TWEEN.getAll().length) {
 						requestAnimationFrame(animate);
@@ -533,21 +535,16 @@ angular.module('dokuvis.viewport',[
 						controls.addEventListener('change', animate);
 					}
 				}
-
-				if (controls) controls.update();
-
-				//updatePointCloudsThrottle();
-
-
-				if (isAnimating) {
-					TWEEN.update();
-				}
 				else {
 					// update image resolution
 					spatialImages.forEach(function (img) {
 						img.updateTextureByDistance(camera.position, 30);
 					}, true);
 				}
+
+				if (controls) controls.update();
+
+				//updatePointCloudsThrottle();
 
 				// position light depending on camera
 				if (dlight) {
@@ -1530,7 +1527,7 @@ angular.module('dokuvis.viewport',[
 				isMouseDown = -1;
 				var mouse = mouseToViewportCoords(event);
 
-				if (navigation.default) {
+				if (navigation.default && event.button !== 2) {
 					// complete navigation
 					if (isRotatingView) {
 						controls.onMouseUp(event.originalEvent);
@@ -1582,6 +1579,16 @@ angular.module('dokuvis.viewport',[
 					if (isRotatingView || isPanningView || isZoomingView) {
 						controls.onMouseUp(event.originalEvent);
 						isRotatingView = isPanningView = isZoomingView = false;
+					}
+				}
+				else if (event.button === 2 && mouse.equals(mouseDownCoord)) {
+					// custom context menu
+					selectRay(mouse);
+					if (selected[0]) {
+						if (selected[0] instanceof DV3D.ImageEntry) {
+							console.log('open context menu');
+							// title, add to collection, focus, open details
+						}
 					}
 				}
 
@@ -1644,7 +1651,10 @@ angular.module('dokuvis.viewport',[
 				// console.log(selected);
 				if (selected[0]) {
 					if (selected[0] instanceof DV3D.ImageEntry)
-						$state.go('.image', {imageId: selected[0].source.id});
+						// $state.go('.image', {imageId: selected[0].source.id});
+						selected[0].focus();
+					else if (selected[0] instanceof DV3D.ObjectEntry)
+						selected[0].focus();
 				}
 			}
 
@@ -2837,7 +2847,7 @@ angular.module('dokuvis.viewport',[
 					else if (obj instanceof DV3D.Plan)
 						viewOrthoPlan(obj);
 					else
-						focusSelection([event.target.object]);
+						focusSelection([event.target]);
 				}
 			}
 
@@ -3278,6 +3288,14 @@ angular.module('dokuvis.viewport',[
 
 				// unbind functions from callFunc
 				delete SpatializeInterface.callFunc[cfId];
+
+				// save camera and controls position
+				if (!viewportCache.viewpoint) viewportCache.viewpoint = {
+					cameraPosition: new THREE.Vector3(),
+					controlsCenter: new THREE.Vector3()
+				};
+				viewportCache.viewpoint.cameraPosition.copy(camera.position);
+				viewportCache.viewpoint.controlsCenter.copy(controls.center);
 
 				controls.dispose();
 

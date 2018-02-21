@@ -9,34 +9,39 @@ angular.module('uh4dApp')
 
 		ctrl.$onInit = function () {
 			// recover search
-			if ($uiRouterGlobals.params.query) {
-				ctrl.searchTerm = $uiRouterGlobals.params.query;
-				ctrl.performSearch();
+			if ($state.params.query) {
+				//ctrl.searchTerm = $state.params.query;
+				performSearch($state.params.query);
 			}
 			else {
-				ctrl.searchTerm = '';
-				ctrl.performSearch();
+				//ctrl.searchTerm = '';
+				performSearch('');
 			}
 		};
 
-		ctrl.onSearchTermEnter = function (event) {
-			if (event.keyCode === 13) // Enter
-				ctrl.performSearch();
-		};
+		// ctrl.onSearchTermEnter = function (event) {
+		// 	if (event.keyCode === 13) // Enter
+		// 		ctrl.performSearch();
+		// };
 
-		ctrl.performSearch = function () {
-			$state.go($state.$current, { query: ctrl.searchTerm });
+		function performSearch(term) {
+			// $state.go($state.$current, { query: ctrl.searchTerm });
 
-			Image.query({ query: ctrl.searchTerm }).$promise
+			Image.query({ query: term }).$promise
 				.then(function (values) {
 					console.log(values);
 					imageQuerySuccess(values);
 					updateSpatialImages(values);
 				})
 				.catch(function (reason) {
-					Utilities.throwApiException('Image.query', reason);
+					Utilities.throwApiException('Image.query() in search component', reason);
 				});
-		};
+		}
+
+		$rootScope.$on('updateSearchTerm', function (event, term) {
+			console.log('updateSearchTerm', term);
+			performSearch(term);
+		});
 
 		ctrl.loadModel = function () {
 			DigitalObject.query().$promise

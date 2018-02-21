@@ -22,6 +22,7 @@ angular.module('uh4dApp', [
 		$stateProvider
 			.state({
 				name: 'root',
+				utl: '/',
 				views: {
 					root: {
 						template: '<ui-view></ui-view>'
@@ -31,6 +32,13 @@ angular.module('uh4dApp', [
 						templateUrl: 'partials/footer.html'
 					}
 				}
+				// params: {
+				// 	query: {
+				// 		type: 'query',
+				// 		dynamic: true,
+				// 		value: null
+				// 	}
+				// }
 			})
 			.state({
 				name: 'root.home',

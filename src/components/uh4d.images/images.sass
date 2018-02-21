@@ -6,57 +6,106 @@ image-list
 	display: flex
 	flex-direction: column
 
+	& > .list-tabs
+		display: flex
+		& > div
+			padding: 2px 8px
+			cursor: pointer
+			&:hover, &.active
+				background-color: $light
+
 	& > .list-ctrls
 		flex: 0 0 auto
+		display: flex
+		align-items: baseline
+		& > div
+			padding: 0 8px
+
+	& > .list-selection
+		flex: 0 1 0
+		padding: 4px 9px
+		margin-bottom: 4px
+		& > ul
+			width: 100%
+			margin: 0
+			& > li.media
+				margin: 5px 0
+				&:hover
+					border-color: $primary !important
+				& > img
+					max-height: 50px
+				& > .media-body
+					margin: 4px 4px 4px 0
+					line-height: initial
+					font-size: 13px
+					& > .media-title
+						font-weight: bold
+						margin-bottom: 4px
+				& > .media-flags
+					width: 1.5rem
+					text-align: center
+					& > i
+						cursor: pointer
+						color: $gray-400
+						&:hover
+							color: $gray-100
 
 	& > .list-body
 		flex: 1 1 0
 		overflow-y: scroll
 
-		&.list-media
-			& > ul
-				width: 100%
-				//& > li:not(:last-child)
-				//	border-bottom: none !important
-				& > li.media
-					margin: 9px
-					position: relative
-					&:hover
-						border-color: $primary !important
-					& > .media-body
-						margin: 4px 4px 4px 0
-						line-height: initial
-						font-size: 13px
-						& > .media-title
-							font-weight: bold
-							margin-bottom: 4px
-
-		&.list-card
-			display: flex
-			flex-wrap: wrap
-			justify-content: space-evenly
-			& > .card
-				width: 165px
-				margin: 3px
-				max-height: 250px
+	.list-media
+		& > ul
+			width: 100%
+			//& > li:not(:last-child)
+			//	border-bottom: none !important
+			& > li.media
+				margin: 9px
 				position: relative
 				&:hover
 					border-color: $primary !important
-				& > .card-body
-					padding: 0.4em
+				& > .media-body
+					margin: 4px 4px 4px 0
 					line-height: initial
-					font-size: 11px
-					& > .card-text
-						font-size: 10px
+					font-size: 13px
+					& > .media-title
+						font-weight: bold
+						margin-bottom: 4px
+				& > .media-flags
+					width: 1.5rem
+					text-align: center
+					& > i
+						cursor: pointer
+						color: $gray-600
+						&:hover
+							color: $gray-100
 
-		.spatial-flag
-			position: absolute
-			right: 5px
-			bottom: 5px
-			cursor: pointer
-			color: $secondary
+	.list-card
+		display: flex
+		flex-wrap: wrap
+		justify-content: space-evenly
+		& > .card
+			width: 165px
+			margin: 3px
+			max-height: 250px
+			position: relative
 			&:hover
-				color: $gray-100
+				border-color: $primary !important
+			& > .card-body
+				padding: 0.4em
+				line-height: initial
+				font-size: 11px
+				& > .card-text
+					font-size: 10px
+			& > .media-flags
+				height: 1.5rem
+				padding: 0 4px
+				& > i
+					margin: 0 1.5px
+					cursor: pointer
+					color: $gray-600
+					&:hover
+						color: $gray-100
 
 	& > .list-pagination
 		flex: 0 0 auto
@@ -117,8 +166,26 @@ $imageBorder: 1px solid #333
 // compare modal
 .compare-modal-body
 	display: flex
+	flex-direction: column
+
+	.captions
+		flex: 0
+		display: flex
+		font-size: 13px
+		& > div
+			flex: 0 0 50%
+			text-align: center
+			display: inline-block
+			//width: 48%
+			//&:first-of-type
+			//	left: 1%
+			//	right: 51%
+			//&:last-of-type
+			//	left: 51%
+			//	right: 1%
 
 	.imageViewer-container
+		flex: 1
 		width: 100%
 		position: relative
 
