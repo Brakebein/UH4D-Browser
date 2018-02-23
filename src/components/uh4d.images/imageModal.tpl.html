@@ -12,7 +12,7 @@
 
 		<div class="details-section">
 			<div class="info-display">
-				<div ng-show="image.description">
+				<div ng-show="$ctrl.image.description">
 					<strong>Description</strong>
 					<p>{{$ctrl.image.description}}</p>
 				</div>
@@ -24,17 +24,21 @@
 					<strong>Date</strong>
 					<p>{{$ctrl.image.date || 'unknown'}}</p>
 				</div>
-				<div ng-show="image.owner">
+				<div ng-show="$ctrl.image.owner">
 					<strong>Owner</strong>
 					<p>{{$ctrl.image.owner}}</p>
 				</div>
-				<div ng-show="image.misc">
+				<div ng-show="$ctrl.image.misc">
 					<strong>Miscellaneous</strong>
 					<p>{{$ctrl.image.misc}}</p>
 				</div>
 				<div>
 					<strong>Tags</strong>
 					<p>{{$ctrl.image.tags.join(', ')}}</p>
+				</div>
+				<div>
+					<strong>Capture number</strong>
+					<p>{{$ctrl.image.captureNumber}}</p>
 				</div>
 				<div>
 					<strong>Links</strong>
