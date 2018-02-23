@@ -449,6 +449,7 @@ angular.module('dokuvis.viewport')
 
 			scope.imageList = [];
 			scope.objectList = [];
+			scope.inIsolationMode = false;
 
 			// listen to viewportSelectionChange event
 			scope.$on('viewportSelectionChange', function (event, selected) {
@@ -460,13 +461,59 @@ angular.module('dokuvis.viewport')
 				});
 			});
 
-			scope.openCompareView = function () {
-				if (scope.imageList[0] && scope.imageList[1])
-					$state.go('.compare', {
-						imageId1: scope.imageList[0].source.id,
-						imageId2: scope.imageList[1].source.id
-					});
+			scope.$on('viewportIsolationEnter', function () {
+				scope.inIsolationMode = true;
+				console.log(scope);
+			});
+
+			scope.$on('viewportIsolationExit', function () {
+				scope.inIsolationMode = false;
+			});
+
+
+			// scope.openCompareView = function () {
+			// 	if (scope.imageList[0] && scope.imageList[1])
+			// 		$state.go('.compare', {
+			// 			imageId1: scope.imageList[0].source.id,
+			// 			imageId2: scope.imageList[1].source.id
+			// 		});
+			// };
+
+		}
+	};
+
+}])
+	
+.directive('viewportContextMenu', ['$state', 'ImageCollection', function ($state, ImageCollection) {
+
+	return {
+		templateUrl: 'components/dokuvis.viewport/viewportContextMenu.tpl.html',
+		restrict: 'E',
+		link: function (scope, element) {
+
+			scope.openDetails = function () {
+				$state.go('.image', { imageId: scope.entry.source.id });
+				scope.$parent.closeContextMenu();
 			};
+
+			scope.addToCollection = function () {
+				ImageCollection.add(scope.entry.source);
+				scope.$parent.closeContextMenu();
+			};
+
+			scope.removeFromCollection = function () {
+				ImageCollection.remove(scope.entry.source);
+				scope.$parent.closeContextMenu();
+			};
+
+			scope.focus = function () {
+				scope.entry.focus();
+				scope.$parent.closeContextMenu();
+			};
+
+			element.on('$destroy', function () {
+				scope.$destroy();
+			});
 
 		}
 	};

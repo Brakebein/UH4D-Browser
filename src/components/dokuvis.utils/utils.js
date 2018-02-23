@@ -320,4 +320,14 @@ angular.module('dokuvis.utils', [
 		}
 
 	}
-]);
+])
+
+.directive('noContextMenu', function () {
+	return {
+		compile: function (element) {
+			element.bind('contextmenu', function (event) {
+				event.preventDefault();
+			});
+		}
+	};
+});

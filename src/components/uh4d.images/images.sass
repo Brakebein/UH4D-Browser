@@ -1,6 +1,8 @@
 @import "../../../node_modules/bootswatch/dist/superhero/variables"
 @import "../../style/variables"
 
+$listMarginBetween: 5px
+
 image-list
 	height: 100%
 	display: flex
@@ -29,7 +31,8 @@ image-list
 			width: 100%
 			margin: 0
 			& > li.media
-				margin: 5px 0
+				position: relative
+				margin: $listMarginBetween 17px $listMarginBetween 0
 				&:hover
 					border-color: $primary !important
 				& > img
@@ -41,6 +44,7 @@ image-list
 					& > .media-title
 						font-weight: bold
 						margin-bottom: 4px
+
 				& > .media-flags
 					width: 1.5rem
 					text-align: center
@@ -49,6 +53,23 @@ image-list
 						color: $gray-400
 						&:hover
 							color: $gray-100
+				& > .media-compare-btn
+					display: block
+					position: absolute
+					width: 14px
+					height: 80%
+					top: -3px // $listMarginBetween / 2
+					right: 0
+					transform: translate(100%, -50%)
+					padding-left: 4px
+					border: 1px solid $dark
+					border-left: none
+					& > .btn
+						position: absolute
+						font-size: 12px
+						padding: 0 3px
+						top: 50%
+						transform: translate(0,-50%)
 
 	& > .list-body
 		flex: 1 1 0

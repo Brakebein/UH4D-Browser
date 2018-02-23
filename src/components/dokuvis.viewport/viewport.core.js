@@ -47,6 +47,7 @@ angular.module('dokuvis.viewport',[
 			//scope.spatialize = 'spatialize' in attrs;
 			var enableSpatializeManual = 'spatializeManual' in attrs;
 
+			var contextMenuElement = null;
 
 			//scope.wi = webglInterface;
 			// scope.viewportSettings = webglInterface.viewportSettings;
@@ -1339,6 +1340,7 @@ angular.module('dokuvis.viewport',[
 
 			// mousedown event handler
 			function mousedown(event) {
+				scope.closeContextMenu();
 				isMouseDown = event.button;
 				mouseDownCoord = mouseToViewportCoords(event);
 				mouseDownEvent = event;
@@ -1588,6 +1590,17 @@ angular.module('dokuvis.viewport',[
 						if (selected[0] instanceof DV3D.ImageEntry) {
 							console.log('open context menu');
 							// title, add to collection, focus, open details
+							var elScope = scope.$new(false);
+							elScope.position = new THREE.Vector2(event.offsetX, event.offsetY);
+							elScope.entry = selected[0];
+							// elScope.contextMenu = scope.contextMenu;
+
+							contextMenuElement = $compile('<viewport-context-menu no-context-menu></viewport-context-menu>')(elScope);
+							// contextMenuElement = $compile('<viewport-context-menu position="contextMenu.position" entry="contextMenu.entry"></viewport-context-menu>')(elScope);
+							// contextMenuElement = angular.element('<viewport-context-menu position="contextMenu.position" entry="contextMenu.entry"></viewport-context-menu>');
+
+							// snapshotElement = $compile('<viewport-snapshot-view></viewport-snapshot-view>')(elScope);
+							$animate.enter(contextMenuElement, element);
 						}
 					}
 				}
@@ -1661,6 +1674,7 @@ angular.module('dokuvis.viewport',[
 			// mouseleave event handler
 			function mouseleave(event) {
 				isMouseDown = -1;
+				scope.closeContextMenu();
 
 				if (navigation.default) {
 					// complete navigation
@@ -1694,6 +1708,13 @@ angular.module('dokuvis.viewport',[
 				}
 
 			}
+
+			scope.closeContextMenu = function () {
+				if (!contextMenuElement) return;
+				$animate.leave(contextMenuElement);
+				contextMenuElement = null;
+				scope.$applyAsync();
+			};
 
 			function navigationEnd() {
 				viewportCache.viewpoint = {
@@ -2116,6 +2137,8 @@ angular.module('dokuvis.viewport',[
 			 * @param obj {DV3D.ImagePane} ImagePane object
 			 */
 			function setImageView(obj) {
+				enterIsolation(obj);
+
 				// new controls/rotation anchor
 				var end =  new THREE.Vector3(0,0,-100);
 				end.applyQuaternion(obj.quaternion);
@@ -2149,7 +2172,24 @@ angular.module('dokuvis.viewport',[
 
 				startAnimation();
 			}
-			webglInterface.callFunc[cfId].setImageView = setImageView;
+			// webglInterface.callFunc[cfId].setImageView = setImageView;
+
+			function enterIsolation(obj) {
+				spatialImages.forEach(function (item) {
+					if (item.object !== obj)
+						item.toggle(false);
+				}, true);
+				scope.$broadcast('viewportIsolationEnter');
+			}
+
+			function exitIsolation() {
+				console.log('exit isolation');
+				spatialImages.forEach(function (item) {
+					item.toggle(true);
+				});
+				scope.$broadcast('viewportIsolationExit');
+			}
+			scope.exitIsolation = exitIsolation;
 
 			if (scope.hud.spatialize) {
 				SpatializeInterface.callFunc[cfId].loadSpatializeImage = loadSpatializeImage;
@@ -3171,6 +3211,7 @@ angular.module('dokuvis.viewport',[
 				if (array.length < 1) return;
 
 				if (array.length === 1 && array[0] instanceof DV3D.ImageEntry) {
+
 					setImageView(array[0].object);
 					return;
 				}
@@ -3281,6 +3322,7 @@ angular.module('dokuvis.viewport',[
 			scope.$on('$destroy', function() {
 				setSelected(null, false, true);
 				clearMarked();
+				exitIsolation();
 				//if (scope.snapshot.active) scope.abortSnapshot();
 
 				if (scope.spatialize)

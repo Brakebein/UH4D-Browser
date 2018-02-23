@@ -1,12 +1,12 @@
 <div class="list-tabs">
-	<div ng-class="{active: $ctrl.listTab === 'selection'}" ng-click="$ctrl.listTab = 'selection'">Selection ({{$ctrl.selection.length}})</div>
-	<div ng-class="{active: $ctrl.listTab === 'collection'}" ng-click="$ctrl.listTab = 'collection'">Collection ({{$ctrl.collection.length}})</div>
+	<div ng-class="{active: $ctrl.listTab === 'selection'}" ng-click="$ctrl.setListTab('selection')">Selection ({{$ctrl.selection.length}})</div>
+	<div ng-class="{active: $ctrl.listTab === 'collection'}" ng-click="$ctrl.setListTab('collection')">Collection ({{$ctrl.collection.length}})</div>
 </div>
 
 <div class="list-selection bg-light">
 
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'selection'">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
@@ -16,12 +16,15 @@
 				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
 				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
+			</div>
+			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filtered[$index-1], filtered[$index])">
+				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
 			</div>
 		</li>
 	</ul>
 
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'collection'">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.collection" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.collection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
@@ -31,6 +34,9 @@
 				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
 				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
+			</div>
+			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filtered[$index-1], filtered[$index])">
+				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
 			</div>
 		</li>
 	</ul>

@@ -27,33 +27,33 @@ viewport {
     background-color: rgba(255, 255, 0, 0.05);
     pointer-events: none; }
 
-viewport .ctrl-container, viewport-object-tree .ctrl-container {
+viewport .ctrl-container, viewport-object-tree .ctrl-container, image-viewer .ctrl-container {
   position: absolute;
   pointer-events: none;
   display: flex; }
-  viewport .ctrl-container > div, viewport-object-tree .ctrl-container > div {
+  viewport .ctrl-container > div, viewport-object-tree .ctrl-container > div, image-viewer .ctrl-container > div {
     pointer-events: auto; }
-    viewport .ctrl-container > div > .row, viewport-object-tree .ctrl-container > div > .row {
+    viewport .ctrl-container > div > .row, viewport-object-tree .ctrl-container > div > .row, image-viewer .ctrl-container > div > .row {
       justify-content: center;
       margin: 0 0 3px; }
-      viewport .ctrl-container > div > .row:last-of-type, viewport-object-tree .ctrl-container > div > .row:last-of-type {
+      viewport .ctrl-container > div > .row:last-of-type, viewport-object-tree .ctrl-container > div > .row:last-of-type, image-viewer .ctrl-container > div > .row:last-of-type {
         margin: 0; }
-  viewport .ctrl-container.ctrl-center, viewport-object-tree .ctrl-container.ctrl-center {
+  viewport .ctrl-container.ctrl-center, viewport-object-tree .ctrl-container.ctrl-center, image-viewer .ctrl-container.ctrl-center {
     width: 100%;
     justify-content: center; }
-  viewport .ctrl-container.ctrl-top, viewport-object-tree .ctrl-container.ctrl-top {
+  viewport .ctrl-container.ctrl-top, viewport-object-tree .ctrl-container.ctrl-top, image-viewer .ctrl-container.ctrl-top {
     top: 0; }
-    viewport .ctrl-container.ctrl-top > div, viewport-object-tree .ctrl-container.ctrl-top > div {
+    viewport .ctrl-container.ctrl-top > div, viewport-object-tree .ctrl-container.ctrl-top > div, image-viewer .ctrl-container.ctrl-top > div {
       background-color: rgba(51, 51, 51, 0.8);
       border: 1px solid #999;
       color: #fafafa;
       font-size: 12px;
       border-top: none;
       border-radius: 0 0 10px 10px; }
-  viewport .ctrl-container.ctrl-top-left, viewport-object-tree .ctrl-container.ctrl-top-left {
+  viewport .ctrl-container.ctrl-top-left, viewport-object-tree .ctrl-container.ctrl-top-left, image-viewer .ctrl-container.ctrl-top-left {
     top: 0;
     left: 0; }
-    viewport .ctrl-container.ctrl-top-left > div, viewport-object-tree .ctrl-container.ctrl-top-left > div {
+    viewport .ctrl-container.ctrl-top-left > div, viewport-object-tree .ctrl-container.ctrl-top-left > div, image-viewer .ctrl-container.ctrl-top-left > div {
       background-color: rgba(51, 51, 51, 0.8);
       border: 1px solid #999;
       color: #fafafa;
@@ -61,10 +61,10 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container {
       border-top: none;
       border-left: none;
       border-radius: 0 0 10px 0; }
-  viewport .ctrl-container.ctrl-top-right, viewport-object-tree .ctrl-container.ctrl-top-right {
+  viewport .ctrl-container.ctrl-top-right, viewport-object-tree .ctrl-container.ctrl-top-right, image-viewer .ctrl-container.ctrl-top-right {
     top: 0;
     right: 0; }
-    viewport .ctrl-container.ctrl-top-right > div, viewport-object-tree .ctrl-container.ctrl-top-right > div {
+    viewport .ctrl-container.ctrl-top-right > div, viewport-object-tree .ctrl-container.ctrl-top-right > div, image-viewer .ctrl-container.ctrl-top-right > div {
       background-color: rgba(51, 51, 51, 0.8);
       border: 1px solid #999;
       color: #fafafa;
@@ -72,19 +72,19 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container {
       border-top: none;
       border-right: none;
       border-radius: 0 0 0 10px; }
-  viewport .ctrl-container.ctrl-bottom, viewport-object-tree .ctrl-container.ctrl-bottom {
+  viewport .ctrl-container.ctrl-bottom, viewport-object-tree .ctrl-container.ctrl-bottom, image-viewer .ctrl-container.ctrl-bottom {
     bottom: 0; }
-    viewport .ctrl-container.ctrl-bottom > div, viewport-object-tree .ctrl-container.ctrl-bottom > div {
+    viewport .ctrl-container.ctrl-bottom > div, viewport-object-tree .ctrl-container.ctrl-bottom > div, image-viewer .ctrl-container.ctrl-bottom > div {
       background-color: rgba(51, 51, 51, 0.8);
       border: 1px solid #999;
       color: #fafafa;
       font-size: 12px;
       border-bottom: none;
       border-radius: 10px 10px 0 0; }
-  viewport .ctrl-container.ctrl-bottom-left, viewport-object-tree .ctrl-container.ctrl-bottom-left {
+  viewport .ctrl-container.ctrl-bottom-left, viewport-object-tree .ctrl-container.ctrl-bottom-left, image-viewer .ctrl-container.ctrl-bottom-left {
     bottom: 0;
     left: 0; }
-    viewport .ctrl-container.ctrl-bottom-left > div, viewport-object-tree .ctrl-container.ctrl-bottom-left > div {
+    viewport .ctrl-container.ctrl-bottom-left > div, viewport-object-tree .ctrl-container.ctrl-bottom-left > div, image-viewer .ctrl-container.ctrl-bottom-left > div {
       background-color: rgba(51, 51, 51, 0.8);
       border: 1px solid #999;
       color: #fafafa;
@@ -92,33 +92,36 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container {
       border-bottom: none;
       border-left: none;
       border-radius: 0 10px 0 0; }
-viewport .ctrl-group, viewport-object-tree .ctrl-group {
+viewport .ctrl-group, viewport-object-tree .ctrl-group, image-viewer .ctrl-group {
   float: left;
   height: 100%;
   padding: 0 4px;
   border-left: 1px solid #999; }
-  viewport .ctrl-group:first-of-type, viewport-object-tree .ctrl-group:first-of-type {
+  viewport .ctrl-group:first-of-type, viewport-object-tree .ctrl-group:first-of-type, image-viewer .ctrl-group:first-of-type {
     border: none; }
-  viewport .ctrl-group.ctrl-group-text, viewport-object-tree .ctrl-group.ctrl-group-text {
+  viewport .ctrl-group.ctrl-group-text, viewport-object-tree .ctrl-group.ctrl-group-text, image-viewer .ctrl-group.ctrl-group-text {
     padding: 3px 4px; }
-  viewport .ctrl-group input, viewport-object-tree .ctrl-group input {
+  viewport .ctrl-group input[type="checkbox"], viewport-object-tree .ctrl-group input[type="checkbox"], image-viewer .ctrl-group input[type="checkbox"] {
+    margin-top: 7px;
+    vertical-align: text-bottom; }
+  viewport .ctrl-group input:not([type="checkbox"]), viewport-object-tree .ctrl-group input:not([type="checkbox"]), image-viewer .ctrl-group input:not([type="checkbox"]) {
     margin: 2px 0;
     padding: 0;
     height: 22px; }
-    viewport .ctrl-group input.error, viewport-object-tree .ctrl-group input.error {
+    viewport .ctrl-group input:not([type="checkbox"]).error, viewport-object-tree .ctrl-group input:not([type="checkbox"]).error, image-viewer .ctrl-group input:not([type="checkbox"]).error {
       border-color: #f00; }
-    viewport .ctrl-group input[disabled], viewport-object-tree .ctrl-group input[disabled] {
+    viewport .ctrl-group input:not([type="checkbox"])[disabled], viewport-object-tree .ctrl-group input:not([type="checkbox"])[disabled], image-viewer .ctrl-group input:not([type="checkbox"])[disabled] {
       cursor: default; }
-  viewport .ctrl-group select, viewport-object-tree .ctrl-group select {
+  viewport .ctrl-group select, viewport-object-tree .ctrl-group select, image-viewer .ctrl-group select {
     padding: 0;
     margin: 2px 0;
     height: 22px; }
-  viewport .ctrl-group .btn, viewport-object-tree .ctrl-group .btn {
+  viewport .ctrl-group .btn, viewport-object-tree .ctrl-group .btn, image-viewer .ctrl-group .btn {
     height: 26px;
     padding: 1px 5px;
     line-height: 1.5;
     font-size: 12px; }
-viewport .ctrl-btn, viewport-object-tree .ctrl-btn {
+viewport .ctrl-btn, viewport-object-tree .ctrl-btn, image-viewer .ctrl-btn {
   color: #ffffff;
   height: 100%;
   border: 1px solid transparent;
@@ -127,26 +130,26 @@ viewport .ctrl-btn, viewport-object-tree .ctrl-btn {
   background-color: transparent;
   -moz-border-radius: 3px;
   border-radius: 3px; }
-  viewport .ctrl-btn:hover, viewport-object-tree .ctrl-btn:hover {
+  viewport .ctrl-btn:hover, viewport-object-tree .ctrl-btn:hover, image-viewer .ctrl-btn:hover {
     background-color: #555; }
-  viewport .ctrl-btn:focus, viewport-object-tree .ctrl-btn:focus {
+  viewport .ctrl-btn:focus, viewport-object-tree .ctrl-btn:focus, image-viewer .ctrl-btn:focus {
     outline: none; }
-  viewport .ctrl-btn[disabled], viewport-object-tree .ctrl-btn[disabled] {
+  viewport .ctrl-btn[disabled], viewport-object-tree .ctrl-btn[disabled], image-viewer .ctrl-btn[disabled] {
     filter: alpha(opacity=30);
     opacity: 0.3; }
-    viewport .ctrl-btn[disabled]:hover, viewport-object-tree .ctrl-btn[disabled]:hover {
+    viewport .ctrl-btn[disabled]:hover, viewport-object-tree .ctrl-btn[disabled]:hover, image-viewer .ctrl-btn[disabled]:hover {
       border: 1px solid #fff; }
-  viewport .ctrl-btn:active, viewport .ctrl-btn.active, viewport-object-tree .ctrl-btn:active, viewport-object-tree .ctrl-btn.active {
+  viewport .ctrl-btn:active, viewport .ctrl-btn.active, viewport-object-tree .ctrl-btn:active, viewport-object-tree .ctrl-btn.active, image-viewer .ctrl-btn:active, image-viewer .ctrl-btn.active {
     background-color: #555;
     border: 1px solid #999;
     border-right-color: #ddd;
     border-bottom-color: #ddd; }
-viewport .ctrl-slider, viewport-object-tree .ctrl-slider {
+viewport .ctrl-slider, viewport-object-tree .ctrl-slider, image-viewer .ctrl-slider {
   padding: 2px;
   display: inline-block; }
-  viewport .ctrl-slider > *, viewport-object-tree .ctrl-slider > * {
+  viewport .ctrl-slider > *, viewport-object-tree .ctrl-slider > *, image-viewer .ctrl-slider > * {
     vertical-align: middle; }
-  viewport .ctrl-slider > input[type=range], viewport-object-tree .ctrl-slider > input[type=range] {
+  viewport .ctrl-slider > input[type=range], viewport-object-tree .ctrl-slider > input[type=range], image-viewer .ctrl-slider > input[type=range] {
     width: 200px;
     margin: 0 5px;
     display: inline-block; }
@@ -349,5 +352,28 @@ viewport-selection-display > .ctrl-container > div {
   padding: 3px 6px 3px; }
   viewport-selection-display > .ctrl-container > div .list-entry {
     max-width: 400px; }
+
+viewport-context-menu {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  pointer-events: none; }
+  viewport-context-menu > .context-menu-dialog {
+    position: absolute;
+    pointer-events: auto; }
+    viewport-context-menu > .context-menu-dialog > ul {
+      background-color: #4E5D6C; }
+      viewport-context-menu > .context-menu-dialog > ul > li {
+        padding: 1px 8px;
+        font-size: 13px;
+        text-overflow: ellipsis;
+        overflow: hidden; }
+        viewport-context-menu > .context-menu-dialog > ul > li > span {
+          display: inline-block;
+          white-space: nowrap;
+          max-width: 100px; }
+      viewport-context-menu > .context-menu-dialog > ul > a {
+        padding: 4px 8px;
+        font-size: 14px; }
 
 /*# sourceMappingURL=viewport.css.map */

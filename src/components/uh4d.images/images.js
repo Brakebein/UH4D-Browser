@@ -83,6 +83,10 @@ angular.module('uh4d.images', [
 			// 	return item instanceof DV3D.ImageEntry;
 			// });
 		});
+
+		$scope.$on('ImageCollectionUpdate', function () {
+			updateImageMeta();
+		});
 		
 		function updateImageMeta() {
 			if (!ctrl.images || !ctrl.images.length) return;
@@ -99,6 +103,21 @@ angular.module('uh4d.images', [
 			$state.go('.image', {imageId: id});
 		};
 
+		ctrl.openCompareModal = function (event, img1, img2) {
+			event.preventDefault();
+			$state.go('.compare', {
+				imageId1: img1.id,
+				imageId2: img2.id
+			});
+		};
+
+		ctrl.setListTab = function (tab) {
+			if (tab === ctrl.listTab)
+				ctrl.listTab = '';
+			else
+				ctrl.listTab = tab;
+		};
+
 		ctrl.setListMode = function (mode) {
 			switch (mode) {
 				case 'list':
@@ -113,9 +132,6 @@ angular.module('uh4d.images', [
 
 			ImageCollection.add(item);
 			ctrl.collection = ImageCollection.get();
-			// if (ctrl.collection.indexOf(item) !== -1) return;
-			// ctrl.collection.push(item);
-			// item.inCollection = true;
 		};
 
 		ctrl.removeFromCollection = function (event, item) {
@@ -123,7 +139,6 @@ angular.module('uh4d.images', [
 
 			ImageCollection.remove(item);
 			ctrl.collection = ImageCollection.get();
-			updateImageMeta();
 		};
 
 		ctrl.focusImage = function (event, spatial) {
@@ -141,7 +156,7 @@ angular.module('uh4d.images', [
 	
 .component('imageModal', {
 	templateUrl: 'components/uh4d.images/imageModal.tpl.html',
-	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', function ($rootScope, $state, $timeout, Image, Utilities) {
+	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection) {
 
 		var $ctrl = this;
 
@@ -157,11 +172,21 @@ angular.module('uh4d.images', [
 				.then(function (value) {
 					console.log(value);
 					$ctrl.image = value;
+					if (ImageCollection.get(id))
+						$ctrl.image.inCollection = true;
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.get', reason);
 				});
 		}
+
+		$ctrl.addToCollection = function () {
+			ImageCollection.add($ctrl.image);
+		};
+
+		$ctrl.removeFromCollection = function () {
+			ImageCollection.remove($ctrl.image);
+		};
 
 		$ctrl.startSpatialize = function () {
 			$state.go('^');
@@ -218,8 +243,8 @@ angular.module('uh4d.images', [
 	}]
 })
 
-.service('ImageCollection', ['$window', '$q', 'Image', 'Utilities',
-	function ($window, $q, Image, Utilities) {
+.service('ImageCollection', ['$window', '$rootScope', '$q', 'Image', 'Utilities',
+	function ($window, $rootScope, $q, Image, Utilities) {
 
 		var scope = this;
 
@@ -280,6 +305,8 @@ angular.module('uh4d.images', [
 				item.inCollection = true;
 				collection.push(item);
 			}
+
+			ImageCollectionUpdate();
 		};
 
 		this.remove = function (item) {
@@ -301,6 +328,8 @@ angular.module('uh4d.images', [
 
 			if (item.inCollection)
 				item.inCollection = false;
+
+			ImageCollectionUpdate();
 		};
 
 		function getImage(id) {
@@ -316,6 +345,10 @@ angular.module('uh4d.images', [
 				});
 
 			return defer.promise;
+		}
+
+		function ImageCollectionUpdate() {
+			$rootScope.$broadcast('ImageCollectionUpdate', collection);
 		}
 
 	}

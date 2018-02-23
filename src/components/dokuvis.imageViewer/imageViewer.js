@@ -16,6 +16,7 @@ angular.module('dokuvis.imageViewer', [])
  * @param src {string} Path/url to the image
  * @param options {Object=} Force resolution/aspect ratio with `width` and `height` property
  * @param spatialize {boolean=} Activate spatialize feature, e.g. setting markers on image
+ * @param grid {boolean=} Activate grid feature
  */
 .directive('imageViewer', ['$document', '$window', '$timeout', 'SpatializeInterface', '$debounce', '$log',
 	function ($document, $window, $timeout, SpatializeInterface, $debounce, $log) {
@@ -23,6 +24,8 @@ angular.module('dokuvis.imageViewer', [])
 		return {
 			restrict: 'E',
 			// templateUrl: 'app/directives/imageViewer/imageViewer.html',
+			template: '<div class="ctrl-container ctrl-bottom-left" ng-if="grid">\n' +
+			'\t<div>\n\t\t<div class="ctrl-group">\n\t\t\t<input type="checkbox" ng-model="grid.visible" ng-change="grid.onVisibilityChange()"/> Show grid\n\t\t</div>\n\t\t<div class="ctrl-group" ng-show="grid.visible">\n\t\t\t<div class="ctrl-slider">\n\t\t\t<span>Size</span>\n\t\t\t<input class="dvSlider" type="range" min="0" max="100" step="1" ng-model="grid.size" ng-change="grid.onSizeChange()"/>\n\t\t</div>\n\t</div>\n\t</div>\n</div>',
 			scope: {
 				source: '=src',
 				options: '=options'
@@ -31,11 +34,6 @@ angular.module('dokuvis.imageViewer', [])
 
 				angular.element(element).css('overflow', 'hidden');
 
-				// activate spatialize feature
-				if ('spatialize' in attrs)
-					scope.spatialize = {
-						markers: SpatializeInterface.markers2D
-					};
 
 				var readyViewer = false,
 					readyTexture = false,
@@ -53,7 +51,7 @@ angular.module('dokuvis.imageViewer', [])
 				var angleX, angleY;
 				var scene, renderer, camera, canvas;
 				var loader = new THREE.TextureLoader();
-				var plane, currentMarker, currentUV;
+				var plane, currentMarker, currentUV, grid;
 
 				// bind event listeners
 				$document.on('mouseup', mouseup);
@@ -341,10 +339,55 @@ angular.module('dokuvis.imageViewer', [])
 					}
 				}
 
+				// activate spatialize feature
+				if ('spatialize' in attrs)
+					scope.spatialize = {
+						markers: SpatializeInterface.markers2D
+					};
+
 				// bind functions to scope
 				if (scope.spatialize) {
 					scope.startMarking = startMarking;
 					scope.clearMarkers = clearMarkers;
+				}
+
+				// activate grid feature
+				if ('grid' in attrs) {
+					scope.grid = {
+						visible: false,
+						size: 50,
+						onSizeChange: function () {
+							var size = logslider(this.size);
+							grid.scale.set(size, size, size);
+							render();
+						},
+						onVisibilityChange: function () {
+							if (this.visible && (!grid || !plane.getObjectById(grid.id))) {
+								if (!grid) {
+									grid = new THREE.GridHelper(20, 200, 0x00ff00, 0xffff00);
+									grid.material.transparent = true;
+									grid.material.opacity = 0.5;
+									grid.rotateX(Math.PI / 2);
+									grid.position.set(0, 0, 0.01);
+									var size = logslider(this.size);
+									grid.scale.set(size, size, size);
+								}
+								plane.add(grid);
+							}
+							else
+								plane.remove(grid);
+							render();
+						}
+					};
+				}
+
+				function logslider(position) {
+					var minp = 0, maxp = 100;
+					var minv = Math.log(0.1),
+						maxv = Math.log(2);
+
+					var scale = (maxv - minv) / (maxp - minp);
+					return Math.exp(minv + scale * (position - minp));
 				}
 
 				// destroy elements / cleanup
@@ -353,6 +396,10 @@ angular.module('dokuvis.imageViewer', [])
 					if (plane) {
 						plane.geometry.dispose();
 						if (plane.material.map) plane.material.map.dispose();
+						plane.material.dispose();
+					}
+					if (grid) {
+						plane.geometry.dispose();
 						plane.material.dispose();
 					}
 

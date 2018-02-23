@@ -115,6 +115,11 @@ angular.module('uh4dApp', [
 					// compareModalInstance.hide();
 					// compareModalInstance.destroy();
 				}]
+			})
+			.state({
+				name: 'root.help',
+				url: '/help',
+				templateUrl: 'partials/help.html'
 			});
 
 		// defaults

@@ -1,7 +1,7 @@
 <div class="ctrl-container ctrl-bottom-left">
 	<div>
 		<div>
-			<button class="btn btn-primary btn-sm ng-hide" ng-show="imageList.length === 2" ng-click="openCompareView()">Compare</button>
+			<button class="btn btn-primary btn-sm ng-hide" ng-show="inIsolationMode" ng-click="$parent.exitIsolation()">Exit isolation</button>
 		</div>
 		<div ng-hide="imageList.length || objectList.length"><i class="fa fa-times"></i> No elements selected.</div>
 

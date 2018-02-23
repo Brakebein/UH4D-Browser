@@ -23,7 +23,8 @@ image-list {
       width: 100%;
       margin: 0; }
       image-list > .list-selection > ul > li.media {
-        margin: 5px 0; }
+        position: relative;
+        margin: 5px 17px 5px 0; }
         image-list > .list-selection > ul > li.media:hover {
           border-color: #DF691A !important; }
         image-list > .list-selection > ul > li.media > img {
@@ -43,6 +44,23 @@ image-list {
             color: #ced4da; }
             image-list > .list-selection > ul > li.media > .media-flags > i:hover {
               color: #EBEBEB; }
+        image-list > .list-selection > ul > li.media > .media-compare-btn {
+          display: block;
+          position: absolute;
+          width: 14px;
+          height: 80%;
+          top: -3px;
+          right: 0;
+          transform: translate(100%, -50%);
+          padding-left: 4px;
+          border: 1px solid #4E5D6C;
+          border-left: none; }
+          image-list > .list-selection > ul > li.media > .media-compare-btn > .btn {
+            position: absolute;
+            font-size: 12px;
+            padding: 0 3px;
+            top: 50%;
+            transform: translate(0, -50%); }
   image-list > .list-body {
     flex: 1 1 0;
     overflow-y: scroll; }
