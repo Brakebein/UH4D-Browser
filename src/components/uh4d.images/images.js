@@ -104,7 +104,7 @@ angular.module('uh4d.images', [
 		};
 
 		ctrl.openCompareModal = function (event, img1, img2) {
-			event.preventDefault();
+			event.stopPropagation();
 			$state.go('.compare', {
 				imageId1: img1.id,
 				imageId2: img2.id
