@@ -92,6 +92,17 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container, image-viewer .ct
       border-bottom: none;
       border-left: none;
       border-radius: 0 10px 0 0; }
+  viewport .ctrl-container.ctrl-bottom-right, viewport-object-tree .ctrl-container.ctrl-bottom-right, image-viewer .ctrl-container.ctrl-bottom-right {
+    bottom: 0;
+    right: 0; }
+    viewport .ctrl-container.ctrl-bottom-right > div, viewport-object-tree .ctrl-container.ctrl-bottom-right > div, image-viewer .ctrl-container.ctrl-bottom-right > div {
+      background-color: rgba(51, 51, 51, 0.8);
+      border: 1px solid #999;
+      color: #fafafa;
+      font-size: 12px;
+      border-bottom: none;
+      border-right: none;
+      border-radius: 10px 0 0 0; }
 viewport .ctrl-group, viewport-object-tree .ctrl-group, image-viewer .ctrl-group {
   float: left;
   height: 100%;

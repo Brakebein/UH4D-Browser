@@ -1,0 +1,24 @@
+<div class="ctrl-container ctrl-bottom-right">
+	<div>
+
+		<div class="row">
+			<div class="ctrl-group">
+				<input type="checkbox" ng-model="heatMap.visible" ng-change="heatMap.toggle()"/> Show heat map
+			</div>
+		</div>
+
+		<div class="row" ng-show="heatMap.visible">
+			<div class="ctrl-group">
+				<input type="checkbox" ng-model="heatMap.overlay" ng-change="heatMap.toggleOverlay()"/> Overlay
+			</div>
+			<div class="ctrl-group">
+				<div class="ctrl-slider">
+					<span>Radius</span>
+					<input class="dvSlider" type="range" min="10" max="100" step="2" ng-model="heatMap.radius" ng-change="heatMap.changeRadius()"/>
+					<span>{{ heatMap.radius }}</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

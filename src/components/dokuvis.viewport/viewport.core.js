@@ -86,7 +86,8 @@ angular.module('dokuvis.viewport',[
 			// Gizmo, Slice, Messen
 			var gizmo, gizmoMove, gizmoRotate;
 
-			var measureTool, pin, vplane;
+			var measureTool, pin, heatMap;
+			var heatMapRadius = 0;
 
 			// Shading-Konstanten
 			// var shading = {
@@ -327,63 +328,6 @@ angular.module('dokuvis.viewport',[
 				//setGizmo(plane, 'move');
 
 
-				// vertex colors test
-				var vplaneGeo = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-				var vplaneMat = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors, depthTest: false, depthWrite: false, transparent: false, opacity: 0.5 });
-				// var vplaneMat2 = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors, depthTest: false, depthWrite: false, transparent: true, opacity: 0.4 });
-				vplane = new THREE.Mesh(vplaneGeo, vplaneMat);
-				// var vplane2 = new THREE.Mesh(vplaneGeo, vplaneMat2);
-
-				vplane.rotateX(-Math.PI/2);
-				vplane.translateX(500);
-				vplane.translateY(500);
-				// vplane2.rotateX(-Math.PI/2);
-				// vplane2.translateX(500);
-				// vplane2.translateY(500);
-
-				console.log(vplaneGeo);
-				var ws = vplaneGeo.parameters.widthSegments,
-					hs = vplaneGeo.parameters.heightSegments;
-				var vc = [];
-
-				for (var i=0; i<vplaneGeo.parameters.heightSegments+1; i++) {
-					var row = [];
-					vc.push(row);
-
-					for (var j=0; j<vplaneGeo.parameters.widthSegments+1; j++) {
-						row.push(new THREE.Color());
-					}
-
-				}
-
-				//console.log(vc);
-				vplaneGeo.vcMatrix = vc;
-
-				vplaneGeo.faces.forEach(function (face, index) {
-					var rowIndex = Math.floor(index / (ws * 2)),
-						colIndex = Math.floor((index % (ws * 2)) / 2);
-
-					if (index % 2 === 0) {
-						face.vertexColors.push(vc[rowIndex][colIndex]);
-						face.vertexColors.push(vc[rowIndex+1][colIndex]);
-						face.vertexColors.push(vc[rowIndex][colIndex+1]);
-					}
-					else {
-						face.vertexColors.push(vc[rowIndex+1][colIndex]);
-						face.vertexColors.push(vc[rowIndex+1][colIndex+1]);
-						face.vertexColors.push(vc[rowIndex][colIndex+1]);
-					}
-				});
-
-				// vc[1][1].set(0xff0000);
-				// vc[0][1].set(0xffff00);
-				// vc[2][2].set(0x00ff00);
-				// vc[2][3].set(0xffff00);
-
-				scene.add(vplane);
-				//scene.add(vplane2);
-
-
 				// pointcloud test
 				// loadPointCloud('data/pointclouds/georgentor/cloud.js', 'potree-test', function (e) {
 				// 	console.info(e);
@@ -422,55 +366,6 @@ angular.module('dokuvis.viewport',[
 
 				animate();
 				viewportCameraMove(camera);
-			}
-
-			function updateVplane() {
-				var vc = vplane.geometry.vcMatrix;
-				var radius = 50;
-				var maxCount = 0;
-				var countMatrix = [];
-				for (var i=0, l=vc.length, k=vc[0].length; i<l; i++) {
-					var row = [];
-					countMatrix.push(row);
-					for (var j=0; j<k; j++) {
-						var count = 0;
-						spatialImages.forEach(function (img) {
-							var v = new THREE.Vector2(j*10, -(1000 - i*10)).sub(new THREE.Vector2(img.object.position.x, img.object.position.z));
-							if (v.length() < radius)
-								count++;
-						}, true);
-						if (count > maxCount) maxCount = count;
-						row.push(count);
-					}
-				}
-				console.log(maxCount);
-				// console.log(countMatrix);
-				// var vColor1 = new THREE.Color(0x0000ff); // blue
-				// var vColor2 = new THREE.Color(0x00ffff); // cyan
-				// var vColor3 = new THREE.Color(0x00ff00); // green
-				// var vColor4 = new THREE.Color(0xffff00); // yellow
-				// var vColor5 = new THREE.Color(0xff0000); // red
-				var vColor1 = new THREE.Color(0x2b83ba); // blue
-				var vColor2 = new THREE.Color(0xabdda4); // cyan
-				var vColor3 = new THREE.Color(0xffffbf); // green
-				var vColor4 = new THREE.Color(0xfdae61); // yellow
-				var vColor5 = new THREE.Color(0xd7191c); // red
-				for (i=0, l=vc.length, k=vc[0].length; i<l; i++) {
-					for (j=0; j<k; j++) {
-						var alpha = countMatrix[i][j] / maxCount;
-						if (alpha < 0.25)
-							//vc[i][j].lerp(vColor1, alpha * 2);
-							vc[i][j].copy(vColor1.clone().lerp(vColor2, alpha * 4));
-						else if (alpha < 0.5)
-							vc[i][j].copy(vColor2.clone().lerp(vColor3, alpha * 4 - 1));
-						else if (alpha < 0.75)
-							vc[i][j].copy(vColor3.clone().lerp(vColor4, alpha * 4 - 2));
-						else
-							vc[i][j].copy(vColor4.clone().lerp(vColor5, alpha * 4 - 3));
-
-					}
-				}
-				vplane.geometry.elementsNeedUpdate = true;
 			}
 
 			/**
@@ -2132,11 +2027,14 @@ angular.module('dokuvis.viewport',[
 
 					spatializeManualElement = $compile('<viewport-spatialize-manual></viewport-spatialize-manual>')(elScope);
 					$animate.enter(spatializeManualElement, element);
+
+					element.find('viewport-selection-display, viewport-analysis-tools').hide();
 				});
 
 				scope.closeSpatializeManual = function () {
 					$animate.leave(spatializeManualElement);
 					spatializeManualElement = null;
+					element.find('viewport-selection-display, viewport-analysis-tools').show();
 				};
 			}
 
@@ -2154,6 +2052,58 @@ angular.module('dokuvis.viewport',[
 				return camera;
 			};
 
+
+			///// HEAT MAP
+
+			// listen to viewportHeatMapUpdate event
+			scope.$on('viewportHeatMapUpdate', function (event, options) {
+				if (!options) return;
+
+				if (options.visibilityChange) {
+					if (options.visible) {
+						if (!heatMap) {
+							// initialize heatMap
+							heatMap = new DV3D.HeatMap(1500, 1500, 150, 150);
+							heatMap.translateX(600);
+							heatMap.translateZ(-500);
+							heatMap.updateMatrixWorld();
+						}
+						scene.add(heatMap);
+						heatMapRadius = options.radius;
+						updateHeatMap();
+					}
+					else {
+						scene.remove(heatMap);
+					}
+				}
+
+				if (options.overlayChange) {
+					heatMap.toggleOverlay(options.overlay);
+				}
+
+				if (options.radiusChange) {
+					heatMapRadius = options.radius;
+					updateHeatMap();
+				}
+
+				animateAsync();
+			});
+
+			function updateHeatMap() {
+				if (!heatMap) return;
+
+				heatMap.update(function (position) {
+					var count = 0;
+
+					spatialImages.forEach(function (img) {
+						var v = new THREE.Vector2(position.x, position.z).sub(new THREE.Vector2(img.object.position.x, img.object.position.z));
+						if (v.length() < heatMapRadius)
+							count++;
+					}, true);
+
+					return count;
+				});
+			}
 
 			///// SPATIAL IMAGES
 
@@ -2175,7 +2125,7 @@ angular.module('dokuvis.viewport',[
 				else
 					loadSpatialImage(images);
 
-				updateVplane();
+				updateHeatMap();
 			});
 
 			/**
@@ -3435,6 +3385,11 @@ angular.module('dokuvis.viewport',[
 
 				if (scope.spatialize)
 					clearMarkers();
+
+				if (heatMap) {
+					scene.remove(heatMap);
+					heatMap.dispose();
+				}
 
 				// unbind functions from callFunc
 				delete SpatializeInterface.callFunc[cfId];
