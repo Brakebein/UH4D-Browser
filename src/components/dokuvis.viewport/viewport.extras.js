@@ -470,15 +470,6 @@ angular.module('dokuvis.viewport')
 				scope.inIsolationMode = false;
 			});
 
-
-			// scope.openCompareView = function () {
-			// 	if (scope.imageList[0] && scope.imageList[1])
-			// 		$state.go('.compare', {
-			// 			imageId1: scope.imageList[0].source.id,
-			// 			imageId2: scope.imageList[1].source.id
-			// 		});
-			// };
-
 		}
 	};
 
@@ -510,6 +501,45 @@ angular.module('dokuvis.viewport')
 				scope.entry.focus();
 				scope.$parent.closeContextMenu();
 			};
+
+			element.on('$destroy', function () {
+				scope.$destroy();
+			});
+
+		}
+	};
+
+}])
+
+.directive('viewportAnalysisTools', ['$debounce', function ($debounce) {
+
+	return {
+		templateUrl: 'components/dokuvis.viewport/viewportAnalysisTools.tpl.html',
+		restrict: 'E',
+		link: function (scope, element) {
+
+			scope.heatMap = {
+				visible: false,
+				overlay: false,
+				radius: 40,
+				toggle: function () {
+					viewportHeatMapUpdate({visibilityChange: true});
+				},
+				toggleOverlay: function () {
+					viewportHeatMapUpdate({overlayChange: true});
+				},
+				changeRadius: $debounce(function () {
+					viewportHeatMapUpdate({radiusChange: true});
+				}, 1000)
+			};
+
+			function viewportHeatMapUpdate(options) {
+				scope.$emit('viewportHeatMapUpdate', angular.extend(options, {
+					visible: scope.heatMap.visible,
+					overlay: scope.heatMap.overlay,
+					radius: scope.heatMap.radius
+				}));
+			}
 
 			element.on('$destroy', function () {
 				scope.$destroy();

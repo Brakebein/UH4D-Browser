@@ -19,7 +19,7 @@ angular.module('uh4dApp')
 
 		$ctrl.submitSearch = function () {
 			$state.go('root.search', { query: $ctrl.searchTerm });
-			updateSearchTerm($ctrl.searchTerm);
+			// updateSearchTerm($ctrl.searchTerm);
 		};
 
 		function updateSearchTerm(term) {
@@ -30,6 +30,7 @@ angular.module('uh4dApp')
 			return $state.params.query;
 		}, function (newVal) {
 			$ctrl.searchTerm = newVal;
+			updateSearchTerm($ctrl.searchTerm);
 		});
 
 	}]

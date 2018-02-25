@@ -86,7 +86,8 @@ angular.module('dokuvis.viewport',[
 			// Gizmo, Slice, Messen
 			var gizmo, gizmoMove, gizmoRotate;
 
-			var measureTool, pin;
+			var measureTool, pin, heatMap;
+			var heatMapRadius = 0;
 
 			// Shading-Konstanten
 			// var shading = {
@@ -2026,11 +2027,14 @@ angular.module('dokuvis.viewport',[
 
 					spatializeManualElement = $compile('<viewport-spatialize-manual></viewport-spatialize-manual>')(elScope);
 					$animate.enter(spatializeManualElement, element);
+
+					element.find('viewport-selection-display, viewport-analysis-tools').hide();
 				});
 
 				scope.closeSpatializeManual = function () {
 					$animate.leave(spatializeManualElement);
 					spatializeManualElement = null;
+					element.find('viewport-selection-display, viewport-analysis-tools').show();
 				};
 			}
 
@@ -2048,6 +2052,58 @@ angular.module('dokuvis.viewport',[
 				return camera;
 			};
 
+
+			///// HEAT MAP
+
+			// listen to viewportHeatMapUpdate event
+			scope.$on('viewportHeatMapUpdate', function (event, options) {
+				if (!options) return;
+
+				if (options.visibilityChange) {
+					if (options.visible) {
+						if (!heatMap) {
+							// initialize heatMap
+							heatMap = new DV3D.HeatMap(1500, 1500, 150, 150);
+							heatMap.translateX(600);
+							heatMap.translateZ(-500);
+							heatMap.updateMatrixWorld();
+						}
+						scene.add(heatMap);
+						heatMapRadius = options.radius;
+						updateHeatMap();
+					}
+					else {
+						scene.remove(heatMap);
+					}
+				}
+
+				if (options.overlayChange) {
+					heatMap.toggleOverlay(options.overlay);
+				}
+
+				if (options.radiusChange) {
+					heatMapRadius = options.radius;
+					updateHeatMap();
+				}
+
+				animateAsync();
+			});
+
+			function updateHeatMap() {
+				if (!heatMap) return;
+
+				heatMap.update(function (position) {
+					var count = 0;
+
+					spatialImages.forEach(function (img) {
+						var v = new THREE.Vector2(position.x, position.z).sub(new THREE.Vector2(img.object.position.x, img.object.position.z));
+						if (v.length() < heatMapRadius)
+							count++;
+					}, true);
+
+					return count;
+				});
+			}
 
 			///// SPATIAL IMAGES
 
@@ -2068,6 +2124,8 @@ angular.module('dokuvis.viewport',[
 				}
 				else
 					loadSpatialImage(images);
+
+				updateHeatMap();
 			});
 
 			/**
@@ -3327,6 +3385,11 @@ angular.module('dokuvis.viewport',[
 
 				if (scope.spatialize)
 					clearMarkers();
+
+				if (heatMap) {
+					scene.remove(heatMap);
+					heatMap.dispose();
+				}
 
 				// unbind functions from callFunc
 				delete SpatializeInterface.callFunc[cfId];
