@@ -1,3 +1,5 @@
+@import "../../node_modules/bootswatch/dist/superhero/variables"
+
 html, body
 	height: 100%
 	padding: 0
@@ -74,3 +76,74 @@ body
 	left: 50%
 	transform: translate(-50%,0)
 	z-index: 1090
+
+// custom range input slider
+input[type=range].dvSlider
+	-webkit-appearance: none
+	width: 100%
+	margin: 0
+	background: none
+
+	&:focus
+		outline: none
+
+	&::-webkit-slider-runnable-track
+		width: 100%
+		height: 6px
+		cursor: pointer
+		background: #eee
+
+	&::-webkit-slider-thumb
+		height: 14px
+		width: 14px
+		background: $primary
+		cursor: pointer
+		-webkit-appearance: none
+		margin-top: -4px
+
+	&:focus::-webkit-slider-runnable-track
+		background: #ddd
+
+	&::-moz-range-track
+		width: 100%
+		height: 6px
+		cursor: pointer
+		background: #eee
+
+	&::-moz-range-thumb
+		height: 14px
+		width: 14px
+		background: $primary
+		cursor: pointer
+
+	&::-ms-track
+		width: 100%
+		height: 8px
+		cursor: pointer
+		background: transparent
+		border-color: transparent
+		color: transparent
+
+	&::-ms-fill-lower
+		background: #484848
+
+	&::-ms-fill-upper
+		background: #eee
+
+	&::-ms-thumb
+		height: 14px
+		width: 14px
+		background: $primary
+		cursor: pointer
+
+	&:focus::-ms-fill-lower
+		background: #eee
+
+	&:focus::-ms-fill-upper
+		background: #626262
+
+input[type=range].dvSlider.dvSlider-dark
+	&::-webkit-slider-runnable-track
+		background: #aaa
+	&:focus::-webkit-slider-runnable-track
+		background: #999

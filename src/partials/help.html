@@ -3,26 +3,69 @@
 
 	<hr/>
 
-	<h1>Navigation</h1>
-	<p>Some introduction text.</p>
+	<h1>Search</h1>
+	<p>As this is a prototype application, there is a manageable amount of images stored in our database. Hence, if no search term is entered in the search bar, all images will be listed as results.</p>
+	<p>To narrow the results, enter keywords into the search bar. Currently, the application will look for</p>
+	<ul>
+		<li>Title</li>
+		<li>Author/photographer</li>
+		<li>Owner</li>
+		<li>Tags</li>
+		<li>Capture number</li>
+	</ul>
+	<p><img src="img/help/searchbar.jpg"/></p>
+	<p>The results are displayed in the column to the right in ascending or descending order (by title, author, or date).</p>
+	<p><img src="img/help/results_list.jpg"/></p>
+
+	<hr/>
+
+	<h1>Images</h1>
+	<p>All search results are listed in the column to the right. All images that have been spatially oriented are also displayed within the 3D viewport. If the image is spatially oriented or not, is indicated by the <i class="fa fa-cube"></i> icon.</p>
+	<p>The spatially oriented images (3D images) can be faded and scaled by the slider in the top-right of the viewport.</p>
+	<p><img src="img/help/image_ctrls.jpg"/></p>
+	<p>To open the detailed view of the image with further metadata and an image viewer for closer inspection, click on the result list entry or right-click on the 3D image to open the context menu and choose "Open details...".</p>
+	<p><img src="img/help/contextmenu.jpg"/></p>
+	<p>You are able to take up the position of the photographer. To do so:</p>
+	<ul>
+		<li>Double click on the 3D image</li>
+		<li>Right-click on the 3D image and choose "Focus"</li>
+		<li>Select the image and hit the <img src="img/help/zoom_sel_w.png"/> button in the navigation bar</li>
+		<li>Click on the <i class="fa fa-cube"></i> item at the result list entry</li>
+	</ul>
+	<p>When focusing the image/taking up the position, the image will be isolated. So, other images won't occlude the geometry/3D models. To exit the isolation mode, press the "Exit isolation" button at the lower-left of the viewport.</p>
+	<p>Selecting an image is done by simply clicking on the 3D image. Multiple images can be selected by holding the "Ctrl" key while clicking. All the selected images are listed within the selection box.</p>
+	<p><img src="img/help/selection_box.jpg"/></p>
+
+	<hr/>
+
+	<h1>Navigation <small>&ndash; 3D viewport</small></h1>
+	<p>Navigation in 3D space is primarily done pressing different mouse buttons. But there is also a navigation bar to assist the navigation.</p>
+
 	<h3>Mouse gestures</h3>
 	<p>There are multiple mouse gestures available:</p>
 	<ul>
-		<li><img height="60" src="img/help/navigation_help_button0.svg"/> <i>Hold:</i> Rotate view, <i>Click:</i> Select item, <i>Double click:</i> Select and focus item</li>
-		<li><img height="60" src="img/help/navigation_help_button1.svg"/> <i>Hold:</i> Pan view</li>
-		<li><img height="60" src="img/help/navigation_help_wheel.svg"/> <i>Scroll:</i> Zoom view</li>
-		<li><img height="60" src="img/help/navigation_help_contextmenu.svg"/> <i>Click:</i> Select item and open context menu</li>
-		<li><img height="60" src="img/help/navigation_help_ctrlselect.svg"/> <i>Click:</i> Select/deselect multiple items</li>
+		<li><img height="60" src="img/help/navigation_help_button0.svg"/> <b>Hold:</b> Rotate view, <b>Click:</b> Select item, <b>Double click:</b> Select and zooom/focus item</li>
+		<li><img height="60" src="img/help/navigation_help_button1.svg"/> <b>Hold:</b> Pan view</li>
+		<li><img height="60" src="img/help/navigation_help_wheel.svg"/> <b>Scroll:</b> Zoom view</li>
+		<li><img height="60" src="img/help/navigation_help_contextmenu.svg"/> <b>Click:</b> Select item and open context menu</li>
+		<li><img height="60" src="img/help/navigation_help_ctrlselect.svg"/> <b>Click:</b> Select/deselect multiple items</li>
 	</ul>
 
 	<h3>Navigation bar</h3>
-	<p>In addition to the mouse gestures, there is also the possibility to navigate with the left mouse button pressed.</p>
+	<p>In addition to the mouse gestures, there is also the possibility to choose a navigation mode and navigate with the left mouse button pressed.</p>
 	<p><img src="img/help/navigation_bar.jpg"/></p>
+	<ul>
+		<li><img src="img/help/zoom_all_w.png"/> Fit the whole scene into the viewport</li>
+		<li><img src="img/help/zoom_sel_w.png"/> Zoom to and focus selected items</li>
+	</ul>
 	<ul>
 		<li><img height="30" src="img/help/cursor80_w.svg"/> Standard navigation mode, see "Mouse gestures"</li>
 		<li><img height="30" src="img/help/orbit_w.svg"/> Rotate/orbit view with left mouse button pressed</li>
 		<li><img height="30" src="img/help/move_w.svg"/> Pan view with left mouse button pressed</li>
 		<li><img height="30" src="img/help/zoom2_w.svg"/> Zoom view with left mouse button pressed</li>
+	</ul>
+	<ul>
+		<li>Choose between different rendering modes of the 3D objects</li>
 	</ul>
 
 	<hr/>
@@ -34,11 +77,36 @@
 		<li>Hit the star icon (<i class="fa fa-star"></i> <i class="fa fa-star-o"></i>) within the search results list entry<br/>
 			<img class="mt-1 mb-1" src="img/help/collection_stars.jpg"/>
 		</li>
-		<li>Right-click within the viewport on an image and choose "Add to collection"/"Remove from collection"<br/>
+		<li>Right-click within the viewport on an image to open the context menu and choose "Add to collection"/"Remove from collection"<br/>
 			<img class="mt-1 mb-1" src="img/help/collection_contextmenu.jpg"/>
 		</li>
 		<li>Press the responsible button within the detail view<br/>
 			<img class="mt-1 mb-1" src="img/help/collection_detailview.jpg"/>
 		</li>
 	</ul>
+
+	<hr/>
+
+	<h1>Compare images</h1>
+	<p>Two images can be compared and inspected to each other. To enter the comparison view, select two images or have at least two images in your collection. Press the "Compare" button that connects two selection/collection entries.</p>
+	<p><img src="img/help/compare_button.jpg"/></p>
+	<p>The comparison view has two image viewers side by side. You are now able to zoom and pan each image individually. Additionally, there is the possibility to overlay a grid to estimate some distances comparatively.</p>
+	<p><img width="100%" src="img/help/compare_view.jpg"/></p>
+
+	<hr/>
+
+	<h1>Spatialize images</h1>
+	<p>Some images are not yet spatially oriented. You can help to contribute and manually orientate an image.</p>
+	<p>Open the detailed view of an image you want to orientate and hit the "Spatialize" button. The 3D viewport will be overlayed with the image. Now, you have to adjust the view to match the image. Use the opacity slider to fade between viewport and image and the field of view (FOV) slider to adjust the FOV of the virtual camera.</p>
+	<p>To set up the view more precisely, there are also some vernier adjustment buttons. You can pan and rotate the virtual camera by tiny amounts according to the precision slider. Hit "Save" when you are done.</p>
+	<p><img src="img/help/spatialize_ctrls.jpg"/></p>
+
+	<hr/>
+
+	<h1>Analysis tools</h1>
+	<p>Until now, there is only one analysis tool available.</p>
+
+	<h3>Heat map &ndash; Frequency distribution</h3>
+	<p>Visualization of hotspots of spatially oriented images. Toggle the heat map with the checkbox at lower-right of the viewport.</p>
+
 </div>
