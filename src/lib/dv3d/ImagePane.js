@@ -38,6 +38,8 @@ DV3D.ImagePane = function ( imageUrl, params ) {
 
 		// plane with texture
 		texture.anisotropy = 8;
+		texture.minFilter = THREE.LinearFilter;
+
 		var paneGeometry = new THREE.PlaneBufferGeometry(scope.width, scope.height);
 		var paneMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, map: texture });
 
@@ -188,6 +190,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 				var scope = this;
 				new THREE.TextureLoader().load(this.texture, function (texture) {
 					texture.anisotropy = 8;
+					texture.minFilter = THREE.LinearFilter;
 					scope.texture = texture;
 					scope.image.material.map = texture;
 					scope.image.material.needsUpdate = true;

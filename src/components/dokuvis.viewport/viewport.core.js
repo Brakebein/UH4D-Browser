@@ -2153,12 +2153,12 @@ angular.module('dokuvis.viewport',[
 				var defer = $q.defer();
 
 				// ImagePane instance
-				var imagepane = new DV3D.ImagePane('data/' + img.file.path + img.file.texture, {
+				var imagepane = new DV3D.ImagePane('data/' + img.file.path + img.file.preview, {
 					width: img.file.width,
 					height: img.file.height,
 					ck: img.spatial.ck,
 					offset: img.spatial.offset,
-					preview: 'data/' + img.file.path + img.file.texturePreview
+					preview: 'data/' + img.file.path + img.file.thumb
 				});
 
 				imagepane.onComplete = function () {

@@ -27,8 +27,11 @@ image-list {
         margin: 5px 17px 5px 0; }
         image-list > .list-selection > ul > li.media:hover {
           border-color: #DF691A !important; }
-        image-list > .list-selection > ul > li.media > img {
-          max-height: 50px; }
+        image-list > .list-selection > ul > li.media > .media-thumb {
+          width: 120px;
+          height: 50px;
+          background-position: center;
+          background-size: cover; }
         image-list > .list-selection > ul > li.media > .media-body {
           margin: 4px 4px 4px 0;
           line-height: initial;
@@ -71,6 +74,11 @@ image-list {
       position: relative; }
       image-list .list-media > ul > li.media:hover {
         border-color: #DF691A !important; }
+      image-list .list-media > ul > li.media > .media-thumb {
+        width: 160px;
+        height: 90px;
+        background-position: center;
+        background-size: cover; }
       image-list .list-media > ul > li.media > .media-body {
         margin: 4px 4px 4px 0;
         line-height: initial;
@@ -97,6 +105,10 @@ image-list {
       position: relative; }
       image-list .list-card > .card:hover {
         border-color: #DF691A !important; }
+      image-list .list-card > .card > .card-img-top {
+        height: 100px;
+        background-position: center;
+        background-size: cover; }
       image-list .list-card > .card > .card-body {
         padding: 0.4em;
         line-height: initial;

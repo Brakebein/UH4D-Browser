@@ -127,6 +127,8 @@ angular.module('dokuvis.imageViewer', [])
 
 					loader.load(url, function (texture) {
 
+						texture.minFilter = THREE.LinearFilter;
+
 						if (scope.options && scope.options.width && scope.options.height)
 							imageAspect = scope.options.width / scope.options.height;
 						else

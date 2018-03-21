@@ -7,7 +7,7 @@
 
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'selection'">
 		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
-			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
+			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
 				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
@@ -25,7 +25,7 @@
 
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'collection'">
 		<li class="media border border-secondary" ng-repeat="img in $ctrl.collection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
-			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
+			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
 				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
@@ -64,7 +64,7 @@
 
 	<ul class="list-unstyled">
 		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage) | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
-			<img class="mr-3" ng-src="data/{{img.file.path + img.file.thumb}}"/>
+			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
 				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
@@ -82,7 +82,7 @@
 <div class="list-body list-card" ng-if="$ctrl.listMode === 'cards'">
 
 	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage) | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
-		<img class="card-img-top" ng-src="data/{{img.file.path + img.file.thumb}}"/>
+		<div class="card-img-top" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 		<div class="card-body">
 			<div ng-clamp="3">{{img.title}}</div>
 			<p class="card-text"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>

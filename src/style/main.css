@@ -57,7 +57,8 @@ body > .main-body {
       .modal-dialog.modal-large > .modal-content > * > .modal-header, .modal-dialog.modal-large > .modal-content > * > .modal-footer, .modal-dialog.modal-xlarge > .modal-content > * > .modal-header, .modal-dialog.modal-xlarge > .modal-content > * > .modal-footer {
         flex: 0 0 auto; }
       .modal-dialog.modal-large > .modal-content > * > .modal-body, .modal-dialog.modal-xlarge > .modal-content > * > .modal-body {
-        flex: 1 1 auto; }
+        flex: 1 1 auto;
+        min-height: 0; }
 
 .alert {
   position: absolute;
