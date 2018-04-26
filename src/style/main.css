@@ -126,4 +126,42 @@ input[type=range].dvSlider.dvSlider-dark::-webkit-slider-runnable-track {
 input[type=range].dvSlider.dvSlider-dark:focus::-webkit-slider-runnable-track {
   background: #999; }
 
+ul[uib-typeahead-popup] {
+  padding: 0;
+  background-color: #EBEBEB; }
+  ul[uib-typeahead-popup] > li.uib-typeahead-match {
+    padding: 0.2rem 0.3rem; }
+    ul[uib-typeahead-popup] > li.uib-typeahead-match > a {
+      color: #000; }
+    ul[uib-typeahead-popup] > li.uib-typeahead-match.active {
+      background-color: #DF691A; }
+      ul[uib-typeahead-popup] > li.uib-typeahead-match.active > a {
+        color: #fff; }
+
+[editable-tags-input] + form > .editable-controls {
+  width: 100%; }
+  [editable-tags-input] + form > .editable-controls > tags-input {
+    width: 80%; }
+    [editable-tags-input] + form > .editable-controls > tags-input li.tag-item:not(.selected) {
+      background-color: #fff;
+      color: #000;
+      border-color: #212529; }
+    [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete {
+      padding: 0;
+      background-color: #EBEBEB;
+      border: none;
+      border-radius: 0; }
+      [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item {
+        background: none;
+        font-size: 0.875rem; }
+        [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item em {
+          font-size: 0.875rem;
+          background: none; }
+        [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item.selected {
+          background-color: #DF691A;
+          color: #fff; }
+          [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item.selected em {
+            background: none;
+            color: #fff; }
+
 /*# sourceMappingURL=main.css.map */

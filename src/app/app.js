@@ -22,7 +22,7 @@ angular.module('uh4dApp', [
 		$stateProvider
 			.state({
 				name: 'root',
-				utl: '/',
+				url: '?edit',
 				views: {
 					root: {
 						template: '<ui-view></ui-view>'
@@ -31,14 +31,13 @@ angular.module('uh4dApp', [
 					footer: {
 						templateUrl: 'partials/footer.html'
 					}
+				},
+				params: {
+					edit: {
+						type: 'query',
+						value: null
+					}
 				}
-				// params: {
-				// 	query: {
-				// 		type: 'query',
-				// 		dynamic: true,
-				// 		value: null
-				// 	}
-				// }
 			})
 			.state({
 				name: 'root.home',
@@ -142,6 +141,12 @@ angular.module('uh4dApp', [
 
 		$rootScope.showModelLoadPanel = true;
 		//$state.go('root.home');
+
+		$rootScope.$watch(function () {
+			return $state.params.edit;
+		}, function (newVal) {
+			$rootScope.editableMode = newVal === 'true';
+		});
 
 	}
 ]);

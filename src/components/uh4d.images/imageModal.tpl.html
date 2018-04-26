@@ -18,11 +18,26 @@
 				</div>
 				<div>
 					<strong>Author</strong>
-					<p>{{$ctrl.image.author || 'unknowm'}}</p>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.author || 'unknown'}}</p>
+					<p ng-show="$root.editableMode">
+						<span data-editable-text="$ctrl.image.author"
+							  data-e-form="eAuthorForm"
+							  data-onbeforesave="$ctrl.updateImage('author', $data)"
+							  data-e-uib-typeahead="name for name in $ctrl.queryAuthors($viewValue)"
+							  data-e-typeahead-min-length="3"
+							  data-e-typeahead-wait-ms="500">{{$ctrl.image.author || 'unknown'}}</span>
+						<button class="btn btn-secondary btn-sm" ng-click="eAuthorForm.$show()" ng-hide="eAuthorForm.$visible"><i class="fa fa-pencil"></i></button>
+					</p>
 				</div>
 				<div>
 					<strong>Date</strong>
-					<p>{{$ctrl.image.date || 'unknown'}}</p>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.date || 'unknown'}}</p>
+					<p ng-show="$root.editableMode">
+						<span data-editable-text="$ctrl.image.date"
+							  data-e-form="eDateForm"
+							  data-onbeforesave="$ctrl.updateImage('date', $data)">{{$ctrl.image.date || 'unknown'}}</span>
+						<button class="btn btn-secondary btn-sm" ng-click="eDateForm.$show()" ng-hide="eDateForm.$visible"><i class="fa fa-pencil"></i></button>
+					</p>
 				</div>
 				<div ng-show="$ctrl.image.owner">
 					<strong>Owner</strong>
@@ -34,7 +49,14 @@
 				</div>
 				<div>
 					<strong>Tags</strong>
-					<p>{{$ctrl.image.tags.join(', ')}}</p>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.tags.join(', ')}}</p>
+					<p ng-show="$root.editableMode">
+						<span editable-tags-input="$ctrl.tags" data-e-form="eTagsForm" data-e-ng-model="$ctrl.tags" data-onbeforesave="$ctrl.updateImage('tags', $data)">
+							{{$ctrl.image.tags.join(', ')}}
+							<editable-tags-input-auto-complete source="$ctrl.queryTags($query)"></editable-tags-input-auto-complete>
+						</span>
+						<button class="btn btn-secondary btn-sm" ng-click="eTagsForm.$show()" ng-hide="eTagsForm.$visible"><i class="fa fa-pencil"></i></button>
+					</p>
 				</div>
 				<div>
 					<strong>Capture number</strong>

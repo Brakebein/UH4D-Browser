@@ -148,3 +148,48 @@ input[type=range].dvSlider.dvSlider-dark
 		background: #aaa
 	&:focus::-webkit-slider-runnable-track
 		background: #999
+
+
+// uib-typeahead
+ul[uib-typeahead-popup]
+	padding: 0
+	background-color: $gray-100
+	& > li.uib-typeahead-match
+		padding: 0.2rem 0.3rem
+		& > a
+			color: $black
+		&.active
+			background-color: $primary
+			& > a
+				color: $white
+
+// editable-tags-input
+[editable-tags-input]
+	& + form > .editable-controls
+		width: 100%
+		& > tags-input
+			width: 80%
+
+			li.tag-item:not(.selected)
+				background-color: $white
+				color: $black
+				border-color: $gray-900
+
+			auto-complete > .autocomplete
+				padding: 0
+				background-color: $gray-100
+				border: none
+				border-radius: 0
+				li.suggestion-item
+					background: none
+					font-size: 0.875rem
+					em
+						font-size: 0.875rem
+						background: none
+					&.selected
+						background-color: $primary
+						color: $white
+						em
+							background: none
+							color: $white
+

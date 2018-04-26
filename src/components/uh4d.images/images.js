@@ -1,6 +1,18 @@
 angular.module('uh4d.images', [
-	'ngResource'
+	'ngResource',
+	'xeditable',
+	'ngTagsInput',
+	'uh4d.authors'
 ])
+
+.run(['editableOptions', 'editableThemes', function (editableOptions, editableThemes) {
+	editableOptions.theme = 'bs3';
+	editableThemes.bs3.buttonsClass = 'btn-sm';
+	editableThemes.bs3.inputClass = 'form-control-sm';
+	editableThemes.bs3.submitTpl = '<button type="submit" class="btn btn-primary"><span class="fa fa-check"></span></button>';
+	editableThemes.bs3.cancelTpl = '<button type="button" class="btn btn-default" ng-click="$form.$cancel()"><span class="fa fa-times"></span></button>';
+	console.log(editableThemes);
+}])
 
 .factory('Image', ['$resource',
 	function ($resource) {
@@ -12,6 +24,9 @@ angular.module('uh4d.images', [
 				url: 'api/search',
 				method: 'GET',
 				isArray: true
+			},
+			update: {
+				method: 'PUT'
 			},
 			spatialize: {
 				method: 'PUT',
@@ -156,7 +171,7 @@ angular.module('uh4d.images', [
 	
 .component('imageModal', {
 	templateUrl: 'components/uh4d.images/imageModal.tpl.html',
-	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection) {
+	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', 'Author', '$http', function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection, Author, $http) {
 
 		var $ctrl = this;
 
@@ -172,6 +187,9 @@ angular.module('uh4d.images', [
 				.then(function (value) {
 					console.log(value);
 					$ctrl.image = value;
+					$ctrl.tags = value.tags.map(function (t) {
+						return { text: t };
+					});
 					if (ImageCollection.get(id))
 						$ctrl.image.inCollection = true;
 				})
@@ -196,6 +214,57 @@ angular.module('uh4d.images', [
 		function spatializeManualStart(image) {
 			$rootScope.$broadcast('spatializeManualStart', image);
 		}
+
+		$ctrl.updateImage = function (prop, data) {
+			if ($ctrl.image[prop] === data) return false;
+
+			var oldValue = $ctrl.image[prop];
+
+			if (prop === 'tags')
+				$ctrl.image.tags = data.map(function (t) {
+					return t.text;
+				});
+			else
+				$ctrl.image[prop] = data;
+
+			return $ctrl.image.$update({ prop: prop })
+				.then(function (result) {
+					console.log(result);
+					// update event
+					return false;
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('Image.update', reason);
+					$ctrl.image[prop] = oldValue;
+					return false;
+				});
+		};
+
+		$ctrl.queryAuthors = function (value) {
+			return Author.query({ name: value }).$promise
+				.then(function (results) {
+					console.log(results);
+					return results.map(function (item) {
+						return item.name;
+					});
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('Author.query', reason);
+				});
+		};
+
+		$ctrl.queryTags = function (value) {
+			return $http.get('api/tag?query=' + value)
+				.then(function (results) {
+					console.log(results);
+					return results.data.map(function (t) {
+						return t.tag;
+					});
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('$http.get api/tag', reason);
+				})
+		};
 
 		$ctrl.close = function () {
 			$state.go('^');
