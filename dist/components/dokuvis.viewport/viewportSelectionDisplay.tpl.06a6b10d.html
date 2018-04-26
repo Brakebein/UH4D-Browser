@@ -1,0 +1,22 @@
+<div class="ctrl-container ctrl-bottom-left">
+	<div>
+		<div>
+			<button class="btn btn-primary btn-sm ng-hide" ng-show="inIsolationMode" ng-click="$parent.exitIsolation()">Exit isolation</button>
+		</div>
+		<div ng-hide="imageList.length || objectList.length"><i class="fa fa-times"></i> No elements selected.</div>
+
+		<div ng-show="imageList.length">
+			<b>Images</b>
+			<div class="list-entry" ng-repeat="entry in imageList" ng-clamp="1">
+				<i class="fa fa-picture-o"></i> {{entry.label}}
+			</div>
+		</div>
+
+		<div ng-show="objectList.length">
+			<b>Objects</b>
+			<div class="list-entry" ng-repeat="entry in objectList" ng-clamp="1">
+				<i class="fa fa-cube"></i> {{entry.label}}
+			</div>
+		</div>
+	</div>
+</div>

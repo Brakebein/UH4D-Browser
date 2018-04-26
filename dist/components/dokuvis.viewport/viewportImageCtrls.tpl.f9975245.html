@@ -1,0 +1,25 @@
+<div class="ctrl-container ctrl-top-right">
+	<div>
+
+		<div class="row">
+			<div class="ctrl-group">
+				<div class="ctrl-slider">
+					<span>Image opacity</span>
+					<input class="dvSlider" type="range" min="0" max="100" step="5" ng-model="opacity" ng-change="setOpacity()"/>
+					<span>{{ opacity }}</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="ctrl-group">
+				<div class="ctrl-slider">
+					<span>Image scale</span>
+					<input class="dvSlider" type="range" min="2" max="20" step="1" ng-model="scale" ng-change="setScale()"/>
+					<span>{{ scale }}</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

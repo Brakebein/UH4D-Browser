@@ -1,0 +1,81 @@
+<div class="modal-body image-modal-body">
+
+	<div class="preview-container">
+		<image-viewer src="'data/' + $ctrl.image.file.path + $ctrl.image.file.preview" options="{width: $ctrl.image.file.width, height: $ctrl.image.file.height}"></image-viewer>
+	</div>
+
+	<div class="info-container">
+		<div class="title-section">
+			<h3>{{$ctrl.image.title}}</h3>
+			<hr/>
+		</div>
+
+		<div class="details-section">
+			<div class="info-display">
+				<div ng-show="$ctrl.image.description">
+					<strong>Description</strong>
+					<p>{{$ctrl.image.description}}</p>
+				</div>
+				<div>
+					<strong>Author</strong>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.author || 'unknown'}}</p>
+					<p ng-show="$root.editableMode">
+						<span data-editable-text="$ctrl.image.author"
+							  data-e-form="eAuthorForm"
+							  data-onbeforesave="$ctrl.updateImage('author', $data)"
+							  data-e-uib-typeahead="name for name in $ctrl.queryAuthors($viewValue)"
+							  data-e-typeahead-min-length="3"
+							  data-e-typeahead-wait-ms="500">{{$ctrl.image.author || 'unknown'}}</span>
+						<button class="btn btn-secondary btn-sm" ng-click="eAuthorForm.$show()" ng-hide="eAuthorForm.$visible"><i class="fa fa-pencil"></i></button>
+					</p>
+				</div>
+				<div>
+					<strong>Date</strong>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.date || 'unknown'}}</p>
+					<p ng-show="$root.editableMode">
+						<span data-editable-text="$ctrl.image.date"
+							  data-e-form="eDateForm"
+							  data-onbeforesave="$ctrl.updateImage('date', $data)">{{$ctrl.image.date || 'unknown'}}</span>
+						<button class="btn btn-secondary btn-sm" ng-click="eDateForm.$show()" ng-hide="eDateForm.$visible"><i class="fa fa-pencil"></i></button>
+					</p>
+				</div>
+				<div ng-show="$ctrl.image.owner">
+					<strong>Owner</strong>
+					<p>{{$ctrl.image.owner}}</p>
+				</div>
+				<div ng-show="$ctrl.image.misc">
+					<strong>Miscellaneous</strong>
+					<p>{{$ctrl.image.misc}}</p>
+				</div>
+				<div>
+					<strong>Tags</strong>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.tags.join(', ')}}</p>
+					<p ng-show="$root.editableMode">
+						<span editable-tags-input="$ctrl.tags" data-e-form="eTagsForm" data-e-ng-model="$ctrl.tags" data-onbeforesave="$ctrl.updateImage('tags', $data)">
+							{{$ctrl.image.tags.join(', ')}}
+							<editable-tags-input-auto-complete source="$ctrl.queryTags($query)"></editable-tags-input-auto-complete>
+						</span>
+						<button class="btn btn-secondary btn-sm" ng-click="eTagsForm.$show()" ng-hide="eTagsForm.$visible"><i class="fa fa-pencil"></i></button>
+					</p>
+				</div>
+				<div>
+					<strong>Capture number</strong>
+					<p>{{$ctrl.image.captureNumber}}</p>
+				</div>
+				<div>
+					<strong>Links</strong>
+					<p><a ng-href="{{$ctrl.image.permalink}}" target="_blank">{{$ctrl.image.permalink}}</a></p>
+					<p><a ng-href="data/{{$ctrl.image.file.path + $ctrl.image.file.original}}" target="_blank">Original file</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div class="modal-footer">
+	<button class="btn btn-secondary" ng-show="!$ctrl.image.inCollection" ng-click="$ctrl.addToCollection()"><i class="fa fa-star"></i> Add to collection</button>
+	<button class="btn btn-secondary ng-hide" ng-show="$ctrl.image.inCollection" ng-click="$ctrl.removeFromCollection()"><i class="fa fa-star-o"></i> Remove from collection</button>
+	<button class="btn btn-secondary" ng-click="$ctrl.startSpatialize()">Spatialize</button>
+	<button class="btn btn-secondary" ng-click="$ctrl.close()">Close</button>
+</div>

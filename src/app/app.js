@@ -23,14 +23,15 @@ angular.module('uh4dApp', [
 			.state({
 				name: 'root',
 				url: '?edit',
+				abstract: true,
 				views: {
 					root: {
 						template: '<ui-view></ui-view>'
 					},
-					header: 'header',
-					footer: {
-						templateUrl: 'partials/footer.html'
-					}
+					header: 'header'
+					// footer: {
+					// 	templateUrl: 'partials/footer.html'
+					// }
 				},
 				params: {
 					edit: {

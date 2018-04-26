@@ -4,6 +4,8 @@
 	<meta charset="UTF-8">
 	<title>UrbanHistory4D</title>
 
+	<!-- build:css style/vendor.css -->
+	<link rel="stylesheet" href="style/bootstrap.css" />
 	<!-- bower:css -->
 	<link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
 	<link rel="stylesheet" href="bower_components/angular-motion/dist/angular-motion.css" />
@@ -11,14 +13,16 @@
 	<link rel="stylesheet" href="bower_components/ng-tags-input/ng-tags-input.css" />
 	<!-- endbower -->
 	<link rel="stylesheet" href="bower_components/ng-tags-input/ng-tags-input.bootstrap.css" />
+	<!-- endbuild -->
 
-	<link rel="stylesheet" href="style/bootstrap.css" />
+	<!-- build:css style/app.css -->
 	<link rel="stylesheet" href="style/main.css" />
 	<link rel="stylesheet" href="app/header/header.css" />
 	<link rel="stylesheet" href="app/search/search.css" />
 
 	<link href="components/dokuvis.viewport/viewport.css" rel="stylesheet">
 	<link href="components/uh4d.images/images.css" rel="stylesheet">
+	<!-- endbuild -->
 
 </head>
 <body ng-app="uh4dApp">
@@ -35,6 +39,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
+	<!-- build:js script/vendor.js -->
 	<!-- bower:js -->
 	<script src="bower_components/angular/angular.js"></script>
 	<script src="bower_components/angular-resource/angular-resource.js"></script>
@@ -51,9 +56,9 @@
 	<script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
 	<script src="bower_components/ng-tags-input/ng-tags-input.js"></script>
 	<!-- endbower -->
+	<!-- endbuild -->
 
-	<script type="text/javascript" src="lib/ng-debounce-throttle.js"></script>
-
+	<!-- build:js script/web3d-bundle.js -->
 	<script type="text/javascript" src="lib/threejs/three-r87.js"></script>
 	<script type="text/javascript" src="lib/threejs/OrbitControls.js"></script>
 	<script type="text/javascript" src="lib/threejs/CombinedCamera.js"></script>
@@ -78,6 +83,10 @@
 	<script type="text/javascript" src="lib/dv3d/SphereMarker.js"></script>
 	<script type="text/javascript" src="lib/dv3d/TorusMarker.js"></script>
 	<script type="text/javascript" src="lib/dv3d/HeatMap.js"></script>
+	<!-- endbuild -->
+
+	<!-- build:js script/app.js -->
+	<script type="text/javascript" src="lib/ng-debounce-throttle.js"></script>
 
 	<script src="app/app.js"></script>
 	<script src="app/header/header.js"></script>
@@ -96,6 +105,7 @@
 	<script type="text/javascript" src="components/uh4d.images/images.js"></script>
 	<script type="text/javascript" src="components/uh4d.models/models.js"></script>
 	<script type="text/javascript" src="components/uh4d.authors/authors.js"></script>
+	<!-- endbuild -->
 
 </body>
 </html>

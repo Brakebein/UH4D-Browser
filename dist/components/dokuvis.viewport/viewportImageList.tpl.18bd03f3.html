@@ -1,0 +1,44 @@
+<div class="list-header">
+	<!--<div>-->
+		<!--<div>-->
+			<!--<button class="btn btn-default btn-xs">Explode</button>-->
+			<!--<button class="btn btn-default btn-xs">Reset</button>-->
+		<!--</div>-->
+	<!--</div>-->
+	<div class="list-header-slim list-header-stretch">
+		<div>
+			<div>
+				<span class="toggle glyphicon"
+					  ng-class="{'glyphicon-eye-open': images.visible, 'glyphicon-eye-close': !images.visible}"
+					  ng-click="images.toggle()"></span>
+			</div>
+			<div>
+				<div class="dvSlider-container dvSlider-slim">
+					Opacity
+					<input class="dvSlider dvSlider-dark" type="range" style="width: 100px" min="0.1" max="1" step="0.1" ng-model="images.opacity" ng-change="images.setOpacity()"/>
+					{{ images.opacity | number: 1 }}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="list-content">
+
+	<p ng-hide="images.count" translate>viewport_list_noimages</p>
+
+	<div ng-repeat="image in images.list | orderBy: 'label'">
+		<div class="list-item" ng-class="{'not-visible': !image.visible}">
+				<span class="toggle glyphicon"
+					  title="{{'viewport_list_toggle'|translate}}"
+					  ng-class="{'glyphicon-eye-open': image.visible, 'glyphicon-eye-close': !image.visible}"
+					  ng-click="image.toggle()"></span>
+			<div class="list-expand"></div>
+			<span class="list-label" ng-click="image.visible && image.select($event)">{{ image.label }}</span>
+			<div class="list-ctrls">
+				<i class="glyphicon glyphicon-search" title="{{'viewport_list_imageview'|translate}}" ng-click="image.focus()"></i>
+			</div>
+		</div>
+	</div>
+
+</div>

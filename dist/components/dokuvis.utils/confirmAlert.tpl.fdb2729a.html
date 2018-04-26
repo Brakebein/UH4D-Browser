@@ -1,0 +1,8 @@
+<div class="alert" tabindex="-1" ng-class="'alert-' + alertOptions.type">
+	<strong ng-bind-html="alertOptions.headerText | translate:alertOptions.translationData"></strong>
+	<p ng-bind-html="alertOptions.bodyText | translate:alertOptions.translationData"></p>
+	<p>
+		<button class="btn btn-default btn-sm" ng-click="alertOptions.ok()">{{alertOptions.actionButtonText | translate}}</button>
+		<button class="btn btn-default btn-sm" ng-click="alertOptions.abort()">{{alertOptions.abortButtonText | translate}}</button>
+	</p>
+</div>

@@ -1,0 +1,51 @@
+<div class="pin-layer"
+	 ng-class="{active: mode === 'pin'}"
+	 ng-mousemove="mousemovePinLayer($event)"
+	 ng-mouseleave="mouseleavePinLayer()"
+	 ng-mouseup="mouseupPinLayer($event)"
+	 no-context-menu></div>
+
+<div class="paint-layer"
+	 ng-class="{active: mode === 'paint'}"
+	 no-context-menu>
+	<div pw-canvas
+		 options="paintOptions"
+		 version="version"></div>
+</div>
+
+<div class="border-layer" ng-style="{'border-color': paintOptions.color}"></div>
+
+<div class="ctrl-container ctrl-bottom ctrl-center">
+	<div>
+
+		<div class="ctrl-group">
+			<button class="btn btn-default" data-ng-disabled="!version" ng-click="version = version - 1">Rückgängig ({{version}})</button>
+			<div class="ctrl-slider">
+				Linienstärke
+				<input class="dvSlider" type="range" min="1" max="20" ng-model="paintOptions.lineWidth"/>
+				<div class="lineWidth">
+					<div ng-style="{ height: paintOptions.lineWidth + 'px', 'margin-top': (20-paintOptions.lineWidth)/2 + 'px' }"></div>
+				</div>
+			</div>
+			<input type="hidden"
+				   minicolors="{control: 'wheel', opacity: true, position: 'top left', format: 'rgb',changeDelay: 200}"
+				   ng-model="paintOptions.color"
+				   ng-change=""/>
+		</div>
+		<div class="ctrl-group">
+			<div class="btn-group">
+				<button class="btn"
+						ng-class="{'btn-default': mode === 'pin', 'btn-primary': mode === 'paint'}"
+						ng-click="setMode('paint')">
+					<i class="fa fa-paint-brush"></i> Malen
+				</button>
+				<button class="btn"
+						ng-class="{'btn-default': mode === 'paint', 'btn-primary': mode === 'pin'}"
+						ng-click="setMode('pin')">
+					<i class="fa fa-thumb-tack"></i> Pinnen
+				</button>
+			</div>
+		</div>
+
+	</div>
+</div>
