@@ -31,6 +31,7 @@ module.exports = function (grunt) {
 				files: [
 					{expand: true, cwd: 'src/', src: 'index.html', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'fonts/**/*', dest: 'dist/'},
+					{expand: true, cwd: 'src/', src: 'bower_components/font-awesome/fonts/*', dest: 'dist/fonts/', flatten: true},
 					{expand: true, cwd: 'src/', src: 'img/**/*.{png,jpg,svg,gif}', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'app/**/*.html', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'components/**/*.html', dest: 'dist/'},
@@ -91,7 +92,8 @@ module.exports = function (grunt) {
 				patterns: {
 					html: [
 						[/src="([^:'"]+)"/img, 'src replacement in html files'],
-						[/ng-include="'([^:'"]+)'"/img, 'ng-include replacement in html files']
+						[/ng-include="'([^:'"]+)'"/img, 'ng-include replacement in html files'],
+						[/template-url="([^:'"]+)"/img, 'template-url replacement in html files']
 					],
 					js: [
 						[/(?:templateUrl|contentTemplate):[\s]*['"]([^:'"]+\.html)['"]/img, 'Partials replacement in js files']

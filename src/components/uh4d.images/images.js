@@ -11,7 +11,6 @@ angular.module('uh4d.images', [
 	editableThemes.bs3.inputClass = 'form-control-sm';
 	editableThemes.bs3.submitTpl = '<button type="submit" class="btn btn-primary"><span class="fa fa-check"></span></button>';
 	editableThemes.bs3.cancelTpl = '<button type="button" class="btn btn-default" ng-click="$form.$cancel()"><span class="fa fa-times"></span></button>';
-	console.log(editableThemes);
 }])
 
 .factory('Image', ['$resource',
