@@ -126,6 +126,11 @@ input[type=range].dvSlider.dvSlider-dark::-webkit-slider-runnable-track {
 input[type=range].dvSlider.dvSlider-dark:focus::-webkit-slider-runnable-track {
   background: #999; }
 
+.editable-wrap.editable-cover-width {
+  width: 100%; }
+  .editable-wrap.editable-cover-width > .editable-controls > .editable-input {
+    flex: 1 1 auto; }
+
 ul[uib-typeahead-popup] {
   padding: 0;
   background-color: #EBEBEB; }

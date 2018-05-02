@@ -2,7 +2,7 @@ angular.module('uh4d.images', [
 	'ngResource',
 	'xeditable',
 	'ngTagsInput',
-	'uh4d.authors'
+	'uh4d.actors'
 ])
 
 .run(['editableOptions', 'editableThemes', function (editableOptions, editableThemes) {
@@ -170,7 +170,7 @@ angular.module('uh4d.images', [
 	
 .component('imageModal', {
 	templateUrl: 'components/uh4d.images/imageModal.tpl.html',
-	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', 'Author', '$http', function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection, Author, $http) {
+	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', 'Person', 'LegalBody', '$http', function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection, Person, LegalBody, $http) {
 
 		var $ctrl = this;
 
@@ -239,16 +239,27 @@ angular.module('uh4d.images', [
 				});
 		};
 
-		$ctrl.queryAuthors = function (value) {
-			return Author.query({ name: value }).$promise
+		$ctrl.queryPersons = function (value) {
+			return Person.query({ name: value }).$promise
 				.then(function (results) {
-					console.log(results);
 					return results.map(function (item) {
 						return item.name;
 					});
 				})
 				.catch(function (reason) {
-					Utilities.throwApiException('Author.query', reason);
+					Utilities.throwApiException('Person.query', reason);
+				});
+		};
+
+		$ctrl.queryLegalBodies = function (value) {
+			return LegalBody.query({ name: value }).$promise
+				.then(function (results) {
+					return results.map(function (item) {
+						return item.name;
+					});
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('LegalBody.query', reason);
 				});
 		};
 
