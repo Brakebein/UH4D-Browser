@@ -143,29 +143,31 @@ ul[uib-typeahead-popup] {
       ul[uib-typeahead-popup] > li.uib-typeahead-match.active > a {
         color: #fff; }
 
-[editable-tags-input] + form > .editable-controls {
+[editable-tags-input] + form {
   width: 100%; }
-  [editable-tags-input] + form > .editable-controls > tags-input {
-    width: 80%; }
-    [editable-tags-input] + form > .editable-controls > tags-input li.tag-item:not(.selected) {
+  [editable-tags-input] + form > .editable-controls {
+    flex-flow: row nowrap; }
+    [editable-tags-input] + form > .editable-controls > tags-input {
+      flex: 1 1 auto; }
+    [editable-tags-input] + form > .editable-controls li.tag-item:not(.selected) {
       background-color: #fff;
       color: #000;
       border-color: #212529; }
-    [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete {
+    [editable-tags-input] + form > .editable-controls auto-complete > .autocomplete {
       padding: 0;
       background-color: #EBEBEB;
       border: none;
       border-radius: 0; }
-      [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item {
+      [editable-tags-input] + form > .editable-controls auto-complete > .autocomplete li.suggestion-item {
         background: none;
         font-size: 0.875rem; }
-        [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item em {
+        [editable-tags-input] + form > .editable-controls auto-complete > .autocomplete li.suggestion-item em {
           font-size: 0.875rem;
           background: none; }
-        [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item.selected {
+        [editable-tags-input] + form > .editable-controls auto-complete > .autocomplete li.suggestion-item.selected {
           background-color: #DF691A;
           color: #fff; }
-          [editable-tags-input] + form > .editable-controls > tags-input auto-complete > .autocomplete li.suggestion-item.selected em {
+          [editable-tags-input] + form > .editable-controls auto-complete > .autocomplete li.suggestion-item.selected em {
             background: none;
             color: #fff; }
 

@@ -171,10 +171,12 @@ ul[uib-typeahead-popup]
 
 // editable-tags-input
 [editable-tags-input]
-	& + form > .editable-controls
+	& + form
 		width: 100%
-		& > tags-input
-			width: 80%
+		& > .editable-controls
+			flex-flow: row nowrap
+			& > tags-input
+				flex: 1 1 auto
 
 			li.tag-item:not(.selected)
 				background-color: $white
