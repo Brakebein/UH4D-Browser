@@ -408,6 +408,7 @@ angular.module('dokuvis.imageViewer', [])
 					if (renderer) {
 						renderer.forceContextLoss();
 						renderer.dispose();
+						renderer = null;
 					}
 
 					if (scope.spatialize)
