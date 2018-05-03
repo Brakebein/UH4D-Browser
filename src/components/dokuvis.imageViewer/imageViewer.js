@@ -405,8 +405,10 @@ angular.module('dokuvis.imageViewer', [])
 						plane.material.dispose();
 					}
 
-					if (renderer)
+					if (renderer) {
+						renderer.forceContextLoss();
 						renderer.dispose();
+					}
 
 					if (scope.spatialize)
 						clearMarkers();

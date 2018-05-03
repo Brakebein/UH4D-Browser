@@ -3404,6 +3404,9 @@ angular.module('dokuvis.viewport',[
 
 				controls.dispose();
 
+				renderer.forceContextLoss();
+				renderer.dispose();
+
 				// unbind event listeners
 				var windowElement = angular.element($window);
 				windowElement.off('keydown', keydown);

@@ -180,7 +180,7 @@ angular.module('dokuvis.viewport')
 				}
 
 				// listen to viewportCameraMove event
-				var cleanOnCameraMove = scope.$on('viewportCameraMove', function (event, cam) {
+				scope.$on('viewportCameraMove', function (event, cam) {
 					camera.rotation.copy(cam.rotation);
 					camera.position.copy(cam.getWorldDirection().negate().setLength(50));
 					render();
@@ -191,8 +191,8 @@ angular.module('dokuvis.viewport')
 					axis.geometry.dispose();
 					axis.material.dispose();
 
-					// unregister events
-					cleanOnCameraMove();
+					renderer.forceContextLoss();
+					renderer.dispose();
 				});
 
 			}
