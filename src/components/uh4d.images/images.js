@@ -30,6 +30,14 @@ angular.module('uh4d.images', [
 			spatialize: {
 				method: 'PUT',
 				url: 'api/image/:id/spatial'
+			},
+			checkFileUpdate: {
+				url: 'api/image/:id/file/check',
+				method: 'GET'
+			},
+			updateFile: {
+				url: 'api/image/:id/file/update',
+				method: 'GET'
 			}
 		});
 
@@ -100,6 +108,15 @@ angular.module('uh4d.images', [
 
 		$scope.$on('ImageCollectionUpdate', function () {
 			updateImageMeta();
+		});
+
+		$scope.$on('imageUpdate', function (event, imgNew) {
+			var img = ctrl.images.find(function (value) {
+				return value.id === imgNew.id;
+			});
+			// extend by new values
+			if (img)
+				angular.extend(img, imgNew);
 		});
 		
 		function updateImageMeta() {
@@ -189,11 +206,26 @@ angular.module('uh4d.images', [
 					$ctrl.tags = value.tags.map(function (t) {
 						return { text: t };
 					});
+
 					if (ImageCollection.get(id))
 						$ctrl.image.inCollection = true;
+
+					if ($rootScope.editableMode)
+						checkFileUpdate(id);
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.get', reason);
+				});
+		}
+
+		function checkFileUpdate(id) {
+			Image.checkFileUpdate({ id: id }).$promise
+				.then(function (value) {
+					if (!value.message)
+						$ctrl.fileUpdate = value;
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('Image.checkFileUpdate', reason);
 				});
 		}
 
@@ -214,6 +246,10 @@ angular.module('uh4d.images', [
 			$rootScope.$broadcast('spatializeManualStart', image);
 		}
 
+		function imageUpdate(image) {
+			$rootScope.$broadcast('imageUpdate', image);
+		}
+
 		$ctrl.updateImage = function (prop, data) {
 			if ($ctrl.image[prop] === data) return false;
 
@@ -229,13 +265,29 @@ angular.module('uh4d.images', [
 			return $ctrl.image.$update({ prop: prop })
 				.then(function (result) {
 					console.log(result);
-					// update event
+					imageUpdate($ctrl.image);
 					return false;
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.update', reason);
 					$ctrl.image[prop] = oldValue;
 					return false;
+				});
+		};
+
+		$ctrl.updateFile = function () {
+			$ctrl.isSaving = true;
+			Image.updateFile({ id: $ctrl.image.id }).$promise
+				.then(function (result) {
+					console.log(result);
+					$ctrl.image.file = result;
+					$ctrl.fileUpdate = null;
+					imageUpdate($ctrl.image);
+					$ctrl.isSaving = false;
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('Image.updateFile', reason);
+					$ctrl.isSaving = false;
 				});
 		};
 
