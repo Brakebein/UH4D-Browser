@@ -46,6 +46,8 @@ DV3D.Entry = function (obj, label) {
 	 */
 	this.opacity = 1.0;
 
+	this.isHighlighted = false;
+
 	obj.entry = this;
 
 };
@@ -74,6 +76,29 @@ Object.assign(DV3D.Entry.prototype, THREE.EventDispatcher.prototype, {
 
 		if (this.visible && event)
 			this.dispatchEvent({ type: 'select', active: this.active, originalEvent: event });
+	},
+
+	/**
+	 * Highlight entry and dispatch `highlight` event.
+	 * @param [bool] {boolean} Object will be highlighted depending on this value. If not set, the highlighted status will be inverted.
+	 * @param [preventEvent=true] {boolean} If set to `false`, event will not be dispatched. (Default: `true`)
+	 */
+	highlight: function (bool, preventEvent) {
+		if (this.isHighlighted === bool) return;
+		if (typeof bool === 'boolean') this.isHighlighted = bool;
+		else this.isHighlighted = !this.isHighlighted;
+
+		if (this.isHighlighted)
+			this.object.highlight();
+		else {
+			if (!this.active)
+				this.object.dehighlight();
+		}
+
+		if (preventEvent !== false)
+			this.dispatchEvent({ type: 'highlight', isHighlighted: this.isHighlighted });
+
+		this.update();
 	},
 
 	/**

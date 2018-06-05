@@ -22,7 +22,7 @@ angular.module('dokuvis.viewport')
 		return {
 			defaults: {
 				NEAR: 1,
-				FAR: 4000,
+				FAR: 5000,
 				initWidth: 800,
 				initHeight: 600,
 				backgroundColor: 0x666666,

@@ -13,6 +13,7 @@ DV3D.Collection = function () {
 	 * @type {Array}
 	 */
 	this.list = [];
+	this.highlighted = [];
 	/**
 	 * Global visibility.
 	 * @type {boolean}
@@ -68,6 +69,7 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 		if (this.get(obj.id)) return;
 		this.list.push(obj);
 		obj.addEventListener('toggle', toggleHandler.bind(this));
+		obj.addEventListener('highlight', highlightHandler.bind(this));
 		this.count++;
 	},
 
@@ -80,6 +82,7 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 		if (index !== -1) {
 			this.list.splice(index, 1);
 			obj.removeEventListener('toggle', toggleHandler);
+			obj.removeEventListener('highlight', highlightHandler);
 			this.count--;
 		}
 	},
@@ -150,12 +153,12 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 			item.setOpacity(value);
 		});
 		// TODO: dispatchEvent animate
-	}
+	},
 
-	/**
-	 * Set the scale of all entries.
-	 * @param value {number} New scale value
-	 */
+	// /**
+	//  * Set the scale of all entries.
+	//  * @param value {number} New scale value
+	//  */
 	// setScale: function (value) {
 	// 	value = +value;
 	// 	if (typeof value === 'number') this.scale = value;
@@ -168,11 +171,48 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 	// 	}
 	// }
 
+	/**
+	 * Dehighlight single or all entries.
+	 * @param [obj] {DV3D.Entry} Entry to dehighlight (optional)
+	 */
+	dehighlight: function (obj) {
+		if (obj) {
+			// remove/dehighlight only obj
+			if (this.highlighted.indexOf(obj) !== -1) {
+				obj.highlight(false, false);
+				this.highlighted.splice(this.highlighted.indexOf(obj), 1);
+			}
+		}
+		else {
+			// remove/dehighlight all highlighted entries
+			this.highlighted.forEach(function (item) {
+				item.highlight(false, false);
+			});
+			this.highlighted = [];
+		}
+	}
+
 });
 
 function toggleHandler(event) {
 	if (event.visible)
 		this.visible = true;
+}
+
+function highlightHandler(event) {
+	var entry = event.target;
+	// dehighlight all other
+	for (var i = 0; this.highlighted.length; i++) {
+		if (this.highlighted[i] === entry && event.isHighlighted === true) continue;
+		this.highlighted[i].highlight(false, false);
+		this.highlighted.splice(i, 1);
+		--i;
+	}
+	// highlight entry
+	if (this.highlighted.indexOf(entry) === -1 && event.isHighlighted === true) {
+		entry.highlight(true, false);
+		this.highlighted.push(entry);
+	}
 }
 
 })();

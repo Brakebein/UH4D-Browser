@@ -112,16 +112,16 @@ viewport .ctrl-group, viewport-object-tree .ctrl-group, image-viewer .ctrl-group
     border: none; }
   viewport .ctrl-group.ctrl-group-text, viewport-object-tree .ctrl-group.ctrl-group-text, image-viewer .ctrl-group.ctrl-group-text {
     padding: 3px 4px; }
-  viewport .ctrl-group input[type="checkbox"], viewport-object-tree .ctrl-group input[type="checkbox"], image-viewer .ctrl-group input[type="checkbox"] {
+  viewport .ctrl-group input[type="checkbox"], viewport .ctrl-group input[type="radio"], viewport-object-tree .ctrl-group input[type="checkbox"], viewport-object-tree .ctrl-group input[type="radio"], image-viewer .ctrl-group input[type="checkbox"], image-viewer .ctrl-group input[type="radio"] {
     margin-top: 7px;
     vertical-align: text-bottom; }
-  viewport .ctrl-group input:not([type="checkbox"]), viewport-object-tree .ctrl-group input:not([type="checkbox"]), image-viewer .ctrl-group input:not([type="checkbox"]) {
+  viewport .ctrl-group input:not([type="checkbox"]):not([type="radio"]), viewport-object-tree .ctrl-group input:not([type="checkbox"]):not([type="radio"]), image-viewer .ctrl-group input:not([type="checkbox"]):not([type="radio"]) {
     margin: 2px 0;
     padding: 0;
     height: 22px; }
-    viewport .ctrl-group input:not([type="checkbox"]).error, viewport-object-tree .ctrl-group input:not([type="checkbox"]).error, image-viewer .ctrl-group input:not([type="checkbox"]).error {
+    viewport .ctrl-group input:not([type="checkbox"]):not([type="radio"]).error, viewport-object-tree .ctrl-group input:not([type="checkbox"]):not([type="radio"]).error, image-viewer .ctrl-group input:not([type="checkbox"]):not([type="radio"]).error {
       border-color: #f00; }
-    viewport .ctrl-group input:not([type="checkbox"])[disabled], viewport-object-tree .ctrl-group input:not([type="checkbox"])[disabled], image-viewer .ctrl-group input:not([type="checkbox"])[disabled] {
+    viewport .ctrl-group input:not([type="checkbox"]):not([type="radio"])[disabled], viewport-object-tree .ctrl-group input:not([type="checkbox"]):not([type="radio"])[disabled], image-viewer .ctrl-group input:not([type="checkbox"]):not([type="radio"])[disabled] {
       cursor: default; }
   viewport .ctrl-group select, viewport-object-tree .ctrl-group select, image-viewer .ctrl-group select {
     padding: 0;
@@ -386,5 +386,11 @@ viewport-context-menu {
       viewport-context-menu > .context-menu-dialog > ul > a {
         padding: 4px 8px;
         font-size: 14px; }
+
+viewport-analysis-tools > .heatmap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; }
 
 /*# sourceMappingURL=viewport.css.map */

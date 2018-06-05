@@ -518,26 +518,36 @@ angular.module('dokuvis.viewport')
 		restrict: 'E',
 		link: function (scope, element) {
 
-			scope.heatMap = {
+			scope.analysisViz = {
+				type: 'heatMap',
 				visible: false,
 				overlay: false,
 				radius: 40,
+				disWeight: false,
 				toggle: function () {
-					viewportHeatMapUpdate({visibilityChange: true});
+					viewportHeatMapUpdate({typeChange: true, overlayChange: true});
 				},
 				toggleOverlay: function () {
 					viewportHeatMapUpdate({overlayChange: true});
 				},
+				changeType: function () {
+					viewportHeatMapUpdate({typeChange: true, overlayChange: true});
+				},
 				changeRadius: $debounce(function () {
 					viewportHeatMapUpdate({radiusChange: true});
-				}, 1000)
+				}, 1000),
+				changeSetting: function () {
+					viewportHeatMapUpdate({settingsChange: true})
+				}
 			};
 
 			function viewportHeatMapUpdate(options) {
 				scope.$emit('viewportHeatMapUpdate', angular.extend(options, {
-					visible: scope.heatMap.visible,
-					overlay: scope.heatMap.overlay,
-					radius: scope.heatMap.radius
+					type: scope.analysisViz.type,
+					visible: scope.analysisViz.visible,
+					overlay: scope.analysisViz.overlay,
+					radius: scope.analysisViz.radius,
+					useWeight: scope.analysisViz.disWeight ? 'disWeight': 'countWeight'
 				}));
 			}
 
