@@ -594,9 +594,9 @@ angular.module('dokuvis.viewport',[
 				}
 				else {
 					// update image resolution
-					// spatialImages.forEach(function (img) {
-					// 	img.updateTextureByDistance(camera.position, 30);
-					// }, true);
+					spatialImages.forEach(function (img) {
+						img.updateTextureByDistance(camera.position, 30);
+					}, true);
 				}
 
 				if (controls) controls.update();
