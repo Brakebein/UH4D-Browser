@@ -10,6 +10,8 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-usemin');
 	grunt.loadNpmTasks('grunt-string-replace');
 
+	grunt.loadNpmTasks('grunt-browserify');
+
 	grunt.loadNpmTasks('grunt-version');
 	grunt.loadNpmTasks('grunt-wiredep');
 
@@ -122,6 +124,14 @@ module.exports = function (grunt) {
 
 
 		///// misc
+
+		// convert CommonJS file to browser compatible js file
+		browserify: {
+			exports: {
+				src: 'src/lib/exports.js',
+				dest: 'src/lib/browserify.js'
+			}
+		},
 
 		// update versions
 		version: {
