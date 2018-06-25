@@ -440,7 +440,7 @@ angular.module('dokuvis.viewport')
 
 }])
 
-.directive('viewportSelectionDisplay', ['$state', function ($state) {
+.directive('viewportSelectionDisplay', ['$rootScope', '$state', 'DigitalObject', function ($rootScope, $state, DigitalObject) {
 
 	return {
 		templateUrl: 'components/dokuvis.viewport/viewportSelectionDisplay.tpl.html',
@@ -450,6 +450,33 @@ angular.module('dokuvis.viewport')
 			scope.imageList = [];
 			scope.objectList = [];
 			scope.inIsolationMode = false;
+
+			scope.includesList = [];
+			scope.excludesList = [];
+
+			function init() {
+				$state.params.filterObjIncl.forEach(function (value) {
+					DigitalObject.get({ id: value }).$promise
+						.then(function (result) {
+							console.log(result);
+							scope.includesList.push({
+								id: result.id,
+								name: result.obj.name,
+								label: result.obj.name
+							});
+						});
+				});
+				$state.params.filterObjExcl.forEach(function (value) {
+					DigitalObject.get({ id: value }).$promise
+						.then(function (result) {
+							scope.excludesList.push({
+								id: result.id,
+								name: result.obj.name,
+								label: result.obj.name
+							});
+						});
+				});
+			}
 
 			// listen to viewportSelectionChange event
 			scope.$on('viewportSelectionChange', function (event, selected) {
@@ -470,17 +497,57 @@ angular.module('dokuvis.viewport')
 				scope.inIsolationMode = false;
 			});
 
+			scope.$on('filterByObject', function (event, entry, mode) {
+				switch (mode) {
+					case 'include': scope.includesList.push(entry); break;
+					case 'exclude': scope.excludesList.push(entry); break;
+					default:
+						var e = scope.includesList.find(function (value) {
+							return value.name === entry.name;
+						});
+						scope.includesList.splice(e, 1);
+						e = scope.excludesList.find(function (value) {
+							return value.name === entry.name;
+						});
+						scope.excludesList.splice(e, 1);
+				}
+			});
+			
+			scope.removeFilterObject = function (entry) {
+				var e = scope.includesList.find(function (value) {
+					return value.name === entry.name;
+				});
+				scope.includesList.splice(e, 1);
+				e = scope.excludesList.find(function (value) {
+					return value.name === entry.name;
+				});
+				scope.excludesList.splice(e, 1);
+
+				$rootScope.$broadcast('filterByObject', entry, 'remove');
+			};
+
+			init();
 		}
 	};
 
 }])
 	
-.directive('viewportContextMenu', ['$state', 'ImageCollection', function ($state, ImageCollection) {
+.directive('viewportContextMenu', ['$rootScope', '$state', 'ImageCollection', function ($rootScope, $state, ImageCollection) {
 
 	return {
 		templateUrl: 'components/dokuvis.viewport/viewportContextMenu.tpl.html',
 		restrict: 'E',
 		link: function (scope, element) {
+
+			scope.isImage = scope.entry instanceof DV3D.ImageEntry;
+			scope.isObject = scope.entry instanceof DV3D.ObjectEntry;
+
+			if (scope.isObject) {
+				if ($state.params.filterObjIncl.indexOf(scope.entry.name) !== -1)
+					scope.isIncluded = true;
+				if ($state.params.filterObjExcl.indexOf(scope.entry.name) !== -1)
+					scope.isExcluded = true;
+			}
 
 			scope.openDetails = function () {
 				$state.go('.image', { imageId: scope.entry.source.id });
@@ -499,6 +566,11 @@ angular.module('dokuvis.viewport')
 
 			scope.focus = function () {
 				scope.entry.focus();
+				scope.$parent.closeContextMenu();
+			};
+
+			scope.filterByObject = function (mode) {
+				$rootScope.$broadcast('filterByObject', scope.entry, mode);
 				scope.$parent.closeContextMenu();
 			};
 
@@ -550,6 +622,10 @@ angular.module('dokuvis.viewport')
 					useWeight: scope.analysisViz.disWeight ? 'disWeight': 'countWeight'
 				}));
 			}
+
+			scope.linkToObjects = function() {
+				scope.$emit('viewportLinkToObjects');
+			};
 
 			element.on('$destroy', function () {
 				scope.$destroy();

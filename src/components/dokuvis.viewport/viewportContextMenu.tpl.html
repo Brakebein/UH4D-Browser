@@ -1,9 +1,14 @@
 <div class="context-menu-dialog" ng-style="{left: position.x, top: position.y}">
 	<ul class="list-group">
 		<li class="list-group-item bg-primary" title="{{entry.label}}"><span>{{entry.label}}</span></li>
-		<a class="list-group-item list-group-item-action" ng-click="openDetails()"><i class="fa fa-info-circle"></i> Open details...</a>
+
+		<a class="list-group-item list-group-item-action" ng-show="isImage" ng-click="openDetails()"><i class="fa fa-info-circle"></i> Open details...</a>
 		<a class="list-group-item list-group-item-action" ng-click="focus()"><i class="fa fa-search"></i> Focus</a>
-		<a class="list-group-item list-group-item-action" ng-show="!entry.source.inCollection" ng-click="addToCollection()"><i class="fa fa-star"></i> Add to collection</a>
-		<a class="list-group-item list-group-item-action" ng-show="entry.source.inCollection" ng-click="removeFromCollection()"><i class="fa fa-star-o"></i> Remove from collection</a>
+		<a class="list-group-item list-group-item-action" ng-show="isImage && !entry.source.inCollection" ng-click="addToCollection()"><i class="fa fa-star"></i> Add to collection</a>
+		<a class="list-group-item list-group-item-action" ng-show="isImage && entry.source.inCollection" ng-click="removeFromCollection()"><i class="fa fa-star-o"></i> Remove from collection</a>
+
+		<a class="list-group-item list-group-item-action" ng-show="isObject && !isIncluded && !isExcluded" ng-click="filterByObject('include')"><i class="fa fa-filter"></i> <i class="fa fa-plus"></i> Filter include</a>
+		<a class="list-group-item list-group-item-action" ng-show="isObject && !isIncluded && !isExcluded" ng-click="filterByObject('exclude')"><i class="fa fa-filter"></i> <i class="fa fa-minus"></i> Filter exclude</a>
+		<a class="list-group-item list-group-item-action" ng-show="isObject && (isIncluded || isExcluded)" ng-click="filterByObject('remove')"><i class="fa fa-filter"></i> <i class="fa fa-times"></i> Remove filter</a>
 	</ul>
 </div>

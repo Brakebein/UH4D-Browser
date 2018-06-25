@@ -361,6 +361,9 @@ viewport-snapshot-view > .screen-layer, viewport-snapshot-view > .paint-layer {
 
 viewport-selection-display > .ctrl-container > div {
   padding: 3px 6px 3px; }
+  viewport-selection-display > .ctrl-container > div hr {
+    border-color: #fafafa;
+    margin: 0; }
   viewport-selection-display > .ctrl-container > div .list-entry {
     max-width: 400px; }
 

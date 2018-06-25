@@ -47,7 +47,7 @@ angular.module('uh4dApp', [
 			})
 			.state({
 				name: 'root.search',
-				url: '/search?query&page',
+				url: '/search?query&page&filterObjIncl&filterObjExcl',
 				component: 'search',
 				params: {
 					query: {
@@ -59,6 +59,18 @@ angular.module('uh4dApp', [
 						type: 'query',
 						dynamic: true,
 						value: null
+					},
+					filterObjIncl: {
+						type: 'query',
+						dynamic: true,
+						array: true,
+						value: []
+					},
+					filterObjExcl: {
+						type: 'query',
+						dynamic: true,
+						array: true,
+						value: []
 					}
 				}
 			})

@@ -189,7 +189,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 function init( texture, params ) {
 	// height = 1, width = aspect ratio
 	var width = this.width = 1.0;
-	var height = this.width = 1.0;
+	var height = this.height = 1.0;
 
 	if (params.width && params.height)
 		width = this.width = params.width / params.height;

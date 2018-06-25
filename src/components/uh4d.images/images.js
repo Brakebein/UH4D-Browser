@@ -38,6 +38,10 @@ angular.module('uh4d.images', [
 			updateFile: {
 				url: 'api/image/:id/file/update',
 				method: 'GET'
+			},
+			setLinksToObjects: {
+				url: 'api/image/:id/link',
+				method: 'PUT'
 			}
 		});
 

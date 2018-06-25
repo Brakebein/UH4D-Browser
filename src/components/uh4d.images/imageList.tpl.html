@@ -6,7 +6,7 @@
 <div class="list-selection bg-light">
 
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'selection'">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection as filteredSel" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
@@ -17,14 +17,14 @@
 				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
-			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filtered[$index-1], filtered[$index])">
+			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filteredSel[$index-1], filteredSel[$index])">
 				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
 			</div>
 		</li>
 	</ul>
 
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'collection'">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.collection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.collection as filteredCol" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
@@ -35,7 +35,7 @@
 				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
-			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filtered[$index-1], filtered[$index])">
+			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filteredCol[$index-1], filteredCol[$index])">
 				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
 			</div>
 		</li>
@@ -63,7 +63,7 @@
 <div class="list-body list-media" ng-if="$ctrl.listMode === 'list'">
 
 	<ul class="list-unstyled">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage) | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
@@ -81,7 +81,7 @@
 
 <div class="list-body list-card" ng-if="$ctrl.listMode === 'cards'">
 
-	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage) | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 		<div class="card-img-top" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 		<div class="card-body">
 			<div ng-clamp="3">{{img.title}}</div>

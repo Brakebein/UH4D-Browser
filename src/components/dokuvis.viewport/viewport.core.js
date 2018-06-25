@@ -594,9 +594,9 @@ angular.module('dokuvis.viewport',[
 				}
 				else {
 					// update image resolution
-					// spatialImages.forEach(function (img) {
-					// 	img.updateTextureByDistance(camera.position, 30);
-					// }, true);
+					spatialImages.forEach(function (img) {
+						img.updateTextureByDistance(camera.position, 30);
+					}, true);
 				}
 
 				if (controls) controls.update();
@@ -996,6 +996,68 @@ angular.module('dokuvis.viewport',[
 			function rejectMarkMat(obj) {
 				rejectHighlightMat(obj);
 			}
+			
+			function getObjectsInSight(entry) {
+				var testObjects = [];
+				// collect test objects
+				objects.forEach(function (obj) {
+					if (obj.type === 'object')
+						testObjects.push(obj.object);
+				}, true);
+
+				var resolution = 20;
+
+				for (var i = 0; i < resolution; i++) {
+					for (var j = 0; j < resolution; j++) {
+						var x = i * entry.object.width / (resolution + 1) + entry.object.width / resolution - entry.object.width / 2;
+						var y = j * entry.object.height / (resolution + 1) + entry.object.height / resolution - entry.object.height / 2;
+						var v = new THREE.Vector3(x, y, 0);
+						v.applyMatrix4(entry.object.image.matrixWorld);
+						var dir = v.sub(entry.object.position).normalize();
+						raycaster.set(entry.object.position, dir);
+						var intersections = raycaster.intersectObjects(testObjects, true);
+						if (intersections[0]) {
+							// console.log(x, y);
+							// console.log(intersections[0].object);
+							var objEntry = intersections[0].object.entry;
+							if (objEntry && selected.indexOf(objEntry) === -1) {
+								selectEntry(objEntry);
+								selected.push(objEntry);
+
+
+							}
+						}
+					}
+				}
+
+				entry.source.$setLinksToObjects({
+					objectIds: selected.map(function (value) {
+						if (value instanceof DV3D.ObjectEntry)
+							return value.name;
+					})
+				})
+					.then(function (response) {
+						console.log(response);
+					})
+					.catch(function (reason) {
+						Utilities.throwApiException('#Image.setLinksToObjects', reason);
+					});
+
+				setSelected(null, false, true);
+
+				animateAsync();
+			}
+
+			scope.$on('viewportLinkToObjects', function (event) {
+				event.stopPropagation();
+				console.log('received event', event);
+				var count = 0;
+				spatialImages.forEach(function (img) {
+					getObjectsInSight(img);
+					console.log(++count);
+				});
+
+			});
 
 			// watch für die Einstellungen für Unsicheres Wissen
 
@@ -1553,7 +1615,7 @@ angular.module('dokuvis.viewport',[
 					// custom context menu
 					selectRay(mouse);
 					if (selected[0]) {
-						if (selected[0] instanceof DV3D.ImageEntry) {
+						if (selected[0] instanceof DV3D.ImageEntry || selected[0] instanceof DV3D.ObjectEntry) {
 							console.log('open context menu');
 							// title, add to collection, focus, open details
 							var elScope = scope.$new(false);
@@ -2115,6 +2177,8 @@ angular.module('dokuvis.viewport',[
 
 						return count;
 					});
+
+					animateAsync();
 				}
 
 				if (vectorField) {

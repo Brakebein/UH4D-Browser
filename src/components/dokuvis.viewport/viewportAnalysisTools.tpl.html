@@ -3,6 +3,12 @@
 <div class="ctrl-container ctrl-bottom-right">
 	<div>
 
+		<div class="row" ng-show="$root.editableMode">
+			<div class="ctrl-group">
+				<button class="btn btn-default"  ng-click="linkToObjects()">Link to Objects</button>
+			</div>
+		</div>
+
 		<div class="row">
 			<div class="ctrl-group">
 				<input type="checkbox" ng-model="analysisViz.visible" ng-change="analysisViz.toggle()"/> Show Visualization of Orientation
