@@ -88,31 +88,7 @@ angular.module('dokuvis.viewport',[
 			// 	XRAY: 'xray'
 			// };
 
-			// var pcConfig = {
-			// 	clipMode: Potree.ClipMode.HIGHLIGHT_INSIDE,
-			// 	isFlipYZ: false,
-			// 	useDEMCollisions: false,
-			// 	generateDEM: false,
-			// 	minNodeSize: 100,
-			// 	// pointBudget: 1000000,
-			// 	edlStrength: 1.0,
-			// 	edlRadius: 1.4,
-			// 	useEDL: false,
-			// 	classifications: {
-			// 		0: { visible: true, name: 'never classified' },
-			// 		1: { visible: true, name: 'unclassified' },
-			// 		2: { visible: true, name: 'ground' },
-			// 		3: { visible: true, name: 'low vegetation' },
-			// 		4: { visible: true, name: 'medium vegetation' },
-			// 		5: { visible: true, name: 'high vegetation' },
-			// 		6: { visible: true, name: 'building' },
-			// 		7: { visible: true, name: 'low point(noise)' },
-			// 		8: { visible: true, name: 'key-point' },
-			// 		9: { visible: true, name: 'water' },
-			// 		12: { visible: true, name: 'overlap' }
-			// 	}
-			// };
-			// Potree.pointBudget = 500000;
+
 
 			var isAnimating = false;
 
@@ -135,7 +111,6 @@ angular.module('dokuvis.viewport',[
 
 			// Übernahme aus viewportCache
 			var objects = viewportCache.objects;
-			var pointclouds = [];
 			var plans = viewportCache.plans;
 			var spatialImages = viewportCache.spatialImages;
 			var geometries = viewportCache.geometries;
@@ -176,9 +151,9 @@ angular.module('dokuvis.viewport',[
 				// Controls (for navigation)
 				controls = new THREE.OrbitControls(camera, renderer.domElement);
 				controls.zoomSpeed = 1.0;
-				// if (viewportCache.viewpoint) controls.center = viewportCache.viewpoint.controlsPosition.clone();
-				if (viewportCache.viewpoint) controls.center.copy(viewportCache.viewpoint.controlsCenter);
-				camera.target = controls.center;
+				// if (viewportCache.viewpoint) controls.target = viewportCache.viewpoint.controlsPosition.clone();
+				if (viewportCache.viewpoint) controls.target.copy(viewportCache.viewpoint.controlsTarget);
+				camera.target = controls.target;
 				controls.addEventListener('change', onControlsChange);
 				controls.addEventListener('end', function () {
 					updateHeatMapAsync();
@@ -367,27 +342,6 @@ angular.module('dokuvis.viewport',[
 				//setGizmo(plane, 'move');
 
 
-				// pointcloud test
-				// loadPointCloud('data/pointclouds/georgentor/cloud.js', 'potree-test', function (e) {
-				// 	console.info(e);
-				// 	var pc = e.pointcloud;
-				// 	pointclouds.push(pc);
-				// 	scene.add(pc);
-				// 	pc.material.pointColorType = Potree.PointColorType.RGB;
-				// 	pc.material.size = 2;
-				// 	pc.material.pointSizeType = Potree.PointSizeType.FIXED;
-				// 	pc.material.shape = Potree.PointShape.SQUARE;
-				// 	pc.rotateOnAxis(new THREE.Vector3(1,0,0),- Math.PI / 2);
-				// 	// var q = new THREE.Quaternion();
-				// 	// q.setFromAxisAngle(new THREE.Vector3(1,0,0), - Math.PI / 2);
-				// 	// pc.quaternion.premultiply(q);
-				// 	var rotMatrix = new THREE.Matrix4();
-				// 	rotMatrix.makeRotationAxis(new THREE.Vector3(1,0,0), - Math.PI / 2);
-				// 	var currentPos = new THREE.Vector4(pc.position.x, pc.position.y, pc.position.z, 1);
-				// 	var newPos = currentPos.applyMatrix4(rotMatrix);
-				// 	pc.position.set(newPos.x, newPos.y, newPos.z);
-				// });
-
 				// add event listeners to entries
 				objects.forEach(function (entry) {
 					entry.addEventListener('change', animateAsync);
@@ -431,96 +385,6 @@ angular.module('dokuvis.viewport',[
 				scope.$broadcast('viewportCameraMove', cam);
 			}
 
-
-			function updatePointClouds() {
-				var pointLoadLimit = 2000000;
-				var visibleNodes = 0,
-					visiblePoints = 0,
-					progress = 0;
-
-				for (var i=0; i<pointclouds.length; i++) {
-					var pc = pointclouds[i];
-					var bbWorld = Potree.utils.computeTransformedBoundingBox(pc.boundingBox, pc.matrixWorld);
-
-					if (!pc.material._defaultIntensityRangeChanged) {
-						var root = pc.pcoGeometry.root;
-						if (root !== null && root.loaded) {
-							var attributes = pc.pcoGeometry.root.geometry.attributes;
-							if (attributes.intensity) {
-								var array = attributes.intensity.array;
-
-								var ordered = [];
-								for (var j=0; j<array.length; j++) {
-									ordered.push(array[j]);
-								}
-								ordered.sort();
-								var capIndex = parseInt((ordered.length - 1) * 0.75);
-								var cap = ordered[capIndex];
-
-								if (cap <= 1)
-									pc.material.intensityRange = [0, 1];
-								else if (cap <= 256)
-									pc.material.intensityRange = [0, 255];
-								else
-									pc.material.intensityRange = [0, cap];
-
-							}
-						}
-					}
-
-					pc.material.clipMode = pcConfig.clipMode;
-					pc.generateDEM = pcConfig.generateDEM;
-					pc.minimumNodePixelSize = pcConfig.minNodeSize;
-
-					visibleNodes += pc.numVisibleNodes;
-					visiblePoints += pc.numVisiblePoints;
-
-					progress += pc.progress;
-
-					var classification = pc.material.classification;
-					var somethingChanged = false;
-					for (var key in pcConfig.classifications) {
-						var w = pcConfig.classifications[key].visible ? 1 : 0;
-						if (classification[key]) {
-							if (classification[key].w !== w) {
-								classification[key].w = w;
-								somethingChanged = true;
-							}
-						}
-						else if (classification.DEFAULT) {
-							classification[key] = classification.DEFAULT;
-							somethingChanged = true;
-						}
-						else {
-							classification[key] = new THREE.Vector4(0.3, 0.6, 0.6, 0.5);
-							somethingChanged = true;
-						}
-						if (somethingChanged)
-							pc.material.recomputeClassification();
-					}
-				}
-
-				var result = Potree.updatePointClouds(pointclouds, camera, renderer);
-				visibleNodes = result.visibleNodes.length;
-				visiblePoints = result.numVisiblePoints;
-
-			}
-			var updatePointCloudsThrottle = $throttle(updatePointClouds, 500, false, true);
-
-			function loadPointCloud(path, name, callback) {
-				if (!path) return;
-				if (path.indexOf('cloud.js') > 0) {
-					Potree.POCLoader.load(path, function (geometry) {
-						if (!geometry)
-							callback({ type: 'loading_failed' });
-						else {
-							var pc = new Potree.PointCloudOctree(geometry);
-							pc.name = name;
-							callback({ type: 'pointcloud_loaded', pointcloud: pc });
-						}
-					})
-				}
-			}
 
 			function updateOctree() {
 				if (renderer) renderer.render(scene, camera);
@@ -602,8 +466,6 @@ angular.module('dokuvis.viewport',[
 				if (controls) controls.update();
 
 				if (windMap) windMap.draw();
-
-				//updatePointCloudsThrottle();
 
 				// position light depending on camera
 				if (dlight) {
@@ -1180,23 +1042,23 @@ angular.module('dokuvis.viewport',[
 						camera.setZoom(1);
 						break;
 					case 'top':
-						camera.toOrthographic(controls.center);
+						camera.toOrthographic(controls.target);
 						camera.toTopView();
 						break;
 					case 'front':
-						camera.toOrthographic(controls.center);
+						camera.toOrthographic(controls.target);
 						camera.toFrontView();
 						break;
 					case 'back':
-						camera.toOrthographic(controls.center);
+						camera.toOrthographic(controls.target);
 						camera.toBackView();
 						break;
 					case 'left':
-						camera.toOrthographic(controls.center);
+						camera.toOrthographic(controls.target);
 						camera.toLeftView();
 						break;
 					case 'right':
-						camera.toOrthographic(controls.center);
+						camera.toOrthographic(controls.target);
 						camera.toRightView();
 						break;
 					default: break;
@@ -1746,7 +1608,7 @@ angular.module('dokuvis.viewport',[
 			function navigationEnd() {
 				viewportCache.viewpoint = {
 					cameraPosition: camera.position.clone(),
-					controlsPosition: controls.center.clone()
+					controlsPosition: controls.target.clone()
 				};
 				console.log(viewportCache.viewpoint);
 
@@ -1963,7 +1825,7 @@ angular.module('dokuvis.viewport',[
 					sData: renderer.domElement.toDataURL("image/jpeg"),
 					cameraMatrix: camera.matrix.toArray(),
 					cameraFOV: camera.fov,
-					cameraCenter: controls.center.toArray(),
+					cameraCenter: controls.target.toArray(),
 					width: SCREEN_WIDTH,
 					height: SCREEN_HEIGHT
 				};
@@ -1994,11 +1856,11 @@ angular.module('dokuvis.viewport',[
 					})
 					.start();
 
-				new TWEEN.Tween(controls.center.clone())
+				new TWEEN.Tween(controls.target.clone())
 					.to(ctrlPos, 500)
 					.easing(TWEEN.Easing.Quadratic.InOut)
 					.onUpdate(function () {
-						controls.center.copy(this);
+						controls.target.copy(this);
 					})
 					.start();
 
@@ -2241,22 +2103,71 @@ angular.module('dokuvis.viewport',[
 
 			// listen to spatialImageLoad event
 			scope.$on('spatialImageLoad', function (event, images, reset) {
-				if (reset === true) {
-					setSelected(null);
-					[].concat(spatialImages.list).forEach(function (image) {
-						scene.remove(image.object);
-						octree.remove(image.object.collisionObject);
-						spatialImages.remove(image);
-						image.dispose();
-					});
-				}
-				if (Array.isArray(images)) {
-					images.forEach(function (img) {
-						loadSpatialImage(img);
-					});
-				}
+
+				setSelected(null);
+
+				var toBeCreated = [],
+					toBeUpdated = [],
+					toBeRemoved = [];
+				
+				var newImages;
+				if (Array.isArray(images))
+					newImages = images;
 				else
-					loadSpatialImage(images);
+					newImages = [images];
+				
+				newImages.forEach(function (img) {
+					if (!img.spatial) return;
+					var si = spatialImages.getByName(img.spatial.id);
+					if (si)
+						toBeUpdated.push({
+							entry: si,
+							resource: img
+						});
+					else
+						toBeCreated.push(img);
+				});
+
+				spatialImages.forEach(function (entry) {
+					if (!newImages.find(function (img) {
+						if (!img.spatial) return false;
+						return entry.name === img.spatial.id;
+					}))
+						toBeRemoved.push(entry);
+				});
+
+				toBeRemoved.forEach(function (value) {
+					scene.remove(value.object);
+					octree.remove(value.object.collisionObject);
+					spatialImages.remove(value);
+					value.dispose();
+				});
+
+				toBeUpdated.forEach(function (value) {
+					value.entry.source = value.resource;
+					value.entry.object.userData.source = value.resource;
+				});
+
+				toBeCreated.forEach(function (value) {
+					loadSpatialImage(value);
+				});
+
+				// if (reset === true) {
+				// 	setSelected(null);
+				// 	[].concat(spatialImages.list).forEach(function (image) {
+				// 		scene.remove(image.object);
+				// 		octree.remove(image.object.collisionObject);
+				// 		spatialImages.remove(image);
+				// 		image.dispose();
+				// 	});
+				// }
+				// if (Array.isArray(images)) {
+				// 	images.forEach(function (img) {
+				// 		loadSpatialImage(img);
+				// 	});
+				// }
+				// else
+				// 	loadSpatialImage(images);
 
 				updateHeatMap();
 			});
@@ -2270,16 +2181,16 @@ angular.module('dokuvis.viewport',[
 				if (!img.spatial)
 					return $q.reject('No spatial information');
 
-				var oldImg = spatialImages.getByName(img.content);
-
-				if (oldImg && replace) {
-					// remove existing one
-					spatialImages.remove(oldImg);
-					scene.remove(oldImg.object);
-					oldImg.dispose();
-				}
-				else if(oldImg && !replace)
-					return $q.reject('Already loaded');
+				// var oldImg = spatialImages.getByName(img.spatial.id);
+				//
+				// if (oldImg && replace) {
+				// 	// remove existing one
+				// 	spatialImages.remove(oldImg);
+				// 	scene.remove(oldImg.object);
+				// 	oldImg.dispose();
+				// }
+				// else if(oldImg && !replace)
+				// 	return $q.reject('Already loaded');
 
 				//$log.debug(img);
 
@@ -2353,10 +2264,10 @@ angular.module('dokuvis.viewport',[
 					.easing(TWEEN.Easing.Quadratic.InOut)
 					.onUpdate(function () { camera.position.copy(this); })
 					.start();
-				new TWEEN.Tween(controls.center.clone())
+				new TWEEN.Tween(controls.target.clone())
 					.to(end, 500)
 					.easing(TWEEN.Easing.Quadratic.InOut)
-					.onUpdate(function () { controls.center.copy(this); })
+					.onUpdate(function () { controls.target.copy(this); })
 					.start();
 				new TWEEN.Tween({ fov: camera.fov })
 					.to({ fov: obj.fov }, 500)
@@ -2468,12 +2379,12 @@ angular.module('dokuvis.viewport',[
 					.easing(TWEEN.Easing.Quadratic.InOut)
 					.onUpdate(function () { camera.position.copy(this); })
 					.start();
-				new TWEEN.Tween(controls.center.clone())
+				new TWEEN.Tween(controls.target.clone())
 					.to(bsCenter, 500)
 					.easing(TWEEN.Easing.Quadratic.InOut)
-					.onUpdate(function () { controls.center.copy(this); })
+					.onUpdate(function () { controls.target.copy(this); })
 					.onComplete(function() {
-						camera.toOrthographic(controls.center);
+						camera.toOrthographic(controls.target);
 						scope.$apply();
 					})
 					.start();
@@ -3026,8 +2937,8 @@ angular.module('dokuvis.viewport',[
 				geo.vertices.push(new THREE.Vector3(xmax, ymax, zmax));
 				geo.computeBoundingSphere();
 
-				// calculate new camera.position and controls.center
-				var s = new THREE.Vector3().subVectors(camera.position, controls.center);
+				// calculate new camera.position and controls.target
+				var s = new THREE.Vector3().subVectors(camera.position, controls.target);
 				var h = geo.boundingSphere.radius / Math.tan( camera.fov / 2 * THREE.Math.DEG2RAD );
 				var newpos = new THREE.Vector3().addVectors(geo.boundingSphere.center, s.setLength(h));
 
@@ -3036,17 +2947,17 @@ angular.module('dokuvis.viewport',[
 				camera.cameraP.far = Math.max(geo.boundingSphere.radius * 100, 200);
 				camera.updateProjectionMatrix();
 
-				// animate camera.position and controls.center
+				// animate camera.position and controls.target
 				new TWEEN.Tween(camera.position.clone())
 					.to(newpos, 500)
 					.easing(TWEEN.Easing.Quadratic.InOut)
 					.onUpdate(function () { camera.position.copy(this); })
 					.start();
 
-				new TWEEN.Tween(controls.center.clone())
+				new TWEEN.Tween(controls.target.clone())
 					.to(geo.boundingSphere.center, 500)
 					.easing(TWEEN.Easing.Quadratic.InOut)
-					.onUpdate(function () { controls.center.copy(this); })
+					.onUpdate(function () { controls.target.copy(this); })
 					.start();
 
 				startAnimation();
@@ -3097,10 +3008,10 @@ angular.module('dokuvis.viewport',[
 				// save camera and controls position
 				if (!viewportCache.viewpoint) viewportCache.viewpoint = {
 					cameraPosition: new THREE.Vector3(),
-					controlsCenter: new THREE.Vector3()
+					controlsTarget: new THREE.Vector3()
 				};
 				viewportCache.viewpoint.cameraPosition.copy(camera.position);
-				viewportCache.viewpoint.controlsCenter.copy(controls.center);
+				viewportCache.viewpoint.controlsTarget.copy(controls.target);
 
 				controls.dispose();
 

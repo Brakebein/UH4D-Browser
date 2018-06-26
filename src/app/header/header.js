@@ -2,7 +2,7 @@ angular.module('uh4dApp')
 .component('header', {
 
 	templateUrl: 'app/header/header.tpl.html',
-	controller: ['$rootScope', '$state', function ($rootScope, $state) {
+	controller: ['$scope', '$state', function ($scope, $state) {
 
 		var $ctrl = this;
 
@@ -12,7 +12,7 @@ angular.module('uh4dApp')
 		};
 
 		// watch for query param changes and update search bar
-		$rootScope.$watch(function () {
+		$scope.$watch(function () {
 			return $state.params.query;
 		}, function (newVal) {
 			$ctrl.searchTerm = newVal;

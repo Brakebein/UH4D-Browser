@@ -54,8 +54,7 @@ angular.module('uh4d.images', [
 
 		var ctrl = this;
 
-
-
+		ctrl.images = [];
 		ctrl.itemsPerPage = 20;
 
 		ctrl.$onInit = function () {
@@ -74,17 +73,6 @@ angular.module('uh4d.images', [
 				updateImageMeta();
 			});
 		};
-
-		function queryImages() {
-			Image.query().$promise
-				.then(function (results) {
-					ctrl.images = results;
-					console.log(results);
-				})
-				.catch(function (reason) {
-					Utilities.throwApiException('Image.query', reason);
-				});
-		}
 
 		$scope.$on('imageQuerySuccess', function (event, values) {
 			ctrl.images = values;
@@ -380,8 +368,6 @@ angular.module('uh4d.images', [
 
 .service('ImageCollection', ['$window', '$rootScope', '$q', 'Image', 'Utilities',
 	function ($window, $rootScope, $q, Image, Utilities) {
-
-		var scope = this;
 
 		var collection = [],
 			collectionIds = $window.localStorage['collectionIds'] ? angular.fromJson($window.localStorage['collectionIds']) : [];

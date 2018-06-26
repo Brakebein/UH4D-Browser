@@ -3,7 +3,7 @@ angular.module('uh4dApp')
 	
 	templateUrl: 'app/search/search.tpl.html',
 	
-	controller: ['$rootScope', '$state', '$uiRouterGlobals', 'Image', 'DigitalObject', 'Utilities', function ($rootScope, $state, $uiRouterGlobals, Image, DigitalObject, Utilities) {
+	controller: ['$scope', '$rootScope', '$state', '$uiRouterGlobals', 'Image', 'DigitalObject', 'Utilities', function ($scope, $rootScope, $state, $uiRouterGlobals, Image, DigitalObject, Utilities) {
 
 		var ctrl = this;
 
@@ -49,7 +49,7 @@ angular.module('uh4dApp')
 			$rootScope.$broadcast('spatialImageLoad', values, true);
 		}
 
-		$rootScope.$on('spatializeManualSuccess', function () {
+		$scope.$on('spatializeManualSuccess', function () {
 			performSearch();
 		});
 
@@ -63,7 +63,7 @@ angular.module('uh4dApp')
 		}
 
 		// populate params filter arrays
-		$rootScope.$on('filterByObject', function (event, entry, mode) {
+		$scope.$on('filterByObject', function (event, entry, mode) {
 			console.log('filterByObject event', entry, mode);
 
 			var includes = [].concat($state.params.filterObjIncl);
@@ -97,7 +97,7 @@ angular.module('uh4dApp')
 		});
 
 		// watch for state/url params change and perform search
-		$rootScope.$watchGroup([
+		$scope.$watchGroup([
 			function () { return $state.params.query; },
 			function () { return $state.params.filterObjIncl.length; },
 			function () { return $state.params.filterObjExcl.length; }
