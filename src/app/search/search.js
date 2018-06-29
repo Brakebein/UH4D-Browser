@@ -7,6 +7,8 @@ angular.module('uh4dApp')
 
 		var ctrl = this;
 
+		console.log('search component', $scope);
+
 		function performSearch(term) {
 			// $state.go($state.$current, { query: ctrl.searchTerm });
 
@@ -49,7 +51,7 @@ angular.module('uh4dApp')
 			$rootScope.$broadcast('spatialImageLoad', values, true);
 		}
 
-		$scope.$on('spatializeManualSuccess', function () {
+		$scope.$on('searchUpdate', function () {
 			performSearch();
 		});
 

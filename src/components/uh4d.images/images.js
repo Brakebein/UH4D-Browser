@@ -42,6 +42,14 @@ angular.module('uh4d.images', [
 			setLinksToObjects: {
 				url: 'api/image/:id/link',
 				method: 'PUT'
+			},
+			createDummy: {
+				url: 'api/image/dummy',
+				method: 'POST'
+			},
+			deleteDummy: {
+				url: 'api/image/dummy/:id',
+				method: 'DELETE'
 			}
 		});
 
@@ -102,13 +110,25 @@ angular.module('uh4d.images', [
 			updateImageMeta();
 		});
 
-		$scope.$on('imageUpdate', function (event, imgNew) {
-			var img = ctrl.images.find(function (value) {
-				return value.id === imgNew.id;
-			});
-			// extend by new values
-			if (img)
-				angular.extend(img, imgNew);
+		$scope.$on('imageUpdate', function (event, vpImg, remove) {
+			if (remove === true) {
+				var index = ctrl.images.findIndex(function (value) {
+					return value.id === vpImg.id;
+				});
+				ctrl.images.splice(index, 1);
+			}
+			else {
+				var img = ctrl.images.find(function (value) {
+					return value.id === vpImg.id;
+				});
+				// extend by new values
+				if (img)
+					angular.extend(img, vpImg);
+
+				// add image to list (maybe restrict to dummy images)
+				else
+					ctrl.images.push(vpImg);
+			}
 		});
 		
 		function updateImageMeta() {
@@ -231,12 +251,8 @@ angular.module('uh4d.images', [
 
 		$ctrl.startSpatialize = function () {
 			$state.go('^');
-			spatializeManualStart($ctrl.image);
+			$rootScope.$broadcast('triggerSpatializeManual', $ctrl.image);
 		};
-
-		function spatializeManualStart(image) {
-			$rootScope.$broadcast('spatializeManualStart', image);
-		}
 
 		function imageUpdate(image) {
 			$rootScope.$broadcast('imageUpdate', image);

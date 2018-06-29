@@ -66,6 +66,45 @@ angular.module('dokuvis.viewport')
 		directionalLight.position.set(-2, 8, 4);
 		scene.add(directionalLight);
 
+		// Sky box
+		var skyGeo = new THREE.SphereBufferGeometry(4000, 32, 15);
+		var skyMat = new THREE.ShaderMaterial({
+			vertexShader: '\
+					varying vec3 vWorldPosition;\
+					\
+					void main() {\
+						vec4 worldPosition = modelMatrix * vec4(position, 1.0);\
+						vWorldPosition = worldPosition.xyz;\
+						gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\
+					}',
+			fragmentShader: '\
+					uniform vec3 topColor;\
+					uniform vec3 horizonColor;\
+					uniform vec3 bottomColor;\
+					uniform float offset;\
+					uniform float topExponent;\
+					uniform float bottomExponent;\
+					varying vec3 vWorldPosition;\
+					\
+					void main() {\
+						float h = normalize(vWorldPosition + offset).y;\
+						if (h > 0.0)\
+							gl_FragColor = vec4( mix( horizonColor, topColor, max( pow( h, topExponent ), 0.0 ) ), 1.0);\
+						else\
+							gl_FragColor = vec4( mix( horizonColor, bottomColor, max( pow( abs(h), bottomExponent ), 0.0 ) ), 1.0);\
+					}',
+			uniforms: {
+				topColor: { value: new THREE.Color().setHSL(0.6, 1, 0.6) },
+				horizonColor: { value: new THREE.Color(0xffffff) },
+				bottomColor: { value: new THREE.Color(0x666666) },
+				offset: { value: 33 },
+				topExponent: { value: 0.6 },
+				bottomExponent: { value: 0.3 }
+			},
+			side: THREE.BackSide
+		});
+		scene.add(new THREE.Mesh(skyGeo, skyMat));
+
 		///// GEOMETRIES
 
 		var geometries = {};

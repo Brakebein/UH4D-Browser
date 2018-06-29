@@ -187,22 +187,22 @@ viewport-axis {
   left: 10px;
   bottom: 10px; }
 
-viewport-loadprogress > .loadprogress-bar {
+viewport-load-progress > .loadprogress-bar {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 0;
   height: 5px;
   background-color: #fc4e2a; }
-viewport-loadprogress > .loadprogress-label {
+viewport-load-progress > .loadprogress-label {
   position: absolute;
   left: 10px;
   bottom: 6px;
   font-size: 8pt;
   color: #fafafa; }
-viewport-loadprogress > .loadprogress-bar.ng-hide, viewport-loadprogress > .loadprogress-label.ng-hide {
+viewport-load-progress > .loadprogress-bar.ng-hide, viewport-load-progress > .loadprogress-label.ng-hide {
   opacity: 0; }
-viewport-loadprogress > .loadprogress-bar.ng-hide-add, viewport-loadprogress > .loadprogress-label.ng-hide-add {
+viewport-load-progress > .loadprogress-bar.ng-hide-add, viewport-load-progress > .loadprogress-label.ng-hide-add {
   transition: opacity 2s linear 2s; }
 
 viewport-object-tree > .list-header, viewport-plan-list > .list-header, viewport-image-list > .list-header {

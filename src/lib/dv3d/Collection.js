@@ -80,6 +80,7 @@ Object.assign(DV3D.Collection.prototype, THREE.EventDispatcher.prototype, {
 	remove: function (obj) {
 		var index = this.list.indexOf(obj);
 		if (index !== -1) {
+			this.dehighlight(obj);
 			this.list.splice(index, 1);
 			obj.removeEventListener('toggle', toggleHandler);
 			obj.removeEventListener('highlight', highlightHandler);

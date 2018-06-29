@@ -628,5 +628,7 @@ function multiSelect(arr, left, right, n, compare) {
 }
 
 },{"quickselect":1}],3:[function(require,module,exports){
+// bind libraries written in CommonJS modules to window global
+
 window.rbush = require('../../node_modules/rbush/index');
 },{"../../node_modules/rbush/index":2}]},{},[3]);
