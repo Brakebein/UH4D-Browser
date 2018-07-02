@@ -6,7 +6,7 @@
 		<a class="list-group-item list-group-item-action" ng-click="$ctrl.focus()"><i class="fa fa-search"></i> Focus</a>
 		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isImage && !$ctrl.entry.source.inCollection" ng-click="$ctrl.addToCollection()"><i class="fa fa-star"></i> Add to collection</a>
 		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isImage && $ctrl.entry.source.inCollection" ng-click="$ctrl.removeFromCollection()"><i class="fa fa-star-o"></i> Remove from collection</a>
-		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isDummyImage" ng-click="$ctrl.deleteDummyImage()"><i class="fa fa-trash"></i> Delete Dummy Image</a>
+		<a class="list-group-item list-group-item-action" ng-show="$root.editableMode && $ctrl.isDummyImage" ng-click="$ctrl.deleteDummyImage()"><i class="fa fa-trash"></i> Delete Dummy Image</a>
 
 		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isObject && !$ctrl.isIncluded && !$ctrl.isExcluded" ng-click="$ctrl.filterByObject('include')"><i class="fa fa-filter"></i> <i class="fa fa-plus"></i> Filter include</a>
 		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isObject && !$ctrl.isIncluded && !$ctrl.isExcluded" ng-click="$ctrl.filterByObject('exclude')"><i class="fa fa-filter"></i> <i class="fa fa-minus"></i> Filter exclude</a>

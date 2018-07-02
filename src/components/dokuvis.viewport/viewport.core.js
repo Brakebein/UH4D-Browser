@@ -75,6 +75,8 @@ angular.module('dokuvis.viewport',[
 
 		var currentMarker;
 
+		var inIsolationMode = true;
+
 		var dummyCreationMode = false;
 		var dummyOrigin, dummyDir, dummyArrow;
 
@@ -373,6 +375,7 @@ angular.module('dokuvis.viewport',[
 		var updateOctreeAsync = $debounce(updateOctree, 100);
 
 		function onControlsChange() {
+			exitIsolation();
 			animateThrottle20();
 			viewportCameraMove(camera);
 		}
@@ -1092,7 +1095,7 @@ angular.module('dokuvis.viewport',[
 			mouseDownEvent = event;
 
 			if (dummyCreationMode && event.button === 0) {
-				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
 				prepareRaycaster(mouseDownCoord);
 				dummyOrigin = raycaster.ray.intersectPlane(plane);
 			}
@@ -1143,7 +1146,7 @@ angular.module('dokuvis.viewport',[
 			var mouse = mouseToViewportCoords(event);
 
 			if (dummyCreationMode && dummyOrigin) {
-				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
 				prepareRaycaster(mouse);
 				var point2 = raycaster.ray.intersectPlane(plane);
 				var dir = new THREE.Vector3().subVectors(point2, dummyOrigin);
@@ -1936,7 +1939,7 @@ angular.module('dokuvis.viewport',[
 		 * @param obj {DV3D.ImagePane} ImagePane object
 		 */
 		function setImageView(obj) {
-			enterIsolation(obj);
+			enterIsolation(obj, false);
 
 			// new controls/rotation anchor
 			var end =  new THREE.Vector3(0,0,-100);
@@ -1954,6 +1957,11 @@ angular.module('dokuvis.viewport',[
 				.to(obj.position, 500)
 				.easing(TWEEN.Easing.Quadratic.InOut)
 				.onUpdate(function () { camera.position.copy(this); })
+				.onComplete(function () {
+					$timeout(function () {
+						inIsolationMode = true;
+					}, 50);
+				})
 				.start();
 			new TWEEN.Tween(controls.target.clone())
 				.to(end, 500)
@@ -1972,19 +1980,22 @@ angular.module('dokuvis.viewport',[
 			startAnimation();
 		}
 
-		function enterIsolation(obj) {
+		function enterIsolation(obj, setFlag) {
 			spatialImages.forEach(function (item) {
 				if (item.object !== obj)
 					item.toggle(false);
 			}, true);
+			if (setFlag !== false)
+				inIsolationMode = true;
 			scope.$broadcast('viewportIsolationEnter');
 		}
 
 		function exitIsolation() {
-			console.log('exit isolation');
+			if (!inIsolationMode) return;
 			spatialImages.forEach(function (item) {
 				item.toggle(true);
 			});
+			inIsolationMode = false;
 			scope.$broadcast('viewportIsolationExit');
 		}
 

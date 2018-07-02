@@ -1,6 +1,6 @@
 {
   "name": "uh4d-browser",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Browsing and Experiencing Repositories of Spatially Oriented Historic Photographic Images",
   "main": "index.js",
   "scripts": {

@@ -133,7 +133,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 					texture.minFilter = THREE.LinearFilter;
 					scope.texture = texture;
 					scope.image.material.map = texture;
-					scope.image.material.needsUpdate = true;
+					//scope.image.material.needsUpdate = true;
 					if (scope.entry)
 						scope.entry.update();
 				}, null, function (xhr) {
@@ -142,7 +142,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			}
 			else {
 				this.image.material.map = this.texture;
-				this.image.material.needsUpdate = true;
+				//this.image.material.needsUpdate = true;
 			}
 			return true;
 		}
@@ -151,7 +151,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			if (this.image.material.map === this.previewTexture) return false;
 
 			this.image.material.map = this.previewTexture;
-			this.image.material.needsUpdate = true;
+			//this.image.material.needsUpdate = true;
 			return true;
 		}
 	},
