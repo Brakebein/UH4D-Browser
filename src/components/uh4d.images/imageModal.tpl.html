@@ -135,6 +135,6 @@
 <div class="modal-footer">
 	<button class="btn btn-secondary" ng-show="!$ctrl.image.inCollection" ng-click="$ctrl.addToCollection()"><i class="fa fa-star"></i> Add to collection</button>
 	<button class="btn btn-secondary ng-hide" ng-show="$ctrl.image.inCollection" ng-click="$ctrl.removeFromCollection()"><i class="fa fa-star-o"></i> Remove from collection</button>
-	<button class="btn btn-secondary" ng-click="$ctrl.startSpatialize()">Spatialize</button>
+	<button class="btn btn-secondary" ng-show="$root.editableMode" ng-click="$ctrl.startSpatialize()">Spatialize</button>
 	<button class="btn btn-secondary" ng-click="$ctrl.close()">Close</button>
 </div>

@@ -50,9 +50,14 @@ DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		this.arrows = [];
 		var maxCount = 0;
 
-		for (var iy = 0, ly = dimension.y; iy < ly; iy += 1 / resolution) {
-			for (var ix = 0, lx = dimension.x; ix < lx; ix += 1 / resolution) {
-				var pos = new THREE.Vector3(Math.round(ix + bbox.min.x), 0, Math.round(iy + bbox.min.y));
+		var step = 1 / resolution;
+		for (var iy = 0, ly = dimension.y; iy < ly; iy += step) {
+			for (var ix = 0, lx = dimension.x; ix < lx; ix += step) {
+				var pos = new THREE.Vector3(
+					Math.round(ix + bbox.min.x + (Math.random() * step / 2 - step / 4)),
+					0,
+					Math.round(iy + bbox.min.y + (Math.random() * step / 2 - step / 4))
+				);
 				var props = callback(pos);
 
 				if (props.direction.x === 0 && props.direction.z === 0)

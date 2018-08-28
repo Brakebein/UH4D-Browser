@@ -1722,10 +1722,10 @@ angular.module('dokuvis.viewport',[
 				}
 				if (vectorField) {
 					vectorField.arrows.forEach(function (a) {
-						a.cone.material.depthTest = !options.overlay;
-						a.line.material.depthTest = !options.overlay;
-						a.cone.material.transparent = options.overlay;
-						a.line.material.transparent = options.overlay;
+						a.object.cone.material.depthTest = !options.overlay;
+						a.object.line.material.depthTest = !options.overlay;
+						a.object.cone.material.transparent = options.overlay;
+						a.object.line.material.transparent = options.overlay;
 					})
 				}
 				if (windMap) {
@@ -1939,6 +1939,7 @@ angular.module('dokuvis.viewport',[
 		 * @param obj {DV3D.ImagePane} ImagePane object
 		 */
 		function setImageView(obj) {
+			exitIsolation();
 			enterIsolation(obj, false);
 
 			// new controls/rotation anchor
