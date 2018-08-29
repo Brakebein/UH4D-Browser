@@ -1,0 +1,8 @@
+<div class="tooltip-dialog" ng-style="{left: $ctrl.position.x, top: $ctrl.position.y}">
+	<img class="tooltip-image" ng-show="$ctrl.isImage" ng-style="$ctrl.tooltipCss.image" ng-src="data/{{$ctrl.entry.source.file.path + $ctrl.entry.source.file.thumb}}"/>
+	<div class="tooltip-label" ng-show="$ctrl.isObject">
+		<div ng-bind="$ctrl.entry.label" ng-style="$ctrl.tooltipCss.label"></div>
+		<div class="tooltip-line" ng-style="$ctrl.tooltipCss.line"></div>
+		<div class="tooltip-dot"></div>
+	</div>
+</div>

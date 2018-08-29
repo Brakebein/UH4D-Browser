@@ -35,6 +35,7 @@ angular.module('dokuvis.viewport',[
 		///// VARIABLES
 
 		var contextMenuElement, contextMenuScope,
+			tooltipElement, tooltipScope,
 			spatializeManualElement , spatializeManualScope;
 
 		// constants frustum clipping
@@ -304,6 +305,34 @@ angular.module('dokuvis.viewport',[
 		}
 
 		/**
+		 * Delay tooltip instantiation
+		 */
+		var hoverDebounce = $debounce(function (entry, position) {
+			openTooltip(entry, position);
+		}, 500, false, false);
+
+		function openTooltip(entry, position) {
+			tooltipScope = scope.$new(false);
+			tooltipScope.position = position;
+			tooltipScope.entry = entry;
+			tooltipScope.close = closeTooltip;
+			tooltipElement = $compile('<viewport-tooltip></viewport-tooltip>')(tooltipScope);
+			$animate.enter(tooltipElement, element);
+		}
+
+		function closeTooltip() {
+			if (tooltipScope) {
+				tooltipScope.$destroy();
+				tooltipScope = null;
+			}
+			if (tooltipElement) {
+				$animate.leave(tooltipElement);
+				tooltipElement = null;
+				scope.$applyAsync();
+			}
+		}
+
+		/**
 		 * Open manual spatialize interface
 		 * @param src
 		 */
@@ -491,29 +520,42 @@ angular.module('dokuvis.viewport',[
 		}
 
 		/**
+		 * Collect test objects
+		 * @param type {...string} Which kind of test objects should be retrieved? `spatialImages` will return the collision object of images used for raycasting.
+		 */
+		function getRaycastTestObjects(type) {
+			var args = Array.from(arguments),
+				testObjects = [];
+
+			if (args.indexOf('objects') !== -1)
+				objects.forEach(function (obj) {
+					if (obj.type === 'object')
+						testObjects.push(obj.object);
+				}, true);
+
+			if (args.indexOf('plans') !== -1)
+				plans.forEach(function (plan) {
+					testObjects.push(plan.object.mesh);
+				}, true);
+
+			// spatialImages in octree
+			if (args.indexOf('spatialImages') !== -1)
+				octree.search(raycaster.ray.origin, 0, true, raycaster.ray.direction)
+					.forEach(function (item) {
+						testObjects.push(item.object);
+					});
+
+			return testObjects;
+		}
+
+		/**
 		 * Selection by a simple click.
 		 * @param mouse {THREE.Vector2} mouse position (in viewport coordinates)
 		 * @param ctrlKey {boolean=false} if ctrlKey is pressed
 		 */
 		function selectRay(mouse, ctrlKey) {
 			prepareRaycaster(mouse);
-			var testObjects = [];
-
-			// collect test objects
-			objects.forEach(function (obj) {
-				if (obj.type === 'object')
-					testObjects.push(obj.object);
-			}, true);
-
-			plans.forEach(function (plan) {
-				testObjects.push(plan.object.mesh);
-			}, true);
-
-			// spatialImages in octree
-			octree.search(raycaster.ray.origin, 0, true, raycaster.ray.direction)
-				.forEach(function (item) {
-					testObjects.push(item.object);
-				});
+			var testObjects = getRaycastTestObjects('objects', 'plans', 'spatialImages');
 
 			// raycast
 			var intersection = raycast(testObjects, true);
@@ -1090,6 +1132,7 @@ angular.module('dokuvis.viewport',[
 		// mousedown event handler
 		function mousedown(event) {
 			closeContextMenu();
+			closeTooltip();
 			isMouseDown = event.button;
 			mouseDownCoord = mouseToViewportCoords(event);
 			mouseDownEvent = event;
@@ -1145,6 +1188,8 @@ angular.module('dokuvis.viewport',[
 			event.preventDefault();
 			var mouse = mouseToViewportCoords(event);
 
+			closeTooltip();
+
 			if (dummyCreationMode && dummyOrigin) {
 				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
 				prepareRaycaster(mouse);
@@ -1186,16 +1231,19 @@ angular.module('dokuvis.viewport',[
 			// just hovering
 			else {
 				prepareRaycaster(mouse);
-				var ocResults = octree.search(raycaster.ray.origin, 0, true, raycaster.ray.direction);
-				var intersections = raycaster.intersectOctreeObjects(ocResults);
-				if (intersections[0]) {
-					// console.log(intersections[0]);
-					if (intersections[0].object.parent.entry instanceof DV3D.Entry)
-						intersections[0].object.parent.entry.highlight(true);
+				var testObjects = getRaycastTestObjects('objects', 'spatialImages');
+
+				var intersection = raycast(testObjects, true);
+				if (intersection) {
+					var entry = intersection.object.entry || intersection.object.parent.entry;
+					if (entry instanceof DV3D.ImageEntry)
+						entry.highlight(true);
 					// animateThrottle20();
+					hoverDebounce(entry, new THREE.Vector2(event.offsetX, event.offsetY));
 				}
 				else {
 					spatialImages.dehighlight();
+					hoverDebounce.cancel();
 				}
 			}
 
@@ -1284,6 +1332,8 @@ angular.module('dokuvis.viewport',[
 				// custom context menu
 				selectRay(mouse);
 				if (selected[0]) {
+					hoverDebounce.cancel();
+					closeTooltip();
 					if (selected[0] instanceof DV3D.ImageEntry || selected[0] instanceof DV3D.ObjectEntry) {
 						openContextMenu(selected[0], new THREE.Vector2(event.offsetX, event.offsetY));
 					}

@@ -566,6 +566,59 @@ angular.module('dokuvis.viewport')
 
 })
 
+.component('viewportTooltip', {
+
+	templateUrl: 'components/dokuvis.viewport/viewportTooltip.tpl.html',
+
+	controller: ['$scope', '$element', '$timeout', function ($scope, $element, $timeout) {
+
+		var $ctrl = this;
+
+		this.$onInit = function () {
+			this.entry = $scope.$parent.entry;
+
+			this.position = { x: -999, y: -999 };
+
+			this.isImage = this.entry instanceof DV3D.ImageEntry;
+			this.isObject = this.entry instanceof DV3D.ObjectEntry;
+
+			// position tooltip within the viewport, displace if near edge
+			this.tooltipCss = {};
+
+			var dialogElement = $element.find('.tooltip-dialog'),
+				imgElement = dialogElement.find('img.tooltip-image');
+
+			imgElement.on('load', function () {
+				$ctrl.tooltipCss.image = {
+					left: Math.min(0, $element.width() - $scope.$parent.position.x - dialogElement.width()),
+					top: Math.min(0, $element.height() - $scope.$parent.position.y - dialogElement.height())
+				};
+				$scope.$applyAsync();
+			});
+
+			$timeout(function () {
+				var labelElement = dialogElement.find('[ng-bind]'),
+					labelPos = labelElement.position();
+
+				var isAbove = $scope.$parent.position.y + labelPos.top > 0,
+					labelOffset = $element.width() - $scope.$parent.position.x - labelElement.outerWidth();
+
+				$ctrl.tooltipCss.label = {
+					transform: 'translate(' + Math.min(labelOffset, -10) + 'px,' + (isAbove ? '-100%' : '0') + ')',
+					top: isAbove ? '-20px' : '20px'
+				};
+				$ctrl.tooltipCss.line = {
+					top: isAbove ? '-20px' : '0'
+				};
+
+				$ctrl.position = $scope.$parent.position;
+			});
+		};
+
+	}]
+
+})
+
 .component('viewportAnalysisTools', {
 
 	templateUrl: 'components/dokuvis.viewport/viewportAnalysisTools.tpl.html',

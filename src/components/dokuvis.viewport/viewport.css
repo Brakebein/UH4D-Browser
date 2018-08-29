@@ -367,28 +367,56 @@ viewport-selection-display > .ctrl-container > div {
   viewport-selection-display > .ctrl-container > div .list-entry {
     max-width: 400px; }
 
-viewport-context-menu {
+viewport-context-menu, viewport-tooltip {
   width: 100%;
   height: 100%;
   position: absolute;
   pointer-events: none; }
-  viewport-context-menu > .context-menu-dialog {
+  viewport-context-menu > .context-menu-dialog, viewport-tooltip > .context-menu-dialog {
     position: absolute;
     pointer-events: auto; }
-    viewport-context-menu > .context-menu-dialog > ul {
+    viewport-context-menu > .context-menu-dialog > ul, viewport-tooltip > .context-menu-dialog > ul {
       background-color: #4E5D6C; }
-      viewport-context-menu > .context-menu-dialog > ul > li {
+      viewport-context-menu > .context-menu-dialog > ul > li, viewport-tooltip > .context-menu-dialog > ul > li {
         padding: 1px 8px;
         font-size: 13px;
         text-overflow: ellipsis;
         overflow: hidden; }
-        viewport-context-menu > .context-menu-dialog > ul > li > span {
+        viewport-context-menu > .context-menu-dialog > ul > li > span, viewport-tooltip > .context-menu-dialog > ul > li > span {
           display: inline-block;
           white-space: nowrap;
           max-width: 100px; }
-      viewport-context-menu > .context-menu-dialog > ul > a {
+      viewport-context-menu > .context-menu-dialog > ul > a, viewport-tooltip > .context-menu-dialog > ul > a {
         padding: 4px 8px;
         font-size: 14px; }
+  viewport-context-menu > .tooltip-dialog, viewport-tooltip > .tooltip-dialog {
+    position: absolute; }
+    viewport-context-menu > .tooltip-dialog > .tooltip-label, viewport-tooltip > .tooltip-dialog > .tooltip-label {
+      position: relative; }
+      viewport-context-menu > .tooltip-dialog > .tooltip-label > [ng-bind], viewport-tooltip > .tooltip-dialog > .tooltip-label > [ng-bind] {
+        background-color: rgba(43, 62, 80, 0.6);
+        padding: 0 0.4rem;
+        white-space: nowrap;
+        border: 1px solid #DF691A;
+        position: absolute;
+        transform: translate(0, -100%);
+        top: -20px; }
+      viewport-context-menu > .tooltip-dialog > .tooltip-label > .tooltip-line, viewport-tooltip > .tooltip-dialog > .tooltip-label > .tooltip-line {
+        position: absolute;
+        height: 20px;
+        border-left: 2px solid #DF691A;
+        left: -1px; }
+      viewport-context-menu > .tooltip-dialog > .tooltip-label > .tooltip-dot, viewport-tooltip > .tooltip-dialog > .tooltip-label > .tooltip-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 4px;
+        background-color: #DF691A;
+        position: absolute;
+        left: -4px;
+        top: -4px; }
+    viewport-context-menu > .tooltip-dialog > .tooltip-image, viewport-tooltip > .tooltip-dialog > .tooltip-image {
+      position: relative;
+      border: 1px solid #DF691A; }
 
 viewport-analysis-tools > .heatmap {
   position: absolute;

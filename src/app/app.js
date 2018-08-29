@@ -14,8 +14,8 @@ angular.module('uh4dApp', [
 	'uh4d.models'
 ])
 
-.config(['$stateProvider', '$urlRouterProvider', '$modalProvider', '$uibModalProvider',
-	function ($stateProvider, $urlRouterProvider, $modalProvider, $uibModalProvider) {
+.config(['$stateProvider', '$urlRouterProvider', '$modalProvider', '$uibModalProvider', '$selectProvider',
+	function ($stateProvider, $urlRouterProvider, $modalProvider, $uibModalProvider, $selectProvider) {
 
 		$urlRouterProvider.otherwise('/');
 
@@ -144,6 +144,10 @@ angular.module('uh4dApp', [
 			animation: false,
 			backdrop: 'static',
 			keyboard: false
+		});
+
+		angular.extend($selectProvider.defaults, {
+			template: 'partials/overrides/bs.select.tpl.html'
 		});
 
 	}

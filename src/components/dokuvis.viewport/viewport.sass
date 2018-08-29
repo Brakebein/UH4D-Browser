@@ -391,7 +391,7 @@ viewport-selection-display
 		.list-entry
 			max-width: 400px
 
-viewport-context-menu
+viewport-context-menu, viewport-tooltip
 	width: 100%
 	height: 100%
 	position: absolute
@@ -414,6 +414,35 @@ viewport-context-menu
 			& > a
 				padding: 4px 8px
 				font-size: 14px
+
+	& > .tooltip-dialog
+		position: absolute
+		& > .tooltip-label
+			position: relative
+			& > [ng-bind]
+				background-color: rgba($body-bg, 0.6)
+				padding: 0 0.4rem
+				white-space: nowrap
+				border: 1px solid $primary
+				position: absolute
+				transform: translate(0,-100%)
+				top: -20px
+			& > .tooltip-line
+				position: absolute
+				height: 20px
+				border-left: 2px solid $primary
+				left: -1px
+			& > .tooltip-dot
+				width: 8px
+				height: 8px
+				border-radius: 4px
+				background-color: $primary
+				position: absolute
+				left: -4px
+				top: -4px
+		& > .tooltip-image
+			position: relative
+			border: 1px solid $primary
 
 viewport-analysis-tools
 	& > .heatmap
