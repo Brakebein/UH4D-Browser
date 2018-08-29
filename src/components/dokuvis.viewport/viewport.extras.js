@@ -505,11 +505,20 @@ angular.module('dokuvis.viewport')
 
 	templateUrl: 'components/dokuvis.viewport/viewportContextMenu.tpl.html',
 
-	controller: ['$scope', '$rootScope', '$state', 'ImageCollection', function ($scope, $rootScope, $state, ImageCollection) {
+	controller: ['$scope', '$element', '$rootScope', '$state', '$timeout', 'ImageCollection', function ($scope, $element, $rootScope, $state, $timeout, ImageCollection) {
+
+		var $ctrl = this;
 
 		this.$onInit = function () {
-			this.position = $scope.$parent.position;
 			this.entry = $scope.$parent.entry;
+
+			this.position = { x: -999, y: -999 };
+
+			$timeout(function () {
+				var dialogElement = $element.find('.context-menu-dialog');
+				$ctrl.position.x = Math.min($scope.$parent.position.x, $element.width() - dialogElement.width());
+				$ctrl.position.y = Math.min($scope.$parent.position.y, $element.height() - dialogElement.height());
+			});
 
 			this.isImage = this.entry instanceof DV3D.ImageEntry;
 			this.isObject = this.entry instanceof DV3D.ObjectEntry;
