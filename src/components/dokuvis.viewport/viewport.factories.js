@@ -29,7 +29,9 @@ angular.module('dokuvis.viewport')
 				selectionColor: 0xfc4e2a,
 				highlightColor: 0xffff44,
 				objectColor: 0xdddddd,
-				edgeColor: 0x333333
+				edgeColor: 0x33ff33,
+				gridSize: 3000,
+				gridDivisions: 100
 			},
 
 			shadings: shadings,
@@ -58,7 +60,22 @@ angular.module('dokuvis.viewport')
 		scene.fog = new THREE.Fog(viewportSettings.defaults.backgroundColor, viewportSettings.defaults.FAR - 100, viewportSettings.defaults.FAR);
 
 		// Grid
-		scene.add(new THREE.GridHelper(100, 10));
+		var grid = new THREE.GridHelper(viewportSettings.defaults.gridSize, viewportSettings.defaults.gridDivisions, 0x2b3e50, 0x2b3e50);
+		grid.position.set(1000, -0.1, -1000);
+		grid.material.dispose();
+		grid.material = new THREE.ShaderMaterial({
+			uniforms: {
+				diffuse: { value: new THREE.Color(0xffffff) },
+				opacity: { value: 0.7 },
+				fogNear: { value: 1 },
+				fogFar: { value: viewportSettings.defaults.gridSize / 2 }
+			},
+			vertexShader: '#include <common>\n#include <color_pars_vertex>\n\nvarying float fogDepth;\n\n#include <logdepthbuf_pars_vertex>\n\nvoid main() {\n\n\t#include <color_vertex>\n\n\t#include <begin_vertex>\n\t#include <project_vertex>\n\t#include <logdepthbuf_vertex>\n\n\t#include <worldpos_vertex>\n\n\tfogDepth = -mvPosition.z;\n\n}',
+			fragmentShader: 'uniform vec3 diffuse;\nuniform float opacity;\n\n#ifndef FLAT_SHADED\n\n\tvarying vec3 vNormal;\n\n#endif\n\n#include <common>\n#include <color_pars_fragment>\n\nvarying float fogDepth;\nuniform float fogNear;\nuniform float fogFar;\n\n#include <logdepthbuf_pars_fragment>\n\nvoid main() {\n\n\tvec4 diffuseColor = vec4( diffuse, opacity );\n\n\t#include <logdepthbuf_fragment>\n\t#include <color_fragment>\n\t#include <alphatest_fragment>\n\n\tgl_FragColor = diffuseColor;\n\n\t#include <premultiplied_alpha_fragment>\n\t#include <tonemapping_fragment>\n\t#include <encodings_fragment>\n\n\tfloat fogFactor = smoothstep( fogNear, fogFar, fogDepth );\n\tgl_FragColor.a *= 1.0 - fogFactor;\n\n}',
+			vertexColors: THREE.VertexColors,
+			transparent: true
+		});
+		scene.add(grid);
 
 		// Light
 		scene.add(new THREE.AmbientLight(0x888888));
@@ -69,6 +86,14 @@ angular.module('dokuvis.viewport')
 		// Sky box
 		var skyGeo = new THREE.SphereBufferGeometry(4000, 32, 15);
 		var skyMat = new THREE.ShaderMaterial({
+			uniforms: {
+				topColor: { value: new THREE.Color().setHSL(0.6, 1, 0.6) },
+				horizonColor: { value: new THREE.Color(0xffffff) },
+				bottomColor: { value: new THREE.Color(0x666666) },
+				offset: { value: 33 },
+				topExponent: { value: 0.6 },
+				bottomExponent: { value: 0.3 }
+			},
 			vertexShader: '\
 					varying vec3 vWorldPosition;\
 					\
@@ -93,14 +118,6 @@ angular.module('dokuvis.viewport')
 						else\
 							gl_FragColor = vec4( mix( horizonColor, bottomColor, max( pow( abs(h), bottomExponent ), 0.0 ) ), 1.0);\
 					}',
-			uniforms: {
-				topColor: { value: new THREE.Color().setHSL(0.6, 1, 0.6) },
-				horizonColor: { value: new THREE.Color(0xffffff) },
-				bottomColor: { value: new THREE.Color(0x666666) },
-				offset: { value: 33 },
-				topExponent: { value: 0.6 },
-				bottomExponent: { value: 0.3 }
-			},
 			side: THREE.BackSide
 		});
 		scene.add(new THREE.Mesh(skyGeo, skyMat));
@@ -225,6 +242,7 @@ angular.module('dokuvis.viewport')
 		THREE.DokuVisTray = {
 
 			scene: scene,
+			grid: grid,
 			directionalLight: directionalLight,
 
 			geometries: geometries,

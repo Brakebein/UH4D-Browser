@@ -474,6 +474,12 @@ angular.module('dokuvis.viewport',[
 
 			if (controls) controls.update();
 
+			if (viewportCache.grid) {
+				var gridResolution = viewportSettings.defaults.gridSize / viewportSettings.defaults.gridDivisions;
+				viewportCache.grid.position.x = Math.round(camera.position.x / gridResolution) * gridResolution;
+				viewportCache.grid.position.z = Math.round(camera.position.z / gridResolution) * gridResolution;
+			}
+
 			if (windMap) windMap.draw();
 
 			// position light depending on camera
@@ -1252,6 +1258,8 @@ angular.module('dokuvis.viewport',[
 					var entry = intersection.object.entry || intersection.object.parent.entry;
 					if (entry instanceof DV3D.ImageEntry)
 						entry.highlight(true);
+					else
+						spatialImages.dehighlight();
 
 					hoverDebounce(entry, new THREE.Vector2(event.offsetX, event.offsetY));
 				}
