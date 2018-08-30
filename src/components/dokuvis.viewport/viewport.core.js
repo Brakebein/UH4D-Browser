@@ -16,6 +16,7 @@ angular.module('dokuvis.viewport',[
  * @module dokuvis.viewport
  * @restrict E
  * @param navigation {boolean} Enable navigation bar
+ * @param compass {boolean} Enable compass for orientation
  * @param imageControls {boolean} Enable image controls panel
  * @param selectionDisplay {boolean} Enable selection display panel
  * @param analysisTools {boolean} Enable analysis tools panel
@@ -226,6 +227,14 @@ angular.module('dokuvis.viewport',[
 				};
 
 				el = $compile('<viewport-navigation></viewport-navigation>')(elScope);
+				$animate.enter(el, element);
+			}
+
+			// <viewport-compass> component
+			if ('compass' in attrs) {
+				elScope = scope.$new(false);
+				elScope.faceNorth = faceNorth;
+				el = $compile('<viewport-compass></viewport-compass>')(elScope);
 				$animate.enter(el, element);
 			}
 
@@ -542,7 +551,8 @@ angular.module('dokuvis.viewport',[
 			if (args.indexOf('spatialImages') !== -1)
 				octree.search(raycaster.ray.origin, 0, true, raycaster.ray.direction)
 					.forEach(function (item) {
-						testObjects.push(item.object);
+						if (item.object.parent.entry.visible)
+							testObjects.push(item.object);
 					});
 
 			return testObjects;
@@ -1231,14 +1241,18 @@ angular.module('dokuvis.viewport',[
 			// just hovering
 			else {
 				prepareRaycaster(mouse);
-				var testObjects = getRaycastTestObjects('objects', 'spatialImages');
+
+				if (inIsolationMode)
+					var testObjects = getRaycastTestObjects('objects');
+				else
+					testObjects = getRaycastTestObjects('objects', 'spatialImages');
 
 				var intersection = raycast(testObjects, true);
 				if (intersection) {
 					var entry = intersection.object.entry || intersection.object.parent.entry;
 					if (entry instanceof DV3D.ImageEntry)
 						entry.highlight(true);
-					// animateThrottle20();
+
 					hoverDebounce(entry, new THREE.Vector2(event.offsetX, event.offsetY));
 				}
 				else {
@@ -1356,6 +1370,7 @@ angular.module('dokuvis.viewport',[
 		function mouseleave(event) {
 			isMouseDown = -1;
 			closeContextMenu();
+			closeTooltip();
 
 			if (navigation.default) {
 				// complete navigation
@@ -1411,6 +1426,8 @@ angular.module('dokuvis.viewport',[
 		// mousewheel event handler
 		function mousewheel(event) {
 			event.preventDefault();
+
+			closeTooltip();
 
 			//if (camera.inPerspectiveMode) {
 			controls.onMouseWheel(event.originalEvent);
@@ -2671,19 +2688,19 @@ angular.module('dokuvis.viewport',[
 
 			// adjust camera frustum (near, far)
 			camera.cameraP.near = boundingSphere.radius / 100;
-			camera.cameraP.far = Math.max(boundingSphere.radius * 100, 200);
+			camera.cameraP.far = Math.max(boundingSphere.radius * 100, viewportSettings.defaults.FAR);
 			camera.updateProjectionMatrix();
 
 			// animate camera.position and controls.target
 			new TWEEN.Tween(camera.position.clone())
 				.to(newpos, 500)
-				.easing(TWEEN.Easing.Quadratic.InOut)
+				.easing(TWEEN.Easing.Cubic.InOut)
 				.onUpdate(function () { camera.position.copy(this); })
 				.start();
 
 			new TWEEN.Tween(controls.target.clone())
 				.to(boundingSphere.center, 500)
-				.easing(TWEEN.Easing.Quadratic.InOut)
+				.easing(TWEEN.Easing.Cubic.InOut)
 				.onUpdate(function () { controls.target.copy(this); })
 				.start();
 
@@ -2696,6 +2713,30 @@ angular.module('dokuvis.viewport',[
 			// 	orthocam.position.set(M.x, M.y, 50);
 			// else if (scope.camera === 'left')
 			// 	orthocam.position.set(-50, M.y, M.z);
+		}
+
+		// tween camera facing north
+		function faceNorth() {
+			var offset = new THREE.Vector3(camera.position.x, controls.target.y, camera.position.z).sub(controls.target),
+				radius = offset.length();
+
+			// angle from z-axis around y-axis
+			var theta = Math.atan2( offset.x, offset.z );
+
+			// tween theta to `0` and apply new angle to camera
+			new TWEEN.Tween({theta: theta})
+				.to({theta: 0}, 1000)
+				.easing(TWEEN.Easing.Cubic.InOut)
+				.onUpdate(function () {
+					offset.x = radius * Math.sin( this.theta );
+					offset.y = camera.position.y;
+					offset.z = radius * Math.cos( this.theta );
+
+					camera.position.copy(new THREE.Vector3(controls.target.x, 0, controls.target.z)).add(offset);
+				})
+				.start();
+
+			startAnimation();
 		}
 
 		// resize viewport

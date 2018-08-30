@@ -147,7 +147,7 @@ angular.module('uh4dApp', [
 		});
 
 		angular.extend($selectProvider.defaults, {
-			template: 'partials/overrides/bs.select.tpl.html'
+			templateUrl: 'partials/overrides/bs.select.tpl.html'
 		});
 
 	}

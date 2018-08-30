@@ -173,6 +173,87 @@ angular.module('dokuvis.viewport')
 ])
 
 /**
+ * Compass for orientation.
+ * @ngdoc directive
+ * @name viewportCompass
+ * @module dokuvis.viewport
+ * @requires https://docs.angularjs.org/api/ng/service/$timeout $timeout
+ * @restrict E
+  */
+.component('viewportCompass', {
+
+	template: '<div class="north" ng-click="$ctrl.faceNorth()">N</div>',
+
+	controller: ['$scope', '$element', '$timeout', function ($scope, $element, $timeout) {
+
+		var renderer, camera, scene, plane, distance;
+
+		$timeout(function () {
+			init();
+		});
+
+		function init() {
+			var width = $element.width(),
+				height = $element.height();
+
+			distance = width;
+
+			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+			renderer.setSize(width, height);
+			$element.append(renderer.domElement);
+
+			camera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, 1, 100);
+			camera.position.set(0, 0, distance);
+
+			scene = new THREE.Scene();
+
+			new THREE.TextureLoader().load('img/compass_v01.png', function (texture) {
+				texture.anisotropy = 8;
+
+				// instantiate compass plane
+				var geo = new THREE.PlaneBufferGeometry(distance - 1, distance - 1);
+				geo.rotateX(-Math.PI / 2);
+				var mat = new THREE.MeshBasicMaterial({
+					map: texture,
+					side: THREE.DoubleSide
+				});
+
+				plane = new THREE.Mesh(geo, mat);
+				scene.add(plane);
+
+				render();
+			});
+		}
+
+		function render() {
+			renderer.render(scene, camera);
+		}
+
+		this.faceNorth = function () {
+			$scope.$parent.faceNorth();
+		};
+
+		// listen to viewportCameraMove event
+		$scope.$on('viewportCameraMove', function (event, cam) {
+			camera.rotation.copy(cam.rotation);
+			camera.position.copy(cam.getWorldDirection().negate().setLength(distance));
+			render();
+		});
+
+		// dispose axis
+		$scope.$on('$destroy', function () {
+			plane.geometry.dispose();
+			plane.material.dispose();
+
+			renderer.forceContextLoss();
+			renderer.dispose();
+		});
+
+	}]
+
+})
+
+/**
  * Display of load progress while loading 3D objects.
  * @ngdoc directive
  * @name viewportLoadProgress
@@ -604,7 +685,7 @@ angular.module('dokuvis.viewport')
 					labelOffset = $element.width() - $scope.$parent.position.x - labelElement.outerWidth();
 
 				$ctrl.tooltipCss.label = {
-					transform: 'translate(' + Math.min(labelOffset, -10) + 'px,' + (isAbove ? '-100%' : '0') + ')',
+					transform: 'translate(' + Math.min(labelOffset, Math.max(-10, -$scope.$parent.position.x)) + 'px,' + (isAbove ? '-100%' : '0') + ')',
 					top: isAbove ? '-20px' : '20px'
 				};
 				$ctrl.tooltipCss.line = {

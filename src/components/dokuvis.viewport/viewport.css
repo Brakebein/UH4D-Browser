@@ -187,6 +187,26 @@ viewport-axis {
   left: 10px;
   bottom: 10px; }
 
+viewport-compass {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  left: 10px;
+  top: 43px;
+  pointer-events: none; }
+  viewport-compass > .north {
+    pointer-events: all;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    background-color: rgba(51, 51, 51, 0.8); }
+    viewport-compass > .north:hover {
+      color: yellow; }
+
 viewport-load-progress > .loadprogress-bar {
   position: absolute;
   left: 0;
