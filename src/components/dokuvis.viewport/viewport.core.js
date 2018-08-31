@@ -721,14 +721,14 @@ angular.module('dokuvis.viewport',[
 		}
 
 		/**
-		 * Event that gets fired, when an object has been selected or deselected.
+		 * Event that gets fired, when an object has been selected or deselected / selection array changed.
 		 * @ngdoc event
 		 * @name viewport#viewportSelectionChange
 		 * @eventType broadcast on $rootScope
 		 */
-		function viewportSelectionChange() {
+		var viewportSelectionChange = $debounce(function () {
 			$rootScope.$broadcast('viewportSelectionChange', selected);
-		}
+		}, 200);
 
 		// apply selection material/color to entry's object and activate entry
 		function selectEntry(entry) {

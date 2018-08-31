@@ -2,6 +2,7 @@ angular.module('uh4d.images', [
 	'ngResource',
 	'xeditable',
 	'ngTagsInput',
+	'dndLists',
 	'uh4d.actors'
 ])
 
@@ -82,13 +83,16 @@ angular.module('uh4d.images', [
 			});
 		};
 
+		// listen to imageQuerySuccess event
 		$scope.$on('imageQuerySuccess', function (event, values) {
 			ctrl.images = values;
 			ctrl.currentPage = 1;
 			updateImageMeta();
 		});
 
-		var setSelection = $debounce(function (selected) {
+		// listen to viewportSelectionChange event
+		$scope.$on('viewportSelectionChange', function (event, selected) {
+			console.log(selected);
 			ctrl.selection = selected
 				.filter(function (item) {
 					return item instanceof DV3D.ImageEntry;
@@ -96,20 +100,14 @@ angular.module('uh4d.images', [
 				.map(function (item) {
 					return item.source;
 				});
-		}, 200);
-
-		$scope.$on('viewportSelectionChange', function (event, selected) {
-			console.log(selected);
-			setSelection(selected);
-			// ctrl.selection = selected.filter(function (item) {
-			// 	return item instanceof DV3D.ImageEntry;
-			// });
 		});
 
+		// listen to ImageCollectionUpdate event
 		$scope.$on('ImageCollectionUpdate', function () {
 			updateImageMeta();
 		});
 
+		// listen to imageUpdate event -> update properties of image in list
 		$scope.$on('imageUpdate', function (event, vpImg, remove) {
 			if (remove === true) {
 				var index = ctrl.images.findIndex(function (value) {
@@ -170,6 +168,7 @@ angular.module('uh4d.images', [
 			}
 		};
 
+		// add image to collection
 		ctrl.addToCollection = function (event, item) {
 			event.stopPropagation();
 
@@ -177,11 +176,18 @@ angular.module('uh4d.images', [
 			ctrl.collection = ImageCollection.get();
 		};
 
+		// remove image from collection
 		ctrl.removeFromCollection = function (event, item) {
 			event.stopPropagation();
 
 			ImageCollection.remove(item);
 			ctrl.collection = ImageCollection.get();
+		};
+
+		// called when element has been moved via drag n drop within the collection list
+		ctrl.collectionChangedByDnd = function (index) {
+			ctrl.collection.splice(index, 1);
+			ImageCollection.updateStorage();
 		};
 
 		ctrl.focusImage = function (event, spatial) {
@@ -467,6 +473,14 @@ angular.module('uh4d.images', [
 				item.inCollection = false;
 
 			ImageCollectionUpdate();
+		};
+
+		this.updateStorage = function () {
+			collectionIds = collection.map(function (value) {
+				return value.id;
+			});
+
+			$window.localStorage['collectionIds'] = angular.toJson(collectionIds);
 		};
 
 		function getImage(id) {
