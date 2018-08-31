@@ -182,7 +182,7 @@ angular.module('dokuvis.viewport')
   */
 .component('viewportCompass', {
 
-	template: '<div class="north" ng-click="$ctrl.faceNorth()">N</div>',
+	template: '<div class="north" title="Orient north" ng-click="$ctrl.faceNorth()">N</div>',
 
 	controller: ['$scope', '$element', '$timeout', function ($scope, $element, $timeout) {
 

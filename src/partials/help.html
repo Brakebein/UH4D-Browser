@@ -10,6 +10,7 @@
 		<ul>
 			<li>Title</li>
 			<li>Author/photographer</li>
+			<li>Date</li>
 			<li>Owner</li>
 			<li>Tags</li>
 			<li>Capture number</li>
@@ -17,25 +18,6 @@
 		<p><img src="img/help/searchbar.jpg"/></p>
 		<p>The results are displayed in the column to the right in ascending or descending order (by title, author, or date).</p>
 		<p><img src="img/help/results_list.jpg"/></p>
-	</div>
-
-	<div class="jumbotron py-4">
-		<h1>Images</h1>
-		<p>All search results are listed in the column to the right. All images that have been spatially oriented are also displayed within the 3D viewport. If the image is spatially oriented or not, is indicated by the <i class="fa fa-cube"></i> icon.</p>
-		<p>The spatially oriented images (3D images) can be faded and scaled by the slider in the top-right of the viewport.</p>
-		<p><img src="img/help/image_ctrls.jpg"/></p>
-		<p>To open the detailed view of the image with further metadata and an image viewer for closer inspection, click on the result list entry or right-click on the 3D image to open the context menu and choose "Open details...".</p>
-		<p><img src="img/help/contextmenu.jpg"/></p>
-		<p>You are able to take up the position of the photographer. To do so:</p>
-		<ul>
-			<li>Double click on the 3D image</li>
-			<li>Right-click on the 3D image and choose "Focus"</li>
-			<li>Select the image and hit the <img src="img/help/zoom_sel_w.png"/> button in the navigation bar</li>
-			<li>Click on the <i class="fa fa-cube"></i> item at the result list entry</li>
-		</ul>
-		<p>When focusing the image/taking up the position, the image will be isolated. So, other images won't occlude the geometry/3D models. To exit the isolation mode, press the "Exit isolation" button at the lower-left of the viewport.</p>
-		<p>Selecting an image is done by simply clicking on the 3D image. Multiple images can be selected by holding the "Ctrl" key while clicking. All the selected images are listed within the selection box.</p>
-		<p><img src="img/help/selection_box.jpg"/></p>
 	</div>
 
 	<div class="jumbotron py-4">
@@ -71,44 +53,89 @@
 	</div>
 
 	<div class="jumbotron py-4">
+		<h1>Images</h1>
+		<p>All search results are listed in the column to the right. All images that have been spatially oriented are also displayed within the 3D viewport. If the image is spatially oriented or not, is indicated by the <i class="text-warning fa fa-cube"></i> icon.</p>
+		<p>The spatially oriented images (3D images) can be faded and scaled by the slider in the top-right of the viewport.</p>
+		<p><img src="img/help/image_ctrls.jpg"/></p>
+		<p>To open the detailed view of the image with further metadata and an image viewer for closer inspection, click on the result list entry or right-click on the 3D image to open the context menu and choose <span class="text-warning"><i class="fa fa-info-circle"></i> Open details...</span> .</p>
+		<p><img src="img/help/contextmenu.jpg"/></p>
+		<p>You are able to take up the position of the photographer. To do so:</p>
+		<ul>
+			<li>Double click on the 3D image</li>
+			<li>Right-click on the 3D image and choose <span class="text-warning"><i class="fa fa-search"></i> Focus</span></li>
+			<li>Select the image and hit the <img src="img/help/zoom_sel_w.png"/> button in the navigation bar</li>
+			<li>Click on the <i class="text-warning fa fa-cube"></i> item at the result list entry</li>
+		</ul>
+		<p>When focusing the image/taking up the position, the image will be isolated. So, other images won't occlude the geometry/3D models. To exit the isolation mode, press the <span class="text-warning">Exit isolation</span> button at the lower-left of the viewport, or just move on.</p>
+		<p>Selecting an image is done by simply clicking on the 3D image. Multiple images can be selected by holding <kbd>Ctrl</kbd> while clicking. All the selected images are listed within the selection box.</p>
+		<p><img src="img/help/selection_box.jpg"/></p>
+	</div>
+
+	<div class="jumbotron py-4">
+		<h1>3D objects <small>&ndash; Buildings</small></h1>
+		<p>The 3D objects represent the buildings of the city. They are used to provide a spatial context to the photographs, so the user can comprehend the photographer's situation.</p>
+		<p>Additionally, the 3D objects can be used to narrow the search results. Right-click on a 3D object to open the context menu and choose</p>
+		<ul>
+			<li>either <span class="text-warning"><i class="fa fa-filter"></i> <i class="fa fa-plus"></i> Filter include</span> to search only for those images that depict this building</li>
+			<li>or <span class="text-warning"><i class="fa fa-filter"></i> <i class="fa fa-minus"></i> Filter exclude</span> to search only for those images that do <b>not</b> depict this building.</li>
+		</ul>
+		<p><img src="img/help/contextmenu_building.jpg"/></p>
+		<p>To remove the filter, right-click again on the the building to open the context menu and choose <span class="text-warning"><i class="fa fa-filter"></i> <i class="fa fa-times"></i> Remove filter</span>, or press the <i class="text-warning fa fa-times"></i> button of the filter entry within the panel at bottom-left corner of the viewport.</p>
+		<p><img src="img/help/filterlist.jpg"/></p>
+	</div>
+
+	<div class="jumbotron py-4">
 		<h1>Collection <small>&ndash; Memorizing images</small></h1>
 		<p><img src="img/help/collection_box.jpg"/></p>
-		<p>Images can be memorized. All memorized images can be found within the "Collection" tab. To add/remove an image to/from the collection, you can</p>
+		<p>Images can be memorized. All memorized images can be found within the <span class="text-warning">Collection</span> tab. To add/remove an image to/from the collection, you can</p>
 		<ul>
-			<li>Hit the star icon (<i class="fa fa-star"></i> <i class="fa fa-star-o"></i>) within the search results list entry<br/>
+			<li>Hit the star icon (<i class="text-warning fa fa-star"></i> <i class="text-warning fa fa-star-o"></i>) within the search results list entry<br/>
 				<img class="mt-1 mb-1" src="img/help/collection_stars.jpg"/>
 			</li>
-			<li>Right-click within the viewport on an image to open the context menu and choose "Add to collection"/"Remove from collection"<br/>
+			<li>Right-click within the viewport on an image to open the context menu and choose <span class="text-warning"><i class="fa fa-star"></i> Add to collection</span> / <span class="text-warning"><i class="fa fa-star-o"></i> Remove from collection</span><br/>
 				<img class="mt-1 mb-1" src="img/help/collection_contextmenu.jpg"/>
 			</li>
 			<li>Press the responsible button within the detail view<br/>
 				<img class="mt-1 mb-1" src="img/help/collection_detailview.jpg"/>
 			</li>
 		</ul>
+		<p>Reorder the images of the collection by drag and drop an entry to the desired position.</p>
+		<p><img src="img/help/collection_dnd.jpg"/></p>
 	</div>
 
 	<div class="jumbotron py-4">
 		<h1>Compare images</h1>
-		<p>Two images can be compared and inspected to each other. To enter the comparison view, select two images or have at least two images in your collection. Press the "Compare" button that connects two selection/collection entries.</p>
+		<p>Two images can be compared and inspected to each other. To enter the comparison view, select two images or have at least two images in your collection. Press the <span class="text-warning">Compare</span> button that connects two selection/collection entries.</p>
 		<p><img src="img/help/compare_button.jpg"/></p>
 		<p>The comparison view has two image viewers side by side. You are now able to zoom and pan each image individually. Additionally, there is the possibility to overlay a grid to estimate some distances comparatively.</p>
-		<p><img width="100%" src="img/help/compare_view.jpg"/></p>
-	</div>
-
-	<div class="jumbotron py-4">
-		<h1>Spatialize images</h1>
-		<p>Some images are not yet spatially oriented. You can help to contribute and manually orientate an image.</p>
-		<p>Open the detailed view of an image you want to orientate and hit the "Spatialize" button. The 3D viewport will be overlayed with the image. Now, you have to adjust the view to match the image. Use the opacity slider to fade between viewport and image and the field of view (FOV) slider to adjust the FOV of the virtual camera.</p>
-		<p>To set up the view more precisely, there are also some vernier adjustment buttons. You can pan and rotate the virtual camera by tiny amounts according to the precision slider. Hit "Save" when you are done.</p>
-		<p><img src="img/help/spatialize_ctrls.jpg"/></p>
+		<p><img src="img/help/compare_view.jpg" style="max-width: 100%"/></p>
 	</div>
 
 	<div class="jumbotron py-4">
 		<h1>Analysis tools</h1>
-		<p>Until now, there is only one analysis tool available.</p>
+		<p>There a few prototypical visualization methods that are supposed to support art and architectural historians in their research.</p>
+		<p>Each method can be toggled within the panel at the bottom-right corner of the viewport. The visualizations will be visible on ground level of the 3D scene. Check the <span class="text-warning">Overlay</span> checkbox to overlie all 3D objects with the visualization. The <span class="text-warning">Radius</span> slider adjusts in which radius images are considered at each sample point.</p>
+		<p><img src="img/help/analysis_panel.jpg"/></p>
 
 		<h3>Heat map &ndash; Frequency distribution</h3>
-		<p>Visualization of hotspots of spatially oriented images. Toggle the heat map with the checkbox at lower-right of the viewport.</p>
+		<p>Visualization of hotspots of spatially oriented images.</p>
+		<p><img src="img/help/analysis_heatmap.jpg" style="max-width: 100%"/></p>
+
+		<h3>Vector field</h3>
+		<p>Visualization of image orientations (glyph-based).</p>
+		<p><img src="img/help/analysis_vectorfield.jpg" style="max-width: 100%"/></p>
+
+		<h3>Moving particles</h3>
+		<p>Visualization of image orientations (particle-based).</p>
+		<p><img src="img/help/analysis_particles2.jpg" style="max-width: 100%"/></p>
+	</div>
+
+	<div class="jumbotron py-4">
+		<h1>Spatialize images <small class="text-danger">[only editable mode]</small></h1>
+		<p>Some images are not yet spatially oriented. You can help to contribute and manually orientate an image.</p>
+		<p>Open the detailed view of an image you want to orientate and hit the <span class="text-warning">Spatialize</span> button. The 3D viewport will be overlayed with the image. Now, you have to adjust the view to match the image. Use the opacity slider to fade between viewport and image and the field of view (FOV) slider to adjust the FOV of the virtual camera.</p>
+		<p>To set up the view more precisely, there are also some vernier adjustment buttons. You can pan and rotate the virtual camera by tiny amounts according to the precision slider. Hit <span class="text-warning">Save</span> when you are done.</p>
+		<p><img src="img/help/spatialize_ctrls.jpg" style="max-width: 100%"/></p>
 	</div>
 
 </div>

@@ -196,6 +196,7 @@ viewport-compass {
   pointer-events: none; }
   viewport-compass > .north {
     pointer-events: all;
+    cursor: pointer;
     position: absolute;
     display: flex;
     justify-content: center;
