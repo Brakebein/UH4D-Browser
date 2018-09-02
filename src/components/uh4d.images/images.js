@@ -59,41 +59,40 @@ angular.module('uh4d.images', [
 
 .component('imageList', {
 	templateUrl: 'components/uh4d.images/imageList.tpl.html',
-	controller: ['$scope', '$state', 'Image', 'Utilities', 'viewportCache', '$debounce', 'ImageCollection', function ($scope, $state, Image, Utilities, viewportCache, $debounce, ImageCollection) {
+	controller: ['$scope', '$element', '$state', 'Image', 'Utilities', 'viewportCache', '$debounce', 'ImageCollection', function ($scope, $element, $state, Image, Utilities, viewportCache, $debounce, ImageCollection) {
 
-		var ctrl = this;
+		var $ctrl = this;
 
-		ctrl.images = [];
-		ctrl.itemsPerPage = 20;
+		$ctrl.images = [];
+		$ctrl.itemsPerPage = 20;
 
-		ctrl.$onInit = function () {
-			console.log('imageList init');
-			ctrl.listTab = 'selection';
-			ctrl.listMode = 'list';
-			ctrl.listOrderBy = {
+		$ctrl.$onInit = function () {
+			$ctrl.listTab = 'selection';
+			$ctrl.listMode = 'list';
+			$ctrl.listOrderBy = {
 				prop: 'title',
 				desc: false
 			};
-			ctrl.page = 0;
-			ctrl.selection = [];
+			$ctrl.page = 0;
+			$ctrl.selection = [];
 
 			ImageCollection.promise.then(function (collection) {
-				ctrl.collection = collection;
+				$ctrl.collection = collection;
 				updateImageMeta();
 			});
 		};
 
 		// listen to imageQuerySuccess event
 		$scope.$on('imageQuerySuccess', function (event, values) {
-			ctrl.images = values;
-			ctrl.currentPage = 1;
+			$ctrl.images = values;
+			$ctrl.currentPage = 1;
 			updateImageMeta();
 		});
 
 		// listen to viewportSelectionChange event
 		$scope.$on('viewportSelectionChange', function (event, selected) {
 			console.log(selected);
-			ctrl.selection = selected
+			$ctrl.selection = selected
 				.filter(function (item) {
 					return item instanceof DV3D.ImageEntry;
 				})
@@ -110,13 +109,13 @@ angular.module('uh4d.images', [
 		// listen to imageUpdate event -> update properties of image in list
 		$scope.$on('imageUpdate', function (event, vpImg, remove) {
 			if (remove === true) {
-				var index = ctrl.images.findIndex(function (value) {
+				var index = $ctrl.images.findIndex(function (value) {
 					return value.id === vpImg.id;
 				});
-				ctrl.images.splice(index, 1);
+				$ctrl.images.splice(index, 1);
 			}
 			else {
-				var img = ctrl.images.find(function (value) {
+				var img = $ctrl.images.find(function (value) {
 					return value.id === vpImg.id;
 				});
 				// extend by new values
@@ -125,14 +124,14 @@ angular.module('uh4d.images', [
 
 				// add image to list (maybe restrict to dummy images)
 				else
-					ctrl.images.push(vpImg);
+					$ctrl.images.push(vpImg);
 			}
 		});
 		
 		function updateImageMeta() {
-			if (!ctrl.images || !ctrl.images.length) return;
+			if (!$ctrl.images || !$ctrl.images.length) return;
 
-			ctrl.images.forEach(function (item) {
+			$ctrl.images.forEach(function (item) {
 				if (ImageCollection.get(item.id))
 					item.inCollection = true;
 				else if (item.inCollection === true)
@@ -140,11 +139,11 @@ angular.module('uh4d.images', [
 			});
 		}
 
-		ctrl.openImage = function (id) {
+		$ctrl.openImage = function (id) {
 			$state.go('.image', {imageId: id});
 		};
 
-		ctrl.openCompareModal = function (event, img1, img2) {
+		$ctrl.openCompareModal = function (event, img1, img2) {
 			event.stopPropagation();
 			$state.go('.compare', {
 				imageId1: img1.id,
@@ -152,45 +151,49 @@ angular.module('uh4d.images', [
 			});
 		};
 
-		ctrl.setListTab = function (tab) {
-			if (tab === ctrl.listTab)
-				ctrl.listTab = '';
+		$ctrl.setListTab = function (tab) {
+			if (tab === $ctrl.listTab)
+				$ctrl.listTab = '';
 			else
-				ctrl.listTab = tab;
+				$ctrl.listTab = tab;
 		};
 
-		ctrl.setListMode = function (mode) {
+		$ctrl.setListMode = function (mode) {
 			switch (mode) {
 				case 'list':
 				case 'cards':
-					ctrl.listMode = mode;
+					$ctrl.listMode = mode;
 					break;
 			}
 		};
 
+		$ctrl.onPaginationChange = function () {
+			$element.find('.list-body').scrollTop(0);
+		};
+
 		// add image to collection
-		ctrl.addToCollection = function (event, item) {
+		$ctrl.addToCollection = function (event, item) {
 			event.stopPropagation();
 
 			ImageCollection.add(item);
-			ctrl.collection = ImageCollection.get();
+			$ctrl.collection = ImageCollection.get();
 		};
 
 		// remove image from collection
-		ctrl.removeFromCollection = function (event, item) {
+		$ctrl.removeFromCollection = function (event, item) {
 			event.stopPropagation();
 
 			ImageCollection.remove(item);
-			ctrl.collection = ImageCollection.get();
+			$ctrl.collection = ImageCollection.get();
 		};
 
 		// called when element has been moved via drag n drop within the collection list
-		ctrl.collectionChangedByDnd = function (index) {
-			ctrl.collection.splice(index, 1);
+		$ctrl.collectionChangedByDnd = function (index) {
+			$ctrl.collection.splice(index, 1);
 			ImageCollection.updateStorage();
 		};
 
-		ctrl.focusImage = function (event, spatial) {
+		$ctrl.focusImage = function (event, spatial) {
 			event.stopPropagation();
 			if (!spatial) return;
 

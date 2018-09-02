@@ -87,10 +87,16 @@ angular.module('uh4dApp')
 					}
 					break;
 				default:
-					var rmIn = includes.splice(includes.indexOf(entry.name), 1);
-					var rmEx = excludes.splice(excludes.indexOf(entry.name), 1);
-					if (rmIn.length || rmEx.length)
+					var index = includes.indexOf(entry.name);
+					if (index !== -1) {
+						includes.splice(index, 1);
 						somethingChanged = true;
+					}
+					index = excludes.indexOf(entry.name);
+					if (index !== -1) {
+						excludes.splice(index, 1);
+						somethingChanged = true;
+					}
 			}
 
 			if (somethingChanged)

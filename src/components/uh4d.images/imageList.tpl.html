@@ -112,6 +112,7 @@
 	<ul uib-pagination
 		class="pagination-sm"
 		ng-model="$ctrl.currentPage"
+		ng-change="$ctrl.onPaginationChange()"
 		total-items="$ctrl.images.length"
 		items-per-page="$ctrl.itemsPerPage"
 		max-size="5"

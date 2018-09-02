@@ -567,14 +567,17 @@ angular.module('dokuvis.viewport')
 				case 'include': $ctrl.includesList.push(entry); break;
 				case 'exclude': $ctrl.excludesList.push(entry); break;
 				default:
-					var e = $ctrl.includesList.find(function (value) {
+					var index = $ctrl.includesList.findIndex(function (value) {
 						return value.name === entry.name;
 					});
-					$ctrl.includesList.splice(e, 1);
-					e = $ctrl.excludesList.find(function (value) {
+					if (index !== -1)
+						$ctrl.includesList.splice(index, 1);
+
+					index = $ctrl.excludesList.findIndex(function (value) {
 						return value.name === entry.name;
 					});
-					$ctrl.excludesList.splice(e, 1);
+					if (index !== -1)
+						$ctrl.excludesList.splice(index, 1);
 			}
 		});
 
