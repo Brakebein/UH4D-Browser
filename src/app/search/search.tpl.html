@@ -13,11 +13,17 @@
 <div class="search-explorer">
 
 	<div class="viewport">
-		<viewport id="mainViewport" spatialize-manual>
-			<viewport-navigation></viewport-navigation>
-			<viewport-image-controls></viewport-image-controls>
-			<viewport-selection-display></viewport-selection-display>
-			<viewport-analysis-tools></viewport-analysis-tools>
+		<viewport id="mainViewport"
+				  navigation
+				  compass
+				  image-controls
+				  selection-display
+				  analysis-tools
+				  spatialize-manual>
+			<!--<viewport-navigation></viewport-navigation>-->
+			<!--<viewport-image-controls></viewport-image-controls>-->
+			<!--<viewport-selection-display></viewport-selection-display>-->
+			<!--<viewport-analysis-tools></viewport-analysis-tools>-->
 		</viewport>
 
 		<div class="viewport-load-panel" ng-show="$root.showModelLoadPanel" ng-click="$ctrl.loadModel()">

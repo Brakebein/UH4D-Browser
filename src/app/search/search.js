@@ -3,31 +3,20 @@ angular.module('uh4dApp')
 	
 	templateUrl: 'app/search/search.tpl.html',
 	
-	controller: ['$rootScope', '$state', '$uiRouterGlobals', 'Image', 'DigitalObject', 'Utilities', function ($rootScope, $state, $uiRouterGlobals, Image, DigitalObject, Utilities) {
+	controller: ['$scope', '$rootScope', '$state', '$uiRouterGlobals', 'Image', 'DigitalObject', 'Utilities', function ($scope, $rootScope, $state, $uiRouterGlobals, Image, DigitalObject, Utilities) {
 
 		var ctrl = this;
 
-		ctrl.$onInit = function () {
-			// recover search
-			if ($state.params.query) {
-				//ctrl.searchTerm = $state.params.query;
-				performSearch($state.params.query);
-			}
-			else {
-				//ctrl.searchTerm = '';
-				performSearch('');
-			}
-		};
-
-		// ctrl.onSearchTermEnter = function (event) {
-		// 	if (event.keyCode === 13) // Enter
-		// 		ctrl.performSearch();
-		// };
+		console.log('search component', $scope);
 
 		function performSearch(term) {
 			// $state.go($state.$current, { query: ctrl.searchTerm });
 
-			Image.query({ query: term }).$promise
+			Image.query({
+				query: term || $state.params.query,
+				filterObjIncl: $state.params.filterObjIncl,
+				filterObjExcl: $state.params.filterObjExcl
+			}).$promise
 				.then(function (values) {
 					console.log(values);
 					imageQuerySuccess(values);
@@ -37,11 +26,6 @@ angular.module('uh4dApp')
 					Utilities.throwApiException('Image.query() in search component', reason);
 				});
 		}
-
-		$rootScope.$on('updateSearchTerm', function (event, term) {
-			console.log('updateSearchTerm', term);
-			performSearch(term);
-		});
 
 		ctrl.loadModel = function () {
 			DigitalObject.query().$promise
@@ -67,8 +51,8 @@ angular.module('uh4dApp')
 			$rootScope.$broadcast('spatialImageLoad', values, true);
 		}
 
-		$rootScope.$on('spatializeManualSuccess', function () {
-			ctrl.performSearch();
+		$scope.$on('searchUpdate', function () {
+			performSearch();
 		});
 
 		function updateSpatialImages(values) {
@@ -79,6 +63,56 @@ angular.module('uh4dApp')
 			});
 			spatialImageLoad(spatials);
 		}
+
+		// populate params filter arrays
+		$scope.$on('filterByObject', function (event, entry, mode) {
+			console.log('filterByObject event', entry, mode);
+
+			var includes = [].concat($state.params.filterObjIncl);
+			var excludes = [].concat($state.params.filterObjExcl);
+
+			var somethingChanged = false;
+
+			switch (mode) {
+				case 'include':
+					if (includes.indexOf(entry.name) === -1) {
+						includes.push(entry.name);
+						somethingChanged = true;
+					}
+					break;
+				case 'exclude':
+					if (excludes.indexOf(entry.name) === -1) {
+						excludes.push(entry.name);
+						somethingChanged = true;
+					}
+					break;
+				default:
+					var index = includes.indexOf(entry.name);
+					if (index !== -1) {
+						includes.splice(index, 1);
+						somethingChanged = true;
+					}
+					index = excludes.indexOf(entry.name);
+					if (index !== -1) {
+						excludes.splice(index, 1);
+						somethingChanged = true;
+					}
+			}
+
+			if (somethingChanged)
+				$state.go('root.search', { filterObjIncl: includes, filterObjExcl: excludes });
+
+		});
+
+		// watch for state/url params change and perform search
+		$scope.$watchGroup([
+			function () { return $state.params.query; },
+			function () { return $state.params.filterObjIncl.length; },
+			function () { return $state.params.filterObjExcl.length; }
+		], function () {
+			performSearch();
+		});
+
 
 	}]
 	

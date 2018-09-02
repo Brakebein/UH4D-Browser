@@ -4,11 +4,14 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks('grunt-contrib-clean');
 	grunt.loadNpmTasks('grunt-contrib-concat');
 	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-contrib-htmlmin');
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-filerev');
 	grunt.loadNpmTasks('grunt-usemin');
 	grunt.loadNpmTasks('grunt-string-replace');
+
+	grunt.loadNpmTasks('grunt-browserify');
 
 	grunt.loadNpmTasks('grunt-version');
 	grunt.loadNpmTasks('grunt-wiredep');
@@ -32,7 +35,20 @@ module.exports = function (grunt) {
 					{expand: true, cwd: 'src/', src: 'index.html', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'fonts/**/*', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'bower_components/font-awesome/fonts/*', dest: 'dist/fonts/', flatten: true},
-					{expand: true, cwd: 'src/', src: 'img/**/*.{png,jpg,svg,gif}', dest: 'dist/'},
+					{expand: true, cwd: 'src/', src: 'img/**/*.{png,jpg,svg,gif}', dest: 'dist/'}
+				]
+			}
+		},
+
+		// copy html partials without comments
+		htmlmin: {
+			dist: {
+				options: {
+					removeComments: true,
+					collapseWhitespace: true,
+					conservativeCollapse: true
+				},
+				files: [
 					{expand: true, cwd: 'src/', src: 'app/**/*.html', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'components/**/*.html', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'partials/**/*.html', dest: 'dist/'}
@@ -96,7 +112,8 @@ module.exports = function (grunt) {
 						[/template-url="([^:'"]+)"/img, 'template-url replacement in html files']
 					],
 					js: [
-						[/(?:templateUrl|contentTemplate):[\s]*['"]([^:'"]+\.html)['"]/img, 'Partials replacement in js files']
+						[/(?:templateUrl|contentTemplate):[\s]*['"]([^:'"]+\.html)['"]/img, 'Partials replacement in js files'],
+						[/\.load\(['"]([^:'"]+)['"][,)]/img, 'TextureLoader image url']
 					],
 					css: [
 						[/url\((?:\.\.\/)*((?!\.\.\/)[^:'"?#()]+)(?:[?#][^:'"?()]+)?\)/img, 'Url replacement in css files']
@@ -122,6 +139,14 @@ module.exports = function (grunt) {
 
 
 		///// misc
+
+		// convert CommonJS file to browser compatible js file
+		browserify: {
+			exports: {
+				src: 'src/lib/exports.js',
+				dest: 'src/lib/browserify.js'
+			}
+		},
 
 		// update versions
 		version: {
@@ -157,6 +182,7 @@ module.exports = function (grunt) {
 	grunt.registerTask('build', [
 		'clean:dist',
 		'copy:dist',
+		'htmlmin:dist',
 		'useminPrepare',
 		'concat:generated',
 		'cssmin:generated',

@@ -30,7 +30,8 @@ search {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        cursor: pointer; }
+        cursor: pointer;
+        z-index: 100; }
     search > .search-explorer > .search-results {
       flex: 0 0 600px; }
 

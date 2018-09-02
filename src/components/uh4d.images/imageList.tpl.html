@@ -5,8 +5,9 @@
 
 <div class="list-selection bg-light">
 
+	<!-- selection list -->
 	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'selection'">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.selection" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
@@ -17,14 +18,20 @@
 				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
-			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filtered[$index-1], filtered[$index])">
+			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, $ctrl.selection[$index-1], $ctrl.selection[$index])">
 				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
 			</div>
 		</li>
 	</ul>
 
-	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'collection'">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.collection as filtered" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+	<!-- collection list -->
+	<ul class="list-unstyled" ng-show="$ctrl.listTab === 'collection'" dnd-list="$ctrl.collection">
+		<li class="media border border-secondary"
+			ng-repeat="img in $ctrl.collection"
+			title="{{img.title}}"
+			dnd-draggable="img"
+			dnd-moved="$ctrl.collectionChangedByDnd($index)"
+			ng-click="$ctrl.openImage(img.id)">
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
@@ -35,9 +42,14 @@
 				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
-			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, filtered[$index-1], filtered[$index])">
+			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, $ctrl.collection[$index-1], $ctrl.collection[$index])">
 				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
 			</div>
+		</li>
+
+		<li class="media border border-secondary dndPlaceholder">
+			<div class="media-thumb"></div>
+			<div class="media-body"></div>
 		</li>
 	</ul>
 </div>
@@ -63,7 +75,7 @@
 <div class="list-body list-media" ng-if="$ctrl.listMode === 'list'">
 
 	<ul class="list-unstyled">
-		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage) | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+		<li class="media border border-secondary" ng-repeat="img in $ctrl.images | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
@@ -81,7 +93,7 @@
 
 <div class="list-body list-card" ng-if="$ctrl.listMode === 'cards'">
 
-	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage) | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
+	<div class="card border border-secondary" ng-repeat="img in $ctrl.images | orderBy:$ctrl.listOrderBy.prop:$ctrl.listOrderBy.desc | limitTo:$ctrl.itemsPerPage:(($ctrl.currentPage-1)*$ctrl.itemsPerPage)" title="{{img.title}}" ng-click="$ctrl.openImage(img.id)">
 		<div class="card-img-top" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 		<div class="card-body">
 			<div ng-clamp="3">{{img.title}}</div>
@@ -100,6 +112,7 @@
 	<ul uib-pagination
 		class="pagination-sm"
 		ng-model="$ctrl.currentPage"
+		ng-change="$ctrl.onPaginationChange()"
 		total-items="$ctrl.images.length"
 		items-per-page="$ctrl.itemsPerPage"
 		max-size="5"

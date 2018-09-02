@@ -64,6 +64,14 @@ image-list {
             padding: 0 3px;
             top: 50%;
             transform: translate(0, -50%); }
+        image-list > .list-selection > ul > li.media.dndDraggingSource {
+          display: none; }
+        image-list > .list-selection > ul > li.media.dndPlaceholder {
+          background-color: rgba(78, 93, 108, 0.5); }
+          image-list > .list-selection > ul > li.media.dndPlaceholder > .media-thumb {
+            background-color: rgba(78, 93, 108, 0.5); }
+      image-list > .list-selection > ul.dndDragover > li.media > .media-compare-btn {
+        display: none; }
   image-list > .list-body {
     flex: 1 1 0;
     overflow-y: scroll; }

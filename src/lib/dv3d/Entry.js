@@ -105,7 +105,7 @@ Object.assign(DV3D.Entry.prototype, THREE.EventDispatcher.prototype, {
 	 * Set camera to fit the object and its children. `focus` event is being dispatched.
 	 */
 	focus: function () {
-		if (!this.visible) return;
+		//if (!this.visible) return;
 		this.dispatchEvent({ type: 'focus' });
 	},
 

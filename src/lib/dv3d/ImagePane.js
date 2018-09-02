@@ -54,7 +54,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 	 * Apply selection color to the material of the pyramid.
 	 */
 	select: function () {
-		console.log('select');
+		// console.log('select');
 		if (!this.pyramid)
 			createPyramid.call(this);
 		if (!this.pyramid.parent !== this)
@@ -66,7 +66,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 	 * Apply default color to the material of the pyramid.
 	 */
 	deselect: function () {
-		console.log('deselect');
+		// console.log('deselect');
 		this.pyramid.material.color.setHex(0x0000ff);
 		this.remove(this.pyramid);
 	},
@@ -133,7 +133,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 					texture.minFilter = THREE.LinearFilter;
 					scope.texture = texture;
 					scope.image.material.map = texture;
-					scope.image.material.needsUpdate = true;
+					//scope.image.material.needsUpdate = true;
 					if (scope.entry)
 						scope.entry.update();
 				}, null, function (xhr) {
@@ -142,7 +142,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			}
 			else {
 				this.image.material.map = this.texture;
-				this.image.material.needsUpdate = true;
+				//this.image.material.needsUpdate = true;
 			}
 			return true;
 		}
@@ -151,7 +151,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			if (this.image.material.map === this.previewTexture) return false;
 
 			this.image.material.map = this.previewTexture;
-			this.image.material.needsUpdate = true;
+			//this.image.material.needsUpdate = true;
 			return true;
 		}
 	},
@@ -189,7 +189,7 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 function init( texture, params ) {
 	// height = 1, width = aspect ratio
 	var width = this.width = 1.0;
-	var height = this.width = 1.0;
+	var height = this.height = 1.0;
 
 	if (params.width && params.height)
 		width = this.width = params.width / params.height;

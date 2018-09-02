@@ -74,6 +74,18 @@ image-list
 						top: 50%
 						transform: translate(0,-50%)
 
+				// dragging style
+				&.dndDraggingSource
+					display: none
+
+				&.dndPlaceholder
+					background-color: rgba($secondary, 0.5)
+					& > .media-thumb
+						background-color: rgba($secondary, 0.5)
+
+			&.dndDragover > li.media > .media-compare-btn
+				display: none
+
 	& > .list-body
 		flex: 1 1 0
 		overflow-y: scroll

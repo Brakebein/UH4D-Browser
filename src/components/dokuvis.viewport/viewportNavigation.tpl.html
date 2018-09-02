@@ -3,25 +3,25 @@
 
 		<!-- focus buttons -->
 		<div class="ctrl-group">
-			<button title="{{'viewport_navi_focus_all' | translate}}" class="ctrl-btn" ng-click="focus('all')"><img src="img/icons/zoom_all_w.png"/></button>
-			<button title="{{'viewport_navi_focus_sel' | translate}}" class="ctrl-btn" ng-click="focus('selected')"><img src="img/icons/zoom_sel_w.png"/></button>
+			<button title="Focus all (fit to view)" class="ctrl-btn" ng-click="$ctrl.focus('all')"><img src="img/icons/zoom_all_w.png"/></button>
+			<button title="Focus selection (fit to view)" class="ctrl-btn" ng-click="$ctrl.focus('selected')"><img src="img/icons/zoom_sel_w.png"/></button>
 		</div>
 
 		<!-- navigation buttons -->
 		<div class="ctrl-group">
-			<button title="{{'viewport_navi_select' | translate}}" class="ctrl-btn" ng-class="{ active: navigation.default }" ng-click="setNavigationMode('select')"><img src="img/icons/cursor80_w.svg" width="24"/></button>
-			<button title="{{'viewport_navi_rotate' | translate}}" class="ctrl-btn" ng-class="{ active: navigation.rotate }" ng-click="setNavigationMode('rotate')"><img src="img/icons/orbit_w.svg" width="24"/></button>
-			<button title="{{'viewport_navi_pan' | translate}}" class="ctrl-btn" ng-class="{ active: navigation.pan }" ng-click="setNavigationMode('pan')"><img src="img/icons/move_w.svg" width="24"/></button>
-			<button title="{{'viewport_navi_zoom' | translate}}" class="ctrl-btn" ng-class="{ active: navigation.zoom }" ng-click="setNavigationMode('zoom')"><img src="img/icons/zoom2_w.svg" width="24"/></button>
+			<button title="Select/standard navigation" class="ctrl-btn" ng-class="{ active: $ctrl.navigation.default }" ng-click="$ctrl.setNavigationMode('select')"><img src="img/icons/cursor80_w.svg" width="24"/></button>
+			<button title="Rotate/orbit view" class="ctrl-btn" ng-class="{ active: $ctrl.navigation.rotate }" ng-click="$ctrl.setNavigationMode('rotate')"><img src="img/icons/orbit_w.svg" width="24"/></button>
+			<button title="Pan view" class="ctrl-btn" ng-class="{ active: $ctrl.navigation.pan }" ng-click="$ctrl.setNavigationMode('pan')"><img src="img/icons/move_w.svg" width="24"/></button>
+			<button title="Zoom view" class="ctrl-btn" ng-class="{ active: $ctrl.navigation.zoom }" ng-click="$ctrl.setNavigationMode('zoom')"><img src="img/icons/zoom2_w.svg" width="24"/></button>
 		</div>
 
 		<!-- dropdown for render mode and camera -->
 		<div class="ctrl-group">
-			<button title="{{'viewport_navi_shading' | translate}}"
+			<button title="Shading"
 					class="btn btn-primary dropdown-toggle"
 					bs-select
-					data-bs-options="s.value as s.label for s in vpSettings.shadings"
-					data-ng-model="vpSettings.shading">
+					data-bs-options="s.value as s.label for s in $ctrl.vpSettings.shadings"
+					data-ng-model="$ctrl.vpSettings.shading">
 				Action
 				<!--<span class="caret"></span>-->
 			</button>
@@ -34,11 +34,6 @@
 				<!--&lt;!&ndash;<span class="caret"></span>&ndash;&gt;-->
 			<!--</button>-->
 		</div>
-
-		<!--<div class="ctrl-group">-->
-			<!--&lt;!&ndash;<button title="Screenshot-Pin" class="ctrlBtn" ng-click="startMarking()"><i class="fa fa-thumb-tack"></i></button>&ndash;&gt;-->
-			<!--<button title="Snapshot" class="ctrl-btn" ng-click="$parent.openSnapshot()"><i class="fa fa-camera"></i></button>-->
-		<!--</div>-->
 
 	</div>
 </div>

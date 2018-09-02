@@ -14,8 +14,8 @@ angular.module('uh4dApp', [
 	'uh4d.models'
 ])
 
-.config(['$stateProvider', '$urlRouterProvider', '$modalProvider', '$uibModalProvider',
-	function ($stateProvider, $urlRouterProvider, $modalProvider, $uibModalProvider) {
+.config(['$stateProvider', '$urlRouterProvider', '$modalProvider', '$uibModalProvider', '$selectProvider',
+	function ($stateProvider, $urlRouterProvider, $modalProvider, $uibModalProvider, $selectProvider) {
 
 		$urlRouterProvider.otherwise('/');
 
@@ -47,7 +47,7 @@ angular.module('uh4dApp', [
 			})
 			.state({
 				name: 'root.search',
-				url: '/search?query&page',
+				url: '/search?query&page&filterObjIncl&filterObjExcl',
 				component: 'search',
 				params: {
 					query: {
@@ -59,6 +59,18 @@ angular.module('uh4dApp', [
 						type: 'query',
 						dynamic: true,
 						value: null
+					},
+					filterObjIncl: {
+						type: 'query',
+						dynamic: true,
+						array: true,
+						value: []
+					},
+					filterObjExcl: {
+						type: 'query',
+						dynamic: true,
+						array: true,
+						value: []
 					}
 				}
 			})
@@ -132,6 +144,10 @@ angular.module('uh4dApp', [
 			animation: false,
 			backdrop: 'static',
 			keyboard: false
+		});
+
+		angular.extend($selectProvider.defaults, {
+			templateUrl: 'partials/overrides/bs.select.tpl.html'
 		});
 
 	}
