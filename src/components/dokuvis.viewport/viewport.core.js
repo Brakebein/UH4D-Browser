@@ -355,6 +355,10 @@ angular.module('dokuvis.viewport',[
 			spatializeManualScope.controls = controls;
 			spatializeManualScope.animate = animateThrottle20;
 			spatializeManualScope.close = closeSpatializeManual;
+			spatializeManualScope.linkToObjects = function (src) {
+				var entry = spatialImages.getByName(src.spatial.id);
+				return linkObjectsInSight(entry);
+			};
 
 			spatializeManualElement = $compile('<viewport-spatialize-manual></viewport-spatialize-manual>')(spatializeManualScope);
 			$animate.enter(spatializeManualElement, element);
@@ -889,33 +893,27 @@ angular.module('dokuvis.viewport',[
 		}
 			
 		function linkObjectsInSight(entry) {
-			var testObjects = [];
-			// collect test objects
-			objects.forEach(function (obj) {
-				if (obj.type === 'object')
-					testObjects.push(obj.object);
-			}, true);
+			var defer = $q.defer(),
+				resolution = 20;
 
-			var resolution = 20;
+			var testObjects = getRaycastTestObjects('objects');
 
 			for (var i = 0; i < resolution; i++) {
 				for (var j = 0; j < resolution; j++) {
-					var x = i * entry.object.width / (resolution + 1) + entry.object.width / resolution - entry.object.width / 2;
-					var y = j * entry.object.height / (resolution + 1) + entry.object.height / resolution - entry.object.height / 2;
-					var v = new THREE.Vector3(x, y, 0);
+					var x = i * entry.object.width / (resolution + 1) + entry.object.width / resolution - entry.object.width / 2,
+						y = j * entry.object.height / (resolution + 1) + entry.object.height / resolution - entry.object.height / 2,
+						v = new THREE.Vector3(x, y, 0);
+
 					v.applyMatrix4(entry.object.image.matrixWorld);
 					var dir = v.sub(entry.object.position).normalize();
 					raycaster.set(entry.object.position, dir);
-					var intersections = raycaster.intersectObjects(testObjects, true);
-					if (intersections[0]) {
-						// console.log(x, y);
-						// console.log(intersections[0].object);
-						var objEntry = intersections[0].object.entry;
+
+					var intersection = raycast(testObjects, true);
+					if (intersection) {
+						var objEntry = intersection.object.entry;
 						if (objEntry && selected.indexOf(objEntry) === -1) {
 							selectEntry(objEntry);
 							selected.push(objEntry);
-
-
 						}
 					}
 				}
@@ -935,14 +933,18 @@ angular.module('dokuvis.viewport',[
 			})
 				.then(function (response) {
 					console.log(response);
+					defer.resolve();
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('#Image.setLinksToObjects', reason);
+					defer.reject(reason);
 				});
 
 			setSelected(null, false, true);
 
 			animateAsync();
+
+			return defer.promise;
 		}
 
 
@@ -1901,8 +1903,8 @@ angular.module('dokuvis.viewport',[
 
 		///// SPATIAL IMAGES
 
-		// listen to spatialImageLoad event
-		scope.$on('spatialImageLoad', function (event, images, reset) {
+		// listen to spatialImageLoadStart event
+		scope.$on('spatialImageLoadStart', function (event, images) {
 
 			setSelected(null);
 
@@ -1916,6 +1918,7 @@ angular.module('dokuvis.viewport',[
 			else
 				newImages = [images];
 
+			// look if search results are already part of entries or not
 			newImages.forEach(function (img) {
 				if (!img.spatial) return;
 				var si = spatialImages.getByName(img.spatial.id);
@@ -1928,6 +1931,7 @@ angular.module('dokuvis.viewport',[
 					toBeCreated.push(img);
 			});
 
+			// get all entries that are not part of search results anymore
 			spatialImages.forEach(function (entry) {
 				if (!newImages.find(function (img) {
 					if (!img.spatial) return false;
@@ -1936,6 +1940,7 @@ angular.module('dokuvis.viewport',[
 					toBeRemoved.push(entry);
 			});
 
+			// remove "missing" images
 			toBeRemoved.forEach(function (value) {
 				scene.remove(value.object);
 				octree.remove(value.object.collisionObject);
@@ -1943,14 +1948,26 @@ angular.module('dokuvis.viewport',[
 				value.dispose();
 			});
 
+			// update still existing images
 			toBeUpdated.forEach(function (value) {
 				value.entry.source = value.resource;
 				value.entry.object.userData.source = value.resource;
 			});
 
+			// load spatial images for new results
+			var promises = [];
 			toBeCreated.forEach(function (value) {
-				loadSpatialImage(value);
+				promises.push(loadSpatialImage(value));
 			});
+
+			// broadcast event when all images have been loaded
+			$q.all(promises)
+				.then(function () {
+					$rootScope.$broadcast('spatialImageLoadSuccess');
+				})
+				.catch(function (reason) {
+					Utilities.throwException('Spatial Image Loading Error', 'An error occurred while loading spatial image', reason);
+				});
 
 			updateHeatMap();
 		});

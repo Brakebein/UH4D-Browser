@@ -383,12 +383,22 @@ angular.module('dokuvis.viewport')
 				.then(function (result) {
 					console.log(result);
 					$rootScope.$broadcast('searchUpdate');
-					$ctrl.close();
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('#Source.spatialize', reason);
 				});
 		};
+
+		$scope.$on('spatialImageLoadSuccess' , function () {
+			$scope.$parent.linkToObjects(source)
+				.then(function () {
+					console.log('linkToObjects done');
+					$ctrl.close();
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('#Source.setLinksToObjects', reason);
+				});
+		});
 
 		this.close = function () {
 			$scope.$parent.close();

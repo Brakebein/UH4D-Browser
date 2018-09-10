@@ -47,8 +47,8 @@ angular.module('uh4dApp')
 			$rootScope.$broadcast('modelQuerySuccess', values, keepScene === true);
 		}
 
-		function spatialImageLoad(values) {
-			$rootScope.$broadcast('spatialImageLoad', values, true);
+		function spatialImageLoadStart(values) {
+			$rootScope.$broadcast('spatialImageLoadStart', values);
 		}
 
 		$scope.$on('searchUpdate', function () {
@@ -61,7 +61,7 @@ angular.module('uh4dApp')
 				if (v.spatial)
 					spatials.push(v);
 			});
-			spatialImageLoad(spatials);
+			spatialImageLoadStart(spatials);
 		}
 
 		// populate params filter arrays
