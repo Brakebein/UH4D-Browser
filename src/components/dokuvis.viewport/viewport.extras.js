@@ -766,4 +766,33 @@ angular.module('dokuvis.viewport')
 
 	}]
 
+})
+
+.component('viewportProgressBar', {
+
+	// template: '<div class="border border-light"><uib-progressbar value="$ctrl.percent"><b>{{$ctrl.percent}} %</b></uib-progressbar></div>',
+	template: '<div class="border border-light"><div class="progress"><div class="progress-bar" ng-style="{width: $ctrl.percent+\'%\'}"><b>{{$ctrl.percent}} %</b></div></div></div>',
+
+	controller: ['$scope', '$timeout', function ($scope, $timeout) {
+
+		var $ctrl = this;
+
+		$ctrl.$onInit = function () {
+
+			$ctrl.percent = 0;
+
+		};
+
+		$scope.$on('viewportProgressUpdate', function (event, value, total) {
+
+			$ctrl.percent = Math.min(Math.round(value / total * 100), 100);
+
+			$scope.$applyAsync();
+			if ($ctrl.percent === 100)
+				$timeout($scope.$parent.close, 100);
+
+		});
+
+	}]
+
 });

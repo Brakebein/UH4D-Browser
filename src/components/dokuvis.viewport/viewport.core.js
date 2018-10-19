@@ -37,7 +37,8 @@ angular.module('dokuvis.viewport',[
 
 		var contextMenuElement, contextMenuScope,
 			tooltipElement, tooltipScope,
-			spatializeManualElement , spatializeManualScope;
+			spatializeManualElement, spatializeManualScope,
+			progressBarElement, progressBarScope;
 
 		// constants frustum clipping
 		var NEAR = viewportSettings.defaults.NEAR,
@@ -57,7 +58,7 @@ angular.module('dokuvis.viewport',[
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, vectorField, windMap;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap;
 		var heatMapRadius = 0;
 
 		var isAnimating = false;
@@ -279,6 +280,7 @@ angular.module('dokuvis.viewport',[
 				el = $compile('<viewport-analysis-tools></viewport-analysis-tools>')(elScope);
 				$animate.enter(el, element);
 			}
+
 		};
 
 
@@ -338,6 +340,24 @@ angular.module('dokuvis.viewport',[
 				$animate.leave(tooltipElement);
 				tooltipElement = null;
 				scope.$applyAsync();
+			}
+		}
+
+		function openProgressBar() {
+			progressBarScope = scope.$new(false);
+			progressBarScope.close = closeProgressBar;
+			progressBarElement = $compile('<viewport-progress-bar></viewport-progress-bar>')(progressBarScope);
+			$animate.enter(progressBarElement, element);
+		}
+
+		function closeProgressBar() {
+			if (progressBarScope) {
+				progressBarScope.$destroy();
+				progressBarScope = null;
+			}
+			if (progressBarElement) {
+				$animate.leave(progressBarElement);
+				progressBarElement = null;
 			}
 		}
 
@@ -1755,6 +1775,11 @@ angular.module('dokuvis.viewport',[
 					heatMap.dispose();
 					heatMap = null;
 				}
+				if (objHeatMap && (options.type !== 'objectHeatMap' || !options.visible)) {
+					// scene.remove(objHeatMap);
+					objHeatMap.dispose();
+					objHeatMap = null;
+				}
 				if (vectorField && (options.type !== 'vectorField' || !options.visible)) {
 					scene.remove(vectorField);
 					vectorField.dispose();
@@ -1772,6 +1797,10 @@ angular.module('dokuvis.viewport',[
 						case 'heatMap':
 							heatMap = new DV3D.HeatMap3();
 							scene.add(heatMap);
+							break;
+						case 'objectHeatMap':
+							objHeatMap = new DV3D.ObjectHeatMap(objects.getByName('d1_HJrdAjjfG_Zwinger').object, camera);
+							// objHeatMap = new DV3D.ObjectHeatMap(objects.getByName('d1_HyHLA6jGf_node-schloss_nord').object, camera);
 							break;
 						case 'vectorField':
 							vectorField = new DV3D.VectorField();
@@ -1842,6 +1871,44 @@ angular.module('dokuvis.viewport',[
 				});
 
 				animateAsync();
+			}
+
+			if (objHeatMap) {
+				objHeatMap.computeUVs();
+
+				openProgressBar();
+
+				objHeatMap.computeMap(function (vpCoord, object) {
+					prepareRaycaster(vpCoord);
+					var intersection = raycast([object]);
+					if (!intersection) return 0;
+
+					var point = intersection.point,
+						normal = intersection.face.normal.clone().applyQuaternion(object.quaternion),
+						count = 0;
+
+					spatialImages.forEach(function (img) {
+
+						var normalToImage = img.object.position.clone().sub(point).normalize();
+						var normalImage = new THREE.Vector3(0,0,-1).applyQuaternion(img.object.quaternion);
+
+						if (normal.dot(normalToImage) > 0 && normalToImage.dot(normalImage) < img.object.fov / 180 - 1) {
+							var distance = point.distanceTo(img.object.position);
+							raycaster.set(point.clone().add(normal), normalToImage);
+							var is = raycast([object]);
+
+							if (!is || is.distance > distance)
+								count++;
+						}
+
+					}, true);
+
+					return count;
+				}, function (value, total) {
+					scope.$broadcast('viewportProgressUpdate', value, total);
+				}, function () {
+					animateAsync();
+				});
 			}
 
 			if (vectorField) {

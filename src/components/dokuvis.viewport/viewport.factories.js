@@ -94,30 +94,9 @@ angular.module('dokuvis.viewport')
 				topExponent: { value: 0.6 },
 				bottomExponent: { value: 0.3 }
 			},
-			vertexShader: '\
-					varying vec3 vWorldPosition;\
-					\
-					void main() {\
-						vec4 worldPosition = modelMatrix * vec4(position, 1.0);\
-						vWorldPosition = worldPosition.xyz;\
-						gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\
-					}',
-			fragmentShader: '\
-					uniform vec3 topColor;\
-					uniform vec3 horizonColor;\
-					uniform vec3 bottomColor;\
-					uniform float offset;\
-					uniform float topExponent;\
-					uniform float bottomExponent;\
-					varying vec3 vWorldPosition;\
-					\
-					void main() {\
-						float h = normalize(vWorldPosition + offset).y;\
-						if (h > 0.0)\
-							gl_FragColor = vec4( mix( horizonColor, topColor, max( pow( h, topExponent ), 0.0 ) ), 1.0);\
-						else\
-							gl_FragColor = vec4( mix( horizonColor, bottomColor, max( pow( abs(h), bottomExponent ), 0.0 ) ), 1.0);\
-					}',
+			// language=GLSL
+			vertexShader: 'varying vec3 vWorldPosition;\n\nvoid main() {\n\n\tvec4 worldPosition = modelMatrix * vec4(position, 1.0);\n\tvWorldPosition = worldPosition.xyz;\n\tgl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n\n}',
+			fragmentShader: 'uniform vec3 topColor;\nuniform vec3 horizonColor;\nuniform vec3 bottomColor;\nuniform float offset;\nuniform float topExponent;\nuniform float bottomExponent;\nvarying vec3 vWorldPosition;\n\nvoid main() {\n\n\tfloat h = normalize(vWorldPosition + offset).y;\n\tif (h > 0.0)\n\t\tgl_FragColor = vec4( mix( horizonColor, topColor, max( pow( h, topExponent ), 0.0 ) ), 1.0);\n\telse\n\t\tgl_FragColor = vec4( mix( horizonColor, bottomColor, max( pow( abs(h), bottomExponent ), 0.0 ) ), 1.0);\n\n}',
 			side: THREE.BackSide
 		});
 		scene.add(new THREE.Mesh(skyGeo, skyMat));

@@ -445,4 +445,17 @@ viewport-analysis-tools > .heatmap {
   height: 100%;
   pointer-events: none; }
 
+viewport-progress-bar {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10%;
+  background-color: rgba(51, 51, 51, 0.2);
+  z-index: 80; }
+  viewport-progress-bar .progress-bar {
+    color: white; }
+
 /*# sourceMappingURL=viewport.css.map */
