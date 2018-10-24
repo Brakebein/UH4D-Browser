@@ -1,4 +1,6 @@
-<!--<div class="heatmap"></div>-->
+<!--<div class="heatmap">-->
+	<!--<canvas width="500" height="500"></canvas>-->
+<!--</div>-->
 
 <div class="ctrl-container ctrl-bottom-right">
 	<div>
@@ -19,6 +21,7 @@
 		<div class="row ng-hide" ng-show="$ctrl.analysis.visible">
 			<div class="ctrl-group">
 				<input type="radio" title="Heat Map" value="heatMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Heat Map<br/>
+				<input type="radio" title="Radar Chart" value="radarChart" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Radar Chart<br/>
 				<input type="radio" title="Object Heat Map" value="objectHeatMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/>Object Heat Map<br/>
 				<input type="radio" title="Vector Field" value="vectorField" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Vector Field<br/>
 				<input type="radio" title="Moving Particles" value="windMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Moving Particles <input type="checkbox" title="useWeight" ng-model="$ctrl.analysis.disWeight" ng-change="$ctrl.analysis.changeSetting()"/> disWeight

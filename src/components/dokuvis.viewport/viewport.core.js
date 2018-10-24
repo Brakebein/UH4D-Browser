@@ -58,7 +58,7 @@ angular.module('dokuvis.viewport',[
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart;
 		var heatMapRadius = 0;
 
 		var isAnimating = false;
@@ -1791,6 +1791,11 @@ angular.module('dokuvis.viewport',[
 					windMap = null;
 					stopAnimation();
 				}
+				if (radarChart && (options.type !== 'radarChart' || !options.visible)) {
+					scene.remove(radarChart);
+					radarChart.dispose();
+					radarChart = null;
+				}
 
 				if (options.visible) {
 					switch (options.type) {
@@ -1813,6 +1818,10 @@ angular.module('dokuvis.viewport',[
 							});
 							windMap._useWeight = options.useWeight;
 							scene.add(windMap);
+							break;
+						case 'radarChart':
+							radarChart = new DV3D.RadarChart();
+							scene.add(radarChart);
 							break;
 					}
 
@@ -1868,6 +1877,25 @@ angular.module('dokuvis.viewport',[
 					});
 
 					return count;
+				});
+
+				animateAsync();
+			}
+
+			if (radarChart) {
+				radarChart.update(camera, function (position) {
+					var or = octree.search(position, heatMapRadius);
+					var vecs = [];
+
+					or.forEach(function (r) {
+						if (position.clone().sub(r.position).length() < heatMapRadius)
+							vecs.push(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+					});
+
+					return {
+						normals: vecs,
+						radius: heatMapRadius
+					};
 				});
 
 				animateAsync();
