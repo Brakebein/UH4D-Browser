@@ -330,4 +330,129 @@ angular.module('dokuvis.utils', [
 			});
 		}
 	};
-});
+})
+
+/**
+ * @ngdoc directive
+ * @name resizable
+ * @module dokuvis.utils
+ * @param resizable {boolean}
+ * @param rDirection {string=} resizable at top, bottom, left, or right (=default) side of the div
+ * @param rSizeMin {number=}
+ * @restrict A
+  */
+.directive('resizable', ['$rootScope', '$document', '$timeout', function ($rootScope, $document, $timeout) {
+
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+
+			// init
+			var horizontal = true;
+
+			// object to resize
+			var rObject = element.find('> *').first();
+			rObject.addClass('resize-object');
+
+			// handle
+			var handleTemplate = '<div class="resize-handle"><span></span></div>';
+
+			switch (attrs.rDirection) {
+				case 'top':
+					element.prepend(handleTemplate);
+					element.addClass('resize-top');
+					horizontal = false;
+					break;
+				case 'bottom':
+					element.append(handleTemplate);
+					element.addClass('resize-bottom');
+					horizontal = false;
+					break;
+				case 'left':
+					element.prepend(handleTemplate);
+					element.addClass('resize-left');
+					break;
+				default:
+					element.append(handleTemplate);
+					element.addClass('resize-right');
+			}
+
+			var rHandle = element.find('.resize-handle');
+
+			var offset = 0,
+				initialSize = 0,
+				toggled = false,
+				clickOutdated = true,
+				minSize = (attrs.rSizeMin) ? parseInt(attrs.rSizeMin) : 0;
+
+			rHandle.on('mousedown', function (event) {
+				event.preventDefault();
+
+				if (event.button !== 0) return;
+
+				clickOutdated = false;
+				$timeout(function () {
+					clickOutdated = true;
+				}, 200);
+
+				$document.on('mousemove', onMousemove);
+				$document.on('mouseup', onMouseup);
+
+				if (horizontal) {
+					offset = event.pageX;
+					initialSize = rObject.width() + rHandle.width();
+				}
+				else {
+					offset = event.pageY;
+					initialSize = rObject.height() + rHandle.height();
+				}
+			});
+
+			function onMousemove(event) {
+				if (toggled) return;
+
+				if (horizontal) {
+					var width = initialSize + offset - event.pageX;
+					rObject.css({
+						width: (width < minSize ? minSize : width) + 'px'
+					});
+				}
+				else {
+					var height = initialSize + offset - event.pageY;
+					rObject.css({
+						height: (height < minSize ? minSize : height) + 'px'
+					});
+				}
+			}
+
+			function onMouseup(event) {
+				$document.off('mousemove', onMousemove);
+				$document.off('mouseup', onMouseup);
+
+				if (!clickOutdated && (event.target === rHandle[0] || event.target.parentNode === rHandle[0]))
+					toggle();
+
+				else if (horizontal && offset !== event.pageX || !horizontal && offset !== event.pageY)
+					broadcastEvent();
+			}
+
+			function toggle() {
+				if (toggled) {
+					element.removeClass('resize-toggled');
+					toggled = false;
+				}
+				else {
+					element.addClass('resize-toggled');
+					toggled = true;
+				}
+				broadcastEvent();
+			}
+
+			function broadcastEvent() {
+				$rootScope.$broadcast('resizeLayout');
+			}
+
+		}
+	};
+
+}]);

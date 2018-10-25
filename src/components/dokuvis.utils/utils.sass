@@ -32,3 +32,82 @@ file-drop-area, [file-drop-area]
 			width: 40px
 			height: 40px
 			padding: 10px
+
+
+// resizable
+$rHandleSize: 12px
+
+[resizable]
+	flex: 0 0 $rHandleSize
+	display: flex
+
+	& > .resize-handle
+		position: relative
+		flex: 0 0 $rHandleSize
+		background-color: darken($body-bg, 10%)
+		& > span
+			position: absolute
+			color: $gray-600
+			top: 50%
+			left: 50%
+			transform: translate(-50%,-50%)
+			font-family: FontAwesome
+			&:before
+				position: absolute
+				top: 50%
+				left: 50%
+				transform: translate(-50%,-50%)
+		&:hover
+			background-color: darken($body-bg, 7%)
+			& > span
+				color: $gray-500
+				border-color: $gray-500
+
+	&.resize-left, &.resize-right
+		& > .resize-handle
+			cursor: col-resize
+			& > span
+				width: 6px
+				height: 30px
+				&:not(.fa)
+					border-width: 0 1px
+
+	&.resize-top, &.resize-bottom
+		flex-direction: column
+		& > .resize-handle
+			cursor: row-resize
+			& > span
+				width: 30px
+				height: 6px
+				&:not(.fa)
+					border-width: 1px 0
+
+	&:not(.resize-toggled)
+		& > .resize-handle > span
+			border: solid $gray-600
+			&:hover
+				cursor: pointer
+				border: none
+		&.resize-top > .resize-handle > span:hover:before
+			content: '\f0d7'
+		&.resize-bottom > .resize-handle > span:hover:before
+			content: '\f0d8'
+		&.resize-right > .resize-handle > span:hover:before
+			content: '\f0d9'
+		&.resize-left > .resize-handle > span:hover:before
+			content: '\f0da'
+
+	&.resize-toggled
+		& > .resize-handle
+			cursor: pointer
+		&.resize-top >.resize-handle > span:before
+			content: '\f0d8'
+		&.resize-bottom >.resize-handle > span:before
+			content: '\f0d7'
+		&.resize-right >.resize-handle > span:before
+			content: '\f0da'
+		&.resize-left >.resize-handle > span:before
+			content: '\f0d9'
+
+		& > .resize-object
+			display: none !important

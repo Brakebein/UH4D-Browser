@@ -1,3 +1,4 @@
+@charset "UTF-8";
 file-drop-area, [file-drop-area] {
   display: block; }
   file-drop-area > div, [file-drop-area] > div {
@@ -29,5 +30,71 @@ file-drop-area, [file-drop-area] {
       width: 40px;
       height: 40px;
       padding: 10px; }
+
+[resizable] {
+  flex: 0 0 12px;
+  display: flex; }
+  [resizable] > .resize-handle {
+    position: relative;
+    flex: 0 0 12px;
+    background-color: #19242f; }
+    [resizable] > .resize-handle > span {
+      position: absolute;
+      color: #868e96;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: FontAwesome; }
+      [resizable] > .resize-handle > span:before {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); }
+    [resizable] > .resize-handle:hover {
+      background-color: #1f2c39; }
+      [resizable] > .resize-handle:hover > span {
+        color: #adb5bd;
+        border-color: #adb5bd; }
+  [resizable].resize-left > .resize-handle, [resizable].resize-right > .resize-handle {
+    cursor: col-resize; }
+    [resizable].resize-left > .resize-handle > span, [resizable].resize-right > .resize-handle > span {
+      width: 6px;
+      height: 30px; }
+      [resizable].resize-left > .resize-handle > span:not(.fa), [resizable].resize-right > .resize-handle > span:not(.fa) {
+        border-width: 0 1px; }
+  [resizable].resize-top, [resizable].resize-bottom {
+    flex-direction: column; }
+    [resizable].resize-top > .resize-handle, [resizable].resize-bottom > .resize-handle {
+      cursor: row-resize; }
+      [resizable].resize-top > .resize-handle > span, [resizable].resize-bottom > .resize-handle > span {
+        width: 30px;
+        height: 6px; }
+        [resizable].resize-top > .resize-handle > span:not(.fa), [resizable].resize-bottom > .resize-handle > span:not(.fa) {
+          border-width: 1px 0; }
+  [resizable]:not(.resize-toggled) > .resize-handle > span {
+    border: solid #868e96; }
+    [resizable]:not(.resize-toggled) > .resize-handle > span:hover {
+      cursor: pointer;
+      border: none; }
+  [resizable]:not(.resize-toggled).resize-top > .resize-handle > span:hover:before {
+    content: ""; }
+  [resizable]:not(.resize-toggled).resize-bottom > .resize-handle > span:hover:before {
+    content: ""; }
+  [resizable]:not(.resize-toggled).resize-right > .resize-handle > span:hover:before {
+    content: ""; }
+  [resizable]:not(.resize-toggled).resize-left > .resize-handle > span:hover:before {
+    content: ""; }
+  [resizable].resize-toggled > .resize-handle {
+    cursor: pointer; }
+  [resizable].resize-toggled.resize-top > .resize-handle > span:before {
+    content: ""; }
+  [resizable].resize-toggled.resize-bottom > .resize-handle > span:before {
+    content: ""; }
+  [resizable].resize-toggled.resize-right > .resize-handle > span:before {
+    content: ""; }
+  [resizable].resize-toggled.resize-left > .resize-handle > span:before {
+    content: ""; }
+  [resizable].resize-toggled > .resize-object {
+    display: none !important; }
 
 /*# sourceMappingURL=utils.css.map */

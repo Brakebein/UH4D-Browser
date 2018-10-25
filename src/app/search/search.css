@@ -33,6 +33,9 @@ search {
         cursor: pointer;
         z-index: 100; }
     search > .search-explorer > .search-results {
-      flex: 0 0 600px; }
+      flex: 0 0 12px;
+      display: flex; }
+      search > .search-explorer > .search-results > image-list {
+        width: 600px; }
 
 /*# sourceMappingURL=search.css.map */

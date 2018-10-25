@@ -169,6 +169,7 @@ angular.module('dokuvis.viewport',[
 			windowElement.on('keyup', keyup);
 			windowElement.on('resize', resizeViewport);
 
+			scope.$on('resizeLayout', resizeViewport);
 
 			// octree
 			octree = new THREE.Octree({
