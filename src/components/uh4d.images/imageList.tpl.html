@@ -54,17 +54,26 @@
 	</ul>
 </div>
 
+<!-- controls -->
 <div class="list-ctrls">
-	<div>{{$ctrl.images.length}} results</div>
-	<div class="form-inline">
-		<label class="mr-2">Order by:</label>
-		<select class="form-control form-control-sm" ng-model="$ctrl.listOrderBy.prop">
+	<div class="input-group input-group-sm w-auto">
+		<div class="input-group-prepend">
+		<span class="input-group-text rounded">{{$ctrl.images.length}} results</span>
+		</div>
+	</div>
+	<div class="input-group input-group-sm w-auto">
+		<div class="input-group-prepend">
+			<span class="input-group-text">Order by</span>
+		</div>
+		<select class="form-control" ng-model="$ctrl.listOrderBy.prop">
 			<option value="title">Title</option>
 			<option value="author">Author</option>
 			<option value="date">Date</option>
 		</select>
-		<button class="btn btn-sm" ng-class="{'btn-primary': !$ctrl.listOrderBy.desc, 'btn-secondary': $ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = false"><i class="fa fa-sort-alpha-asc"></i></button>
-		<button class="btn btn-sm" ng-class="{'btn-primary': $ctrl.listOrderBy.desc, 'btn-secondary': !$ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = true"><i class="fa fa-sort-alpha-desc"></i></button>
+		<div class="input-group-append">
+			<button class="btn btn-sm" ng-class="{'btn-primary': !$ctrl.listOrderBy.desc, 'btn-secondary': $ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = false"><i class="fa fa-sort-alpha-asc"></i></button>
+			<button class="btn btn-sm" ng-class="{'btn-primary': $ctrl.listOrderBy.desc, 'btn-secondary': !$ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = true"><i class="fa fa-sort-alpha-desc"></i></button>
+		</div>
 	</div>
 	<div class="btn-group btn-group-sm">
 		<button class="btn btn-sm" ng-class="$ctrl.listMode === 'list' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setListMode('list')"><i class="fa fa-th-list"></i></button>
