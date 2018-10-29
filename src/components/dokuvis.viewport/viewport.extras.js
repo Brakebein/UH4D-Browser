@@ -717,7 +717,7 @@ angular.module('dokuvis.viewport')
 
 	templateUrl: 'components/dokuvis.viewport/viewportAnalysisTools.tpl.html',
 
-	controller: ['$scope', '$debounce', function ($scope, $debounce) {
+	controller: ['$scope', '$element', '$timeout', '$debounce', function ($scope, $element, $timeout, $debounce) {
 
 		var $ctrl = this;
 
@@ -763,6 +763,13 @@ angular.module('dokuvis.viewport')
 		this.toggleDummyCreationMode = function () {
 			$ctrl.dummyCreationMode = $scope.$parent.toggleDummyCreationMode();
 		};
+
+		$scope.$on('viewportHeatMapComplete', function (event, config) {
+			$ctrl.legend = {
+				gradient: config.gradient,
+				domain: [config.scale.min, config.scale.max]
+			};
+		});
 
 	}]
 

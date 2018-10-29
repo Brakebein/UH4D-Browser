@@ -455,4 +455,130 @@ angular.module('dokuvis.utils', [
 		}
 	};
 
-}]);
+}])
+
+.component('legendGradient', {
+
+	template: '<svg></svg>',
+
+	bindings: {
+		domain: '<',
+		gradient: '<',
+		orientation: '@'
+	},
+
+	controller: ['$scope', '$element', '$timeout', function ($scope, $element, $timeout) {
+
+		var $ctrl = this;
+
+		var el, svg,
+			defaultGradient = { 0: '#000', 1: '#fff' },
+			defaultDomain = [0, 100];
+
+		$ctrl.$onInit = function () {
+			el = $element.find('svg');
+			svg = d3.select(el[0]);
+
+			$scope.$watchGroup([
+				function () { return $ctrl.domain; },
+				function () { return $ctrl.gradient; }
+			], function () {
+				$timeout(draw);
+			});
+		};
+
+		function draw() {
+			el.empty();
+
+			// layout dependent css
+			if ($ctrl.orientation === 'left' || $ctrl.orientation === 'right') {
+				el.css('width', '50px');
+				el.css('height', '100%');
+			}
+			else {
+				el.css('width', '100%');
+				el.css('height', '40px');
+			}
+
+			var width = el.width(),
+				height = el.height(),
+				offset = 10,
+				domain = $ctrl.domain || defaultDomain,
+				tickValues = [domain[0], Math.round((domain[1] - domain[0]) / 2 + domain[0]), domain[1]],
+				gradientConfig = $ctrl.gradient || defaultGradient,
+				tmpValues = [];
+
+			// linear gradient
+			for (var key in gradientConfig) {
+				tmpValues.push({ stop: key * 100, color: gradientConfig[key] });
+			}
+			tmpValues.sort(function (a, b) {
+				return a.stop - b.stop;
+			});
+
+			var gradient = svg.append('defs')
+				.append('linearGradient')
+				.attr('id', 'svgGradient')
+				.attr('x1', '0%').attr('y2', '0%');
+			tmpValues.forEach(function (value) {
+				gradient.append('stop')
+					.attr('offset', value.stop + '%')
+					.attr('stop-color', value.color);
+			});
+
+			var scale = d3.scaleLinear()
+				.domain(domain);
+
+			var rect = svg.append('rect'),
+				group = svg.append('g'),
+				axis;
+
+
+			switch ($ctrl.orientation) {
+				case 'left':
+					gradient.attr('x2', '0%').attr('y1', '100%');
+					rect.attr('x', 30)
+						.attr('y', offset)
+						.attr('width', 20)
+						.attr('height', Math.max(height - offset * 2 + 1, 0));
+					scale.range([height - offset * 2, 0]);
+					axis = d3.axisLeft(scale).tickValues(tickValues);
+					group.attr('transform', 'translate(30,' + offset + ')');
+					break;
+				case 'right':
+					gradient.attr('x2', '0%').attr('y1', '100%');
+					rect.attr('y', offset)
+						.attr('width', 20)
+						.attr('height', Math.max(height - offset * 2 + 1, 0));
+					scale.range([height - offset * 2, 0]);
+					axis = d3.axisRight(scale).tickValues(tickValues);
+					group.attr('transform', 'translate(20,' + offset + ')');
+					break;
+				case 'top':
+					gradient.attr('x2', '100%').attr('y1', '0%');
+					rect.attr('x', offset)
+						.attr('y', 20)
+						.attr('width', Math.max(width - offset * 2 + 1, 0))
+						.attr('height', 20);
+					scale.range([0, width - offset * 2]);
+					axis = d3.axisTop(scale).tickValues(tickValues);
+					group.attr('transform', 'translate(' + offset + ',20)');
+					break;
+				default:
+					gradient.attr('x2', '100%').attr('y1', '0%');
+					rect.attr('x', offset)
+						.attr('width', Math.max(width - offset * 2 + 1, 0))
+						.attr('height', 20);
+					scale.range([0, width - offset * 2]);
+					axis = d3.axisBottom(scale).tickValues(tickValues);
+					group.attr('transform', 'translate(' + offset + ',20)');
+			}
+
+			rect.attr('fill', 'url(#svgGradient)');
+
+			group.call(axis);
+		}
+
+	}]
+
+});

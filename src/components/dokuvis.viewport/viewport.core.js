@@ -1840,6 +1840,9 @@ angular.module('dokuvis.viewport',[
 					});
 
 					return count;
+				}, function (config) {
+					console.log(config);
+					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
 				animateAsync();

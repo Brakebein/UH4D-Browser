@@ -41,7 +41,7 @@ DV3D.HeatMap3 = function (container0, canvas0) {
 
 DV3D.HeatMap3.prototype = Object.assign( Object.create(THREE.Mesh.prototype), {
 
-	update: function (camera, callback) {
+	update: function (camera, callback, onComplete) {
 
 		// ground plane and viewing frustum rays
 		var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
@@ -116,6 +116,11 @@ DV3D.HeatMap3.prototype = Object.assign( Object.create(THREE.Mesh.prototype), {
 		});
 
 		this.material.map.needsUpdate = true;
+
+		onComplete({
+			gradient: this._heatmap._config.gradient,
+			scale: { min: 0, max: maxValue }
+		});
 	},
 	
 	dispose: function () {
