@@ -12,6 +12,10 @@
 			</div>
 		</div>
 
+		<div class="row mt-1 ng-hide" ng-show="$ctrl.legend">
+			<legend-gradient class="position-relative" domain="$ctrl.legend.domain" gradient="$ctrl.legend.gradient" orientation="bottom"></legend-gradient>
+		</div>
+
 		<div class="row">
 			<div class="ctrl-group">
 				<input type="checkbox" ng-model="$ctrl.analysis.visible" ng-change="$ctrl.analysis.toggle()"/> Show Visualization of Orientation

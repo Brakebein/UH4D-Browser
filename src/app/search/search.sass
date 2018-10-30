@@ -1,3 +1,5 @@
+@import "../../style/variables"
+
 search
 	position: relative
 	width: 100%
@@ -31,6 +33,7 @@ search
 				left: 0
 				right: 0
 				background-color: rgba(0,0,0,0.5)
+				color: $panelFontColor
 				display: flex
 				flex-direction: column
 				justify-content: center
@@ -39,4 +42,8 @@ search
 				z-index: 100
 
 		& > .search-results
-			flex: 0 0 600px
+			flex: 0 0 12px
+			display: flex
+
+			& > image-list
+				width: 600px // initial width

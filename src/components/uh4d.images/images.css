@@ -12,13 +12,15 @@ image-list {
   image-list > .list-ctrls {
     flex: 0 0 auto;
     display: flex;
-    align-items: baseline; }
+    align-items: baseline;
+    justify-content: space-evenly;
+    flex-wrap: wrap; }
     image-list > .list-ctrls > div {
-      padding: 0 8px; }
+      padding: 0 8px;
+      margin-top: 4px; }
   image-list > .list-selection {
     flex: 0 1 0;
-    padding: 4px 9px;
-    margin-bottom: 4px; }
+    padding: 4px 9px; }
     image-list > .list-selection > ul {
       width: 100%;
       margin: 0; }

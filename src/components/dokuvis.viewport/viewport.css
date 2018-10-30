@@ -204,7 +204,8 @@ viewport-compass {
     width: 16px;
     height: 16px;
     font-size: 12px;
-    background-color: rgba(51, 51, 51, 0.8); }
+    background-color: rgba(51, 51, 51, 0.8);
+    color: #fafafa; }
     viewport-compass > .north:hover {
       color: yellow; }
 
