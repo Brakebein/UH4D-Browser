@@ -4,11 +4,55 @@ DV3D.VectorField = function () {
 
 	this.arrows = null;
 
+	this.config = {
+		depthTest: true,
+		transparent: false,
+		gradient: {
+			//0.0: '#00ff32',
+			// 0.3: '#2b83ba', // blue
+			0.1: '#85dd58', // cyan
+			0.4: '#ffffbf', // green
+			0.7: '#fdae61', // yellow
+			1.0: '#d7191c'  // red
+		}
+	};
+
+	this._palette = this._getColorPalette(this.config);
 };
 
 DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototype), {
 
-	update: function (camera, callback) {
+	_getColorPalette: function(config) {
+		var gradientConfig = config.gradient || config.defaultGradient;
+		var paletteCanvas = document.createElement('canvas');
+		var paletteCtx = paletteCanvas.getContext('2d');
+
+		paletteCanvas.width = 256;
+		paletteCanvas.height = 1;
+
+		var gradient = paletteCtx.createLinearGradient(0, 0, 256, 1);
+		for (var key in gradientConfig) {
+			gradient.addColorStop(key, gradientConfig[key]);
+		}
+
+		paletteCtx.fillStyle = gradient;
+		paletteCtx.fillRect(0, 0, 256, 1);
+
+		return paletteCtx.getImageData(0, 0, 256, 1).data;
+	},
+
+	setConfig: function (config) {
+		Object.assign(this.config, config);
+
+		var scope = this;
+		if (this.arrows)
+			this.arrows.forEach(function (a) {
+				a.object.material.depthTest = scope.config.depthTest;
+				a.object.material.transparent = scope.config.transparent;
+			});
+	},
+
+	update: function (camera, callback, onComplete) {
 		this.dispose();
 
 		// ground plane and viewing frustum rays
@@ -77,26 +121,41 @@ DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		var scope = this;
 
 		this.arrows.forEach(function (value) {
-			var color = new THREE.Color(0xffff00).lerp(new THREE.Color(0x00ff00), value.count / maxCount);
-			var a = new THREE.ArrowHelper(value.direction, value.position, 1, color.getHex(), 0.7, 0.3);
-			a.cone.material.depthTest = false;
-			a.line.material.depthTest = false;
-			a.cone.material.transparent = true;
-			a.line.material.transparent = true;
-			// a.cone.material.opacity = value.count / maxCount;
-			// a.line.material.opacity = value.count / maxCount;
-			a.cone.renderOrder = 1000;
-			a.line.renderOrder = 1000;
-			// a.renderOrder = 1000;
+			var offset = Math.round(value.count / maxCount * 255) * 4,
+				color = 'rgb(' + scope._palette[offset] + ',' + scope._palette[offset + 1] + ',' + scope._palette[offset + 2] + ')';
+
+			var geo = new THREE.CylinderBufferGeometry(0, 0.5, 1, 5, 1),
+				mat = new THREE.MeshBasicMaterial({
+					color: color,
+					depthTest: scope.config.depthTest,
+					transparent: scope.config.transparent
+				}),
+				a = new THREE.Mesh(geo, mat);
+
+			a.position.copy(value.position);
+			var dir = value.direction;
+			if (dir.y > 0.99999)
+				a.quaternion.set(0,0,0,1);
+			else if (dir.y < -0.99999)
+				a.quaternion.set(1,0,0,0);
+			else {
+				var axis = new THREE.Vector3(dir.z, 0, -dir.x).normalize(),
+					radians = Math.acos(dir.y);
+				a.quaternion.setFromAxisAngle(axis, radians);
+			}
 
 			var scale = (1 / resolution) * value.disWeight;// * value.dirWeight * 2;// * ((value.count / maxCount) * 0.75 + 0.25);
-			a.scale.set(scale, scale, scale);
+			a.scale.set(scale * 0.3, scale * 0.7, scale * 0.3);
 
 			scope.add(a);
 			value.object = a;
 		});
 
-		console.log(this.arrows);
+		if (onComplete)
+			onComplete({
+				gradient: this.config.gradient,
+				scale: { min: 0, max: maxCount }
+			});
 	},
 
 	dispose: function () {
@@ -105,10 +164,8 @@ DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		this.arrows.forEach(function (a) {
 			var obj = a.object;
 			scope.remove(obj);
-			obj.cone.geometry.dispose();
-			obj.cone.material.dispose();
-			obj.line.geometry.dispose();
-			obj.line.material.dispose();
+			obj.geometry.dispose();
+			obj.material.dispose();
 		});
 		this.arrows = null;
 	}

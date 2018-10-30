@@ -138,6 +138,7 @@ WindGL.prototype.resize = function resize () {
 };
 
 WindGL.prototype.setColorRamp = function setColorRamp (colors) {
+    this.colorRamp = colors;
     // lookup texture for colorizing the particles according to their speed
     this.colorRampTexture = createTexture(this.gl, this.gl.LINEAR, getColorRamp(colors), 16, 16);
 };

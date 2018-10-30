@@ -729,12 +729,14 @@ angular.module('dokuvis.viewport')
 				radius: 40,
 				disWeight: false,
 				toggle: function () {
+					$ctrl.legend = null;
 					viewportHeatMapUpdate({typeChange: true, overlayChange: true});
 				},
 				toggleOverlay: function () {
 					viewportHeatMapUpdate({overlayChange: true});
 				},
 				changeType: function () {
+					$ctrl.legend = null;
 					viewportHeatMapUpdate({typeChange: true, overlayChange: true});
 				},
 				changeRadius: $debounce(function () {

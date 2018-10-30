@@ -1799,12 +1799,10 @@ angular.module('dokuvis.viewport',[
 					heatMap.material.depthWrite = !options.overlay;
 				}
 				if (vectorField) {
-					vectorField.arrows.forEach(function (a) {
-						a.object.cone.material.depthTest = !options.overlay;
-						a.object.line.material.depthTest = !options.overlay;
-						a.object.cone.material.transparent = options.overlay;
-						a.object.line.material.transparent = options.overlay;
-					})
+					vectorField.setConfig({
+						depthTest: !options.overlay,
+						transparent: options.overlay
+					});
 				}
 				if (windMap) {
 					windMap.material.depthTest = !options.overlay;
@@ -1841,7 +1839,6 @@ angular.module('dokuvis.viewport',[
 
 					return count;
 				}, function (config) {
-					console.log(config);
 					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
@@ -1870,6 +1867,8 @@ angular.module('dokuvis.viewport',[
 						disWeight: 1 - disMin / heatMapRadius,
 						dirWeight: 1 - (disTmp / heatMapRadius) / count
 					};
+				}, function (config) {
+					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
 				animateAsync();
@@ -1897,6 +1896,8 @@ angular.module('dokuvis.viewport',[
 						disWeight: 1 - disMin / heatMapRadius,
 						dirWeight: 1 - (disTmp / heatMapRadius) / count
 					};
+				}, function (config) {
+					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
 				startAnimation();

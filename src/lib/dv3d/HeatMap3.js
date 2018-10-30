@@ -117,10 +117,12 @@ DV3D.HeatMap3.prototype = Object.assign( Object.create(THREE.Mesh.prototype), {
 
 		this.material.map.needsUpdate = true;
 
-		onComplete({
-			gradient: this._heatmap._config.gradient,
-			scale: { min: 0, max: maxValue }
-		});
+		if (onComplete)
+			onComplete({
+				gradient: this._heatmap._config.gradient,
+				scale: { min: 0, max: maxValue }
+			});
+
 	},
 	
 	dispose: function () {

@@ -393,7 +393,7 @@ angular.module('dokuvis.utils', [
 				clickOutdated = false;
 				$timeout(function () {
 					clickOutdated = true;
-				}, 200);
+				}, 200, false);
 
 				$document.on('mousemove', onMousemove);
 				$document.on('mouseup', onMouseup);
