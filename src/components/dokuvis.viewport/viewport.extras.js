@@ -262,14 +262,17 @@ angular.module('dokuvis.viewport')
  */
 .component('viewportLoadProgress', {
 
-	template: '<div class="loadprogress-bar ng-hide" ng-show="$ctrl.visible" ng-style="{ width: $ctrl.progress + \'%\' }"></div>\n<div class="loadprogress-label ng-hide" ng-show="$ctrl.visible">{{ $ctrl.item }} &ndash; {{ $ctrl.loaded }} / {{ $ctrl.total }}</div>',
+	// template: '<div class="loadprogress-bar ng-hide" ng-show="$ctrl.visible" ng-style="{ width: $ctrl.progress + \'%\' }"></div>\n<div class="loadprogress-label ng-hide" ng-show="$ctrl.visible">{{ $ctrl.item }} &ndash; {{ $ctrl.loaded }} / {{ $ctrl.total }}</div>',
+	template: '<div class="border border-light"><div class="progress"><div class="progress-bar" ng-style="{width: $ctrl.progress+\'%\'}"><b>{{$ctrl.progress}} %</b></div></div></div><p>{{ $ctrl.item }} &ndash; {{ $ctrl.loaded }} / {{ $ctrl.total }}</p>',
 
-	controller: ['$scope', function ($scope) {
 
-		var $ctrl = this;
+	controller: ['$scope', '$element', function ($scope, $element) {
+
+		var $ctrl = this,
+			isVisible = false;
 
 		this.$onInit = function () {
-			this.visible = false;
+			$element.hide();
 			this.item = '';
 			this.loaded = 0;
 			this.total = 0;
@@ -278,21 +281,22 @@ angular.module('dokuvis.viewport')
 
 		// listen to viewportLoadProgress event
 		$scope.$on('viewportLoadProgress', function (event, item, loaded, total) {
-			if (!$ctrl.visible) {
-				$ctrl.progress = loaded / total * 100;
-				$ctrl.visible = true;
-				$scope.$apply();
+			if (!isVisible) {
+				$element.show();
+				isVisible = true;
 			}
 
 			$ctrl.item = item;
 			$ctrl.loaded = loaded;
 			$ctrl.total = total;
-			$ctrl.progress = loaded / total * 100;
+			$ctrl.progress = Math.round(loaded / total * 100);
 
 			if ($ctrl.progress === 100) {
-				$ctrl.visible = false;
-				$scope.$applyAsync();
+				$element.hide();
+				isVisible = false;
 			}
+
+			$scope.$applyAsync();
 		});
 
 	}]

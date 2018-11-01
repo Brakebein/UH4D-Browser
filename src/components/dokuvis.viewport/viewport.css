@@ -209,23 +209,20 @@ viewport-compass {
     viewport-compass > .north:hover {
       color: yellow; }
 
-viewport-load-progress > .loadprogress-bar {
+viewport-load-progress {
   position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  height: 5px;
-  background-color: #fc4e2a; }
-viewport-load-progress > .loadprogress-label {
-  position: absolute;
-  left: 10px;
-  bottom: 6px;
-  font-size: 8pt;
-  color: #fafafa; }
-viewport-load-progress > .loadprogress-bar.ng-hide, viewport-load-progress > .loadprogress-label.ng-hide {
-  opacity: 0; }
-viewport-load-progress > .loadprogress-bar.ng-hide-add, viewport-load-progress > .loadprogress-label.ng-hide-add {
-  transition: opacity 2s linear 2s; }
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10%;
+  background-color: rgba(51, 51, 51, 0.2);
+  z-index: 80; }
+  viewport-load-progress .progress-bar {
+    color: white; }
+  viewport-load-progress > p {
+    font-size: 8pt; }
 
 viewport-object-tree > .list-header, viewport-plan-list > .list-header, viewport-image-list > .list-header {
   margin: 20px 0 5px; }
