@@ -59,7 +59,7 @@ module.exports = function (grunt) {
 		// identify build blocks and prepare minification
 		useminPrepare: {
 			options: {
-				root: 'src',
+				root: './',
 				dest: 'dist',
 				flow: {
 					html: {
@@ -71,7 +71,7 @@ module.exports = function (grunt) {
 					}
 				}
 			},
-			html: 'src/index.html'
+			html: 'dist/index.html'
 		},
 
 		// cssmin: {
@@ -124,7 +124,21 @@ module.exports = function (grunt) {
 
 		// correct css url references
 		'string-replace': {
-			dist: {
+			'src-path': {
+				files: {
+					'dist/': 'dist/index.html'
+				},
+				options: {
+					replacements: [{
+						pattern: /<script([^>]+)src="(?!node_modules)([^"]+)"/g,
+						replacement: '<script$1src="src/$2"'
+					}, {
+						pattern: /<link([^>]+)href="(?!node_modules)([^"]+)"/g,
+						replacement: '<link$1href="src/$2"'
+					}]
+				}
+			},
+			'css-fix': {
 				files: {
 					'dist/': 'dist/style/*.css'
 				},
@@ -182,6 +196,7 @@ module.exports = function (grunt) {
 	grunt.registerTask('build', [
 		'clean:dist',
 		'copy:dist',
+		'string-replace:src-path',
 		'htmlmin:dist',
 		'useminPrepare',
 		'concat:generated',
@@ -189,7 +204,7 @@ module.exports = function (grunt) {
 		'uglify:generated',
 		'filerev',
 		'usemin',
-		'string-replace:dist',
+		'string-replace:css-fix',
 		'clean:tmp'
 	]);
 
