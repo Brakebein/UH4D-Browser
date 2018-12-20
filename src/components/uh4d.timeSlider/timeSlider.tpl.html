@@ -1,0 +1,21 @@
+<svg>
+	<defs>
+		<linearGradient id="alphaLinear">
+			<stop offset="0%" stop-color="black"/>
+			<stop offset="5%" stop-color="white"/>
+			<stop offset="95%" stop-color="white"/>
+			<stop offset="100%" stop-color="black"/>
+		</linearGradient>
+		<mask id="alphaMask">
+			<rect x="0" y="0" width="100" height="100" fill="url(#alphaLinear)"/>
+		</mask>
+	</defs>
+</svg>
+
+<div class="time-options">
+	<span>Options</span>
+	<div class="form-check d-flex">
+		<input class="form-check-input" id="checkUndated" type="checkbox" ng-model="$ctrl.includeUndated" ng-change="$ctrl.includeUndatedChanged()"/>
+		<label class="form-check-label" for="checkUndated">Incl. Undated</label>
+	</div>
+</div>

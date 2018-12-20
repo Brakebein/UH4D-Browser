@@ -24,14 +24,14 @@
 
 		<div ng-show="$ctrl.imageList.length">
 			<b>Images</b>
-			<div class="list-entry" ng-repeat="entry in $ctrl.imageList" ng-clamp="1">
+			<div class="list-entry text-truncate" ng-repeat="entry in $ctrl.imageList">
 				<i class="fa fa-picture-o"></i> {{entry.label}}
 			</div>
 		</div>
 
 		<div ng-show="$ctrl.objectList.length">
 			<b>Objects</b>
-			<div class="list-entry" ng-repeat="entry in $ctrl.objectList" ng-clamp="1">
+			<div class="list-entry text-truncate" ng-repeat="entry in $ctrl.objectList">
 				<i class="fa fa-cube"></i> {{entry.label}}
 			</div>
 		</div>

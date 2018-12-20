@@ -1,0 +1,51 @@
+time-slider {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex; }
+  time-slider svg {
+    flex: 1;
+    width: 100%;
+    height: 100%; }
+    time-slider svg rect.background {
+      fill: #000;
+      opacity: 0.8; }
+    time-slider svg rect.track {
+      fill: #8d9dad;
+      pointer-events: none; }
+    time-slider svg g.tick-container {
+      pointer-events: none; }
+    time-slider svg g.tick > line {
+      stroke: #8d9dad;
+      stroke-width: 2px; }
+    time-slider svg g.tick > text {
+      fill: #8d9dad;
+      font-size: 12px; }
+    time-slider svg rect.image-span {
+      fill: #DF691A;
+      opacity: 0.3;
+      cursor: grab; }
+    time-slider svg .from-handle > path, time-slider svg .to-handle > path {
+      fill: none;
+      stroke: #DF691A;
+      stroke-width: 2px; }
+    time-slider svg .from-handle > text, time-slider svg .to-handle > text {
+      fill: #DF691A;
+      font-size: 12px; }
+    time-slider svg .from-handle > rect, time-slider svg .to-handle > rect {
+      fill: transparent;
+      cursor: w-resize; }
+  time-slider .time-options {
+    flex: 0 0 auto;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-left: 2px solid #4E5D6C; }
+    time-slider .time-options > span {
+      display: block;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 10px;
+      opacity: 0.6; }
+    time-slider .time-options > div {
+      margin: 0 0.25rem; }
+
+/*# sourceMappingURL=timeSlider.css.map */

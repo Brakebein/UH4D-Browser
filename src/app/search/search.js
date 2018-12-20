@@ -14,6 +14,9 @@ angular.module('uh4dApp')
 
 			Image.query({
 				query: term || $state.params.query,
+				from: $state.params.from,
+				to: $state.params.to,
+				undated: $state.params.undated,
 				filterObjIncl: $state.params.filterObjIncl,
 				filterObjExcl: $state.params.filterObjExcl
 			}).$promise
@@ -64,6 +67,10 @@ angular.module('uh4dApp')
 			spatialImageLoadStart(spatials);
 		}
 
+		$scope.$on('filterByDate', function (event, from, to, undated) {
+			$state.go('root.search', { from: from, to: to, undated: undated });
+		});
+
 		// populate params filter arrays
 		$scope.$on('filterByObject', function (event, entry, mode) {
 			console.log('filterByObject event', entry, mode);
@@ -107,6 +114,9 @@ angular.module('uh4dApp')
 		// watch for state/url params change and perform search
 		$scope.$watchGroup([
 			function () { return $state.params.query; },
+			function () { return $state.params.from; },
+			function () { return $state.params.to; },
+			function () { return $state.params.undated; },
 			function () { return $state.params.filterObjIncl.length; },
 			function () { return $state.params.filterObjExcl.length; }
 		], function () {

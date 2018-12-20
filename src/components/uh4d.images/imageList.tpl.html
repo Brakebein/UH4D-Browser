@@ -11,7 +11,7 @@
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
-				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
+				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 			</div>
 			<div class="media-flags">
 				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
@@ -35,7 +35,7 @@
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="1" ng-bind="img.title"></div>
-				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
+				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 			</div>
 			<div class="media-flags">
 				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
@@ -68,7 +68,7 @@
 		<select class="form-control" ng-model="$ctrl.listOrderBy.prop">
 			<option value="title">Title</option>
 			<option value="author">Author</option>
-			<option value="date">Date</option>
+			<option value="date.from">Date</option>
 		</select>
 		<div class="input-group-append">
 			<button class="btn btn-sm" ng-class="{'btn-primary': !$ctrl.listOrderBy.desc, 'btn-secondary': $ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = false"><i class="fa fa-sort-alpha-asc"></i></button>
@@ -88,7 +88,7 @@
 			<div class="media-thumb mr-3" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 			<div class="media-body">
 				<div class="media-title" ng-clamp="2" ng-bind="img.title"></div>
-				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
+				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 			</div>
 			<div class="media-flags">
 				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
@@ -106,7 +106,7 @@
 		<div class="card-img-top" ng-style="{'background-image': 'url(data/' + img.file.path + img.file.thumb + ')'}"></div>
 		<div class="card-body">
 			<div ng-clamp="3" ng-bind="img.title"></div>
-			<p class="card-text"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown'}}</i></p>
+			<p class="card-text"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 		</div>
 		<div class="media-flags">
 			<i title="Memorize" class="fa fa-star-o"></i>

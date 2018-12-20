@@ -3,7 +3,8 @@ angular.module('uh4d.images', [
 	'xeditable',
 	'ngTagsInput',
 	'dndLists',
-	'uh4d.actors'
+	'uh4d.actors',
+	'angularMoment'
 ])
 
 .run(['editableOptions', 'editableThemes', function (editableOptions, editableThemes) {
@@ -51,6 +52,10 @@ angular.module('uh4d.images', [
 			deleteDummy: {
 				url: 'api/image/dummy/:id',
 				method: 'DELETE'
+			},
+			getDateExtent: {
+				method: 'GET',
+				url: 'api/image/dateExtent'
 			}
 		});
 
@@ -276,6 +281,8 @@ angular.module('uh4d.images', [
 				$ctrl.image.tags = data.map(function (t) {
 					return t.text;
 				});
+			else if (prop === 'date')
+				$ctrl.image[prop] = { value: data };
 			else
 				$ctrl.image[prop] = data;
 
@@ -506,4 +513,33 @@ angular.module('uh4d.images', [
 		}
 
 	}
-]);
+])
+
+.filter('imageDate', ['moment', function (moment) {
+	return function (input) {
+
+		if (!input.display) return input.value;
+
+		var out;
+
+		switch (input.display) {
+			case 'YYYY/YYYY':
+				out = moment(input.from).format('YYYY') + '/' + moment(input.to).format('YYYY');
+				break;
+			case 'around YYYY':
+				out = 'around ' + moment(input.from).add(5, 'years').format('YYYY');
+				break;
+			case 'before YYYY':
+				out = 'before ' + moment(input.to).format('YYYY');
+				break;
+			case 'after YYYY':
+				out = 'after ' + moment(input.from).format('YYYY');
+				break;
+			default:
+				out = moment(input.from).format(input.display);
+		}
+
+		return out;
+
+	};
+}]);

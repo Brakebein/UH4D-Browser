@@ -1,0 +1,63 @@
+@import "../../style/variables"
+
+time-slider
+	position: absolute
+	width: 100%
+	height: 100%
+	display: flex
+
+	svg
+		flex: 1
+		width: 100%
+		height: 100%
+
+		rect.background
+			fill: #000
+			opacity: 0.8
+
+		rect.track
+			fill: $light
+			pointer-events: none
+
+		g.tick-container
+			pointer-events: none
+
+		g.tick
+			& > line
+				stroke: $light
+				stroke-width: 2px
+			& > text
+				fill: $light
+				font-size: 12px
+
+		rect.image-span
+			fill: $primary
+			opacity: 0.3
+			cursor: grab
+
+		.from-handle, .to-handle
+			& > path
+				fill: none
+				stroke: $primary
+				stroke-width: 2px
+			& > text
+				fill: $primary
+				font-size: 12px
+			& > rect
+				fill: transparent
+				cursor: w-resize
+
+	.time-options
+		flex: 0 0 auto
+		background-color: rgba(#000, 0.8)
+		border-left: 2px solid $secondary
+
+		& > span
+			display: block
+			text-align: center
+			text-transform: uppercase
+			font-size: 10px
+			opacity: 0.6
+
+		& > div
+			margin: 0 0.25rem
