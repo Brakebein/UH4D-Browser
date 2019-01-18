@@ -11,7 +11,8 @@ angular.module('uh4dApp', [
 	'dokuvis.imageViewer',
 
 	'uh4d.images',
-	'uh4d.models'
+	'uh4d.models',
+	'uh4d.timeSlider'
 ])
 
 .config(['$stateProvider', '$urlRouterProvider', '$modalProvider', '$uibModalProvider', '$selectProvider',
@@ -47,10 +48,25 @@ angular.module('uh4dApp', [
 			})
 			.state({
 				name: 'root.search',
-				url: '/search?query&page&filterObjIncl&filterObjExcl',
+				url: '/search?query&from&to&undated&page&filterObjIncl&filterObjExcl',
 				component: 'search',
 				params: {
 					query: {
+						type: 'query',
+						dynamic: true,
+						value: null
+					},
+					from: {
+						type: 'query',
+						dynamic: true,
+						value: null
+					},
+					to: {
+						type: 'query',
+						dynamic: true,
+						value: null
+					},
+					undated: {
 						type: 'query',
 						dynamic: true,
 						value: null

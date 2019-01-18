@@ -3,11 +3,11 @@
 	<div class="captions">
 		<div>
 			<div><b>{{$ctrl.image1.title}}</b></div>
-			<i>{{$ctrl.image1.author || 'unknown'}} - {{$ctrl.image1.date || 'unknown'}}</i>
+			<i>{{$ctrl.image1.author || 'unknown'}} - {{$ctrl.image1.date || 'unknown' | imageDate}}</i>
 		</div>
 		<div>
 			<div><b>{{$ctrl.image2.title}}</b></div>
-			<i>{{$ctrl.image2.author || 'unknown'}} - {{$ctrl.image2.date || 'unknown'}}</i>
+			<i>{{$ctrl.image2.author || 'unknown'}} - {{$ctrl.image2.date || 'unknown' | imageDate}}</i>
 		</div>
 	</div>
 

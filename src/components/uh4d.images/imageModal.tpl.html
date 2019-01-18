@@ -48,11 +48,11 @@
 
 				<div>
 					<strong>Date</strong>
-					<p ng-hide="$root.editableMode">{{$ctrl.image.date || 'unknown'}}</p>
+					<p ng-hide="$root.editableMode">{{$ctrl.image.date || 'unknown' | imageDate}}</p>
 					<p ng-show="$root.editableMode">
-						<span data-editable-text="$ctrl.image.date"
+						<span data-editable-text="$ctrl.image.date.value"
 							  data-e-form="eDateForm"
-							  data-onbeforesave="$ctrl.updateImage('date', $data)">{{$ctrl.image.date || 'unknown'}}</span>
+							  data-onbeforesave="$ctrl.updateImage('date', $data)">{{$ctrl.image.date.value || 'unknown'}}</span>
 						<button class="btn btn-secondary btn-sm" ng-click="eDateForm.$show()" ng-hide="eDateForm.$visible"><i class="fa fa-pencil"></i></button>
 					</p>
 				</div>

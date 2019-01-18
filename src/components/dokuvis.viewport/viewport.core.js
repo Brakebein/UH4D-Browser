@@ -17,6 +17,7 @@ angular.module('dokuvis.viewport',[
  * @restrict E
  * @param navigation {boolean} Enable navigation bar
  * @param compass {boolean} Enable compass for orientation
+ * @param loadProgress {boolean} Enable progress bar while loading objects
  * @param imageControls {boolean} Enable image controls panel
  * @param selectionDisplay {boolean} Enable selection display panel
  * @param analysisTools {boolean} Enable analysis tools panel
@@ -2333,6 +2334,8 @@ angular.module('dokuvis.viewport',[
 		scope.$on('modelQuerySuccess', function (event, entries) {
 			resetScene();
 			ctmloader.manager.reset();
+
+			viewportLoadProgress('init', 0, 1);
 
 			loadHierarchyObjects(entries)
 				.then(function () {
