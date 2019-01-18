@@ -103,25 +103,23 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 			}
 		}
 
-		// chart basic normals
-		var normVecs = [
-			new THREE.Vector2(1,1).normalize(),
-			new THREE.Vector2(1,0),
-			new THREE.Vector2(1,-1).normalize(),
-			new THREE.Vector2(0,-1),
-			new THREE.Vector2(-1,-1).normalize(),
-			new THREE.Vector2(-1,0),
-			new THREE.Vector2(-1,1).normalize(),
-			new THREE.Vector2(0,1)
-		];
+		// parameters
+		var canvasWidth = 200,
+			angleSteps = 16,
+			piAngle = 2 * Math.PI / angleSteps;
 
-		var pi8 = 2 * Math.PI / 8;
-		var canvasWidth = 200;
+		// chart basic normals
+		var normVecs = [];
+		for (var i = 0; i < angleSteps; i++) {
+			normVecs.push(new THREE.Vector2(0, 1).rotateAround(new THREE.Vector2(0,0), -i * 2 * Math.PI / angleSteps));
+		}
 
 		// compute each chart
 		this._charts.forEach(function (value) {
 
-			var acc = [0,0,0,0,0,0,0,0];
+			var acc = normVecs.map(function () {
+				return 0;
+			});
 
 			value.normals.forEach(function (vec3) {
 				var vec2 = new THREE.Vector2(vec3.x, vec3.z).normalize();
@@ -130,12 +128,12 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 				if (vec2.x < 0)
 					angle = angle * -1 + 2 * Math.PI;
 
-				var temp = angle / pi8;
+				var temp = angle / piAngle;
 				var index = Math.floor(temp);
 				var t = temp - index;
 
-				acc[(index - 1) % 8] += t;
-				acc[index % 8] += t;
+				acc[index % angleSteps] += t;
+				acc[(index + 1) % angleSteps] += t;
 			});
 
 			var maxScalar = 0;

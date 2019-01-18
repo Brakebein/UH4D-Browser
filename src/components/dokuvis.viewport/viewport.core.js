@@ -59,7 +59,7 @@ angular.module('dokuvis.viewport',[
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radarChart2;
 		var heatMapRadius = 0;
 
 		var isAnimating = false;
@@ -1798,6 +1798,11 @@ angular.module('dokuvis.viewport',[
 					radarChart.dispose();
 					radarChart = null;
 				}
+				if (radarChart2 && (options.type !== 'radarChart2' || !options.visible)) {
+					scene.remove(radarChart2);
+					radarChart2.dispose();
+					radarChart2 = null;
+				}
 
 				if (options.visible) {
 					switch (options.type) {
@@ -1824,6 +1829,10 @@ angular.module('dokuvis.viewport',[
 						case 'radarChart':
 							radarChart = new DV3D.RadarChart();
 							scene.add(radarChart);
+							break;
+						case 'radarChart2':
+							radarChart2 = new DV3D.RadarChart2();
+							scene.add(radarChart2);
 							break;
 					}
 
@@ -1899,6 +1908,20 @@ angular.module('dokuvis.viewport',[
 						radius: heatMapRadius
 					};
 				});
+
+				animateAsync();
+			}
+
+			if (radarChart2) {
+				var obj = objects.getByName('d1_HJrdAjjfG_Zwinger').object;
+				var center = obj.geometry.boundingBox.getCenter().applyMatrix4(obj.matrixWorld);
+
+				var vecs = [];
+				spatialImages.forEach(function (img) {
+					vecs.push(new THREE.Vector3(0,0,1).applyQuaternion(img.object.quaternion));
+				});
+
+				radarChart2.update(center, vecs);
 
 				animateAsync();
 			}
