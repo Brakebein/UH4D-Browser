@@ -51,7 +51,7 @@ angular.module('dokuvis.viewport',[
 			renderer, scene, controls,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
-			octree,
+			octree, rbushTree,
 			ctmloader, textureLoader;
 
 		// lists
@@ -180,6 +180,8 @@ angular.module('dokuvis.viewport',[
 				//objectsThreshold: 8
 				//undeferred: true
 			});
+
+			rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
 
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
 			// ground.rotation.x = -Math.PI / 2;
@@ -1864,6 +1866,11 @@ angular.module('dokuvis.viewport',[
 			}
 
 			if (options.settingsChange) {
+				if (radarChart2) {
+					radarChart2.setAngleOffset(options.radarChartAngle);
+					if (options.radarChartResolution)
+						radarChart2.setAngleResolution(options.radarChartResolution);
+				}
 				if (windMap) {
 					windMap._useWeight = options.useWeight;
 				}
@@ -2088,6 +2095,11 @@ angular.module('dokuvis.viewport',[
 			$q.all(promises)
 				.then(function () {
 					$rootScope.$broadcast('spatialImageLoadSuccess');
+					console.log(octree);
+					console.log(rbushTree);
+					// addRBushGraph();
+					// $timeout(addOctreeGraph, 500);
+					//buildCluster();
 				})
 				.catch(function (reason) {
 					Utilities.throwException('Spatial Image Loading Error', 'An error occurred while loading spatial image', reason);
@@ -2095,6 +2107,201 @@ angular.module('dokuvis.viewport',[
 
 			updateHeatMap();
 		});
+		
+		function buildCluster() {
+			var siCopy = [],
+				depth = 0;
+
+			var startSec = Date.now();
+
+			spatialImages.forEach(function (entry) {
+				siCopy.push(entry.object);
+			});
+
+			function clusterNearest() {
+
+				var tempDist = siCopy[0].position.distanceTo(siCopy[1].position),
+					a = siCopy[0],
+					b = siCopy[1];
+
+				for (var i = 1, l = siCopy.length; i < l; i++) {
+					for (var j = 0; j < l; j++) {
+						if (i === j) continue;
+
+						var d = siCopy[i].position.distanceTo(siCopy[j].position);
+						if (d < tempDist) {
+							tempDist = d;
+							a = siCopy[i];
+							b = siCopy[j];
+						}
+					}
+				}
+
+				var aCount = a.cluster ? a.count : 1,
+					bCount = b.cluster ? b.count : 1,
+					count = aCount + bCount;
+
+				var cluster = {
+					position: new THREE.Vector3().addVectors(a.position, b.position).divideScalar(2),
+					// position: new THREE.Vector3().addVectors(a.position.clone().multiplyScalar(aCount / count), b.position.clone().multiplyScalar(bCount / count)),
+					children: [a, b],
+					depth: depth,
+					distance: tempDist,
+					cluster: true,
+					count: (a.cluster ? a.count : 1) + (b.cluster ? b.count : 1)
+				};
+
+				siCopy.splice(siCopy.indexOf(a), 1);
+				siCopy.splice(siCopy.indexOf(b), 1);
+				siCopy.push(cluster);
+
+				depth++;
+			}
+
+			while (siCopy.length > 1) {
+				clusterNearest();
+			}
+
+			console.log('Elapsed time', Date.now() - startSec);
+
+			console.log('Cluster Tree', siCopy);
+			addClusterGraph(siCopy[0]);
+		}
+
+		function addClusterGraph(root) {
+
+			var geo = new THREE.Geometry();
+
+			var colorStep = 0.7 / (root.depth - 1);
+
+			function traverseTree(node, parentPos) {
+
+				if (node instanceof DV3D.ImagePane) {
+					geo.vertices.push(parentPos, node.position);
+					var color = new THREE.Color(0xaaaaaa);
+					geo.colors.push(color, color);
+				}
+
+				if (!node.cluster) return;
+
+				if (parentPos) {
+					geo.vertices.push(parentPos, node.position);
+					var color = new THREE.Color().setHSL((node.depth - 1) * colorStep, 1.0, 0.5);
+					geo.colors.push(color, color);
+				}
+
+				node.children.forEach(function (child) {
+					traverseTree(child, node.position);
+				});
+
+			}
+			traverseTree(root, null);
+
+			var line = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, depthWrite: false, depthTest: false}));
+			scene.add(line);
+
+			console.log(line);
+
+			animateAsync();
+
+			addClusterPoints(root, 30);
+		}
+
+		function addClusterPoints(root, threshold) {
+			function traverseTree(node) {
+				if (!node.cluster) return;
+
+				if (node.distance < threshold) {
+					var sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
+					sphere.position.copy(node.position);
+					scene.add(sphere);
+				}
+				else {
+					node.children.forEach(function (child) {
+						traverseTree(child);
+					});
+				}
+			}
+			traverseTree(root);
+
+			animateAsync();
+		}
+
+		function addRBushGraph() {
+
+			var geo = new THREE.Geometry();
+
+			var colorStep = 0.75 / (rbushTree.data.height - 1);
+
+			function traverseTree(node, parentPos) {
+				var pos = new THREE.Vector3((node.minX + node.maxX) / 2, 0, (node.minY + node.maxY) / 2);
+				if (parentPos) {
+					geo.vertices.push(parentPos, pos);
+					var color = new THREE.Color().setHSL((node.height - 1) * colorStep, 1.0, 0.5);
+					geo.colors.push(color, color);
+
+					node.distance = pos.distanceTo(parentPos);
+				}
+
+				if (node.leaf) {
+					// var sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
+					// sphere.position.set((data.minX + data.maxX) / 2, 0, (data.minY + data.maxY) / 2);
+					// scene.add(sphere);
+					return;
+				}
+				else {
+					node.children.forEach(function (child) {
+						traverseTree(child, pos);
+					});
+				}
+			}
+			traverseTree(rbushTree.data, null);
+
+			// var geo = new THREE.Geometry();
+			// geo.vertices.concat(vertices);
+
+			var line = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, depthWrite: false, depthTest: false}));
+			scene.add(line);
+
+			console.log(line);
+
+			animateAsync();
+		}
+
+		function addOctreeGraph() {
+
+			var geo = new THREE.Geometry();
+
+			var colorStep = 0.05;
+
+			function traverseTree(node, parentPos) {
+				var pos = node.position.clone();
+				if (parentPos) {
+					geo.vertices.push(parentPos, pos);
+					var color = new THREE.Color().setHSL(node.depth * colorStep, 1.0, 0.5);
+					geo.colors.push(color, color);
+				}
+
+				for (var i=0; i < node.objects.length; i++) {
+					geo.vertices.push(pos, node.objects[i].position);
+					var color = new THREE.Color(0xaaaaaa);//.setHSL((node.depth + 1) * colorStep, 1.0, 0.5);
+					geo.colors.push(color, color);
+				}
+
+				for (var i=0; i < node.nodesIndices.length; i++) {
+					traverseTree(node.nodesByIndex[node.nodesIndices[i]], pos);
+				}
+			}
+			traverseTree(octree.root, null);
+
+			var line = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, depthWrite: false, depthTest: false}));
+			scene.add(line);
+
+			console.log(line);
+
+			animateAsync();
+
+		}
 
 		/**
 		 * Loads spatialized image into the scene.
@@ -2132,6 +2339,12 @@ angular.module('dokuvis.viewport',[
 			defer.promise.then(function () {
 				octree.add(imagepane.collisionObject);
 				updateOctreeAsync();
+
+				// rbushTree.insert({
+				// 	x: imagepane.position.x,
+				// 	y: imagepane.position.z,
+				// 	image: imagepane
+				// });
 			});
 
 			imagepane.name = img.spatial.id;

@@ -2,6 +2,9 @@ DV3D.RadarChart2 = function () {
 
 	THREE.Object3D.call(this);
 
+	this.angleOffset = 0;
+	this.angleResolution = 16;
+
 	this._chart = null;
 
 	this._palette = this._getColorPalette({
@@ -38,6 +41,14 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		return paletteCtx.getImageData(0, 0, 256, 1).data;
 	},
 
+	setAngleOffset: function (offset) {
+		this.angleOffset = offset;
+	},
+
+	setAngleResolution: function (resolution) {
+		this.angleResolution = resolution;
+	},
+
 	update: function (center, normals) {
 
 		var scope = this;
@@ -45,8 +56,9 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 
 		// parameters
 		var canvasWidth = 500,
-			angleSteps = 16,
+			angleSteps = scope.angleResolution,
 			piAngle = 2 * Math.PI / angleSteps;
+			//angleOffset = piAngle * 1.5;
 
 
 		// set chart position
@@ -55,12 +67,14 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		// chart basic normals
 		var normVecs = [];
 		for (var i = 0; i < angleSteps; i++) {
-			normVecs.push(new THREE.Vector2(0, 1).rotateAround(new THREE.Vector2(0,0), -i * 2 * Math.PI / angleSteps));
+			normVecs.push(new THREE.Vector2(0, 1).rotateAround(new THREE.Vector2(0,0), -i * piAngle + scope.angleOffset));
 		}
 
 		var acc = normVecs.map(function () {
 			return 0;
 		});
+
+		console.log(normals);
 
 		normals.forEach(function (vec3) {
 			var vec2 = new THREE.Vector2(vec3.x, vec3.z).normalize();
@@ -69,7 +83,7 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 			if (vec2.x < 0)
 				angle = angle * -1 + 2 * Math.PI;
 
-			var temp = angle / piAngle;
+			var temp = (angle + scope.angleOffset) / piAngle;
 			var index = Math.floor(temp);
 			var t = temp - index;
 

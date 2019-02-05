@@ -732,6 +732,7 @@ angular.module('dokuvis.viewport')
 				overlay: false,
 				radius: 40,
 				disWeight: false,
+				radarChartAngle: 0,
 				toggle: function () {
 					$ctrl.legend = null;
 					viewportHeatMapUpdate({typeChange: true, overlayChange: true});
@@ -758,9 +759,19 @@ angular.module('dokuvis.viewport')
 				visible: $ctrl.analysis.visible,
 				overlay: $ctrl.analysis.overlay,
 				radius: $ctrl.analysis.radius,
-				useWeight: $ctrl.analysis.disWeight ? 'disWeight': 'countWeight'
+				useWeight: $ctrl.analysis.disWeight ? 'disWeight': 'countWeight',
+				radarChartAngle: $ctrl.analysis.radarChartAngle
 			}));
 		}
+
+		this.incrementRadarChartAngle = function (incr) {
+			$ctrl.analysis.radarChartAngle += incr * Math.PI / 180;
+			viewportHeatMapUpdate({settingsChange: true});
+		};
+
+		this.setRadarChartResolution = function (resolution) {
+			viewportHeatMapUpdate({settingsChange: true, radarChartResolution: resolution});
+		};
 
 		this.linkToObjects = function () {
 			$scope.$parent.linkToObjects();
