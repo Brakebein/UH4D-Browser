@@ -87,7 +87,7 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 			var index = Math.floor(temp);
 			var t = temp - index;
 
-			acc[index % angleSteps] += t;
+			acc[index % angleSteps] += 1.0 - t;
 			acc[(index + 1) % angleSteps] += t;
 		});
 
@@ -97,13 +97,11 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		});
 
 		var sampleVecs = acc.map(function (value, index) {
-			return normVecs[index].clone().setLength(value / maxScalar);
+			// return normVecs[index].clone().setLength(value / maxScalar);
+			return normVecs[index].clone().setLength(value / maxScalar).multiplyScalar(canvasWidth / 2);
 		});
 
 		var origin = new THREE.Vector2(canvasWidth / 2, canvasWidth / 2);
-		sampleVecs.forEach(function (v) {
-			v.multiplyScalar(canvasWidth / 2);//.add(origin);
-		});
 
 		// create canvas material and geometry
 		var canvas = document.createElement('canvas');
@@ -155,6 +153,12 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 			});
 			ctx.stroke();
 			ctx.fill();
+
+			var textPos = new THREE.Vector2(vec.length() - 10,0).rotateAround(new THREE.Vector2(), angle);
+			ctx.fillStyle = 'black';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(acc[index].toFixed(1), textPos.x, textPos.y);
 		});
 
 	},
