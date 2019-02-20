@@ -49,7 +49,7 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		this.angleResolution = resolution;
 	},
 
-	update: function (center, normals) {
+	update: function (camera, center, normals) {
 
 		var scope = this;
 		scope.dispose();
@@ -74,7 +74,7 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 			return 0;
 		});
 
-		console.log(normals);
+		//console.log(normals);
 
 		normals.forEach(function (vec3) {
 			var vec2 = new THREE.Vector2(vec3.x, vec3.z).normalize();
@@ -91,22 +91,29 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 			acc[(index + 1) % angleSteps] += t;
 		});
 
-		var maxScalar = 0;
-		acc.forEach(function (value) {
-			maxScalar = Math.max(value, maxScalar);
+		var maxScalar = 0,
+			maxArea = Math.pow(canvasWidth / 2, 2) * piAngle / Math.PI;
+
+		// gaussian blur values [1 4 6 4 1]
+		acc = acc.map(function (value, index) {
+			var blur = (acc[(index + 2) % acc.length] + acc[(index + 1) % acc.length] * 4 + 6 * value + acc[(index - 1 + acc.length) % acc.length]* 4 + acc[(index - 1 + acc.length) % acc.length]) / 16;
+
+			maxScalar = Math.max(blur, maxScalar);
+
+			return blur;
 		});
 
 		var sampleVecs = acc.map(function (value, index) {
-			// return normVecs[index].clone().setLength(value / maxScalar);
-			return normVecs[index].clone().setLength(value / maxScalar).multiplyScalar(canvasWidth / 2);
+			return normVecs[index].clone().setLength(value / maxScalar);
+			// return normVecs[index].clone().setLength(value / maxScalar).multiplyScalar(canvasWidth / 2);
 		});
 
 		var origin = new THREE.Vector2(canvasWidth / 2, canvasWidth / 2);
 
 		// create canvas material and geometry
 		var canvas = document.createElement('canvas');
-		canvas.setAttribute('width', canvasWidth);
-		canvas.setAttribute('height', canvasWidth);
+		canvas.setAttribute('width', canvasWidth.toString());
+		canvas.setAttribute('height', canvasWidth.toString());
 
 		var geometry = new THREE.PlaneBufferGeometry(150, 150);
 		geometry.rotateX(-Math.PI / 2);
@@ -125,11 +132,11 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 		// draw chart
 		var ctx = canvas.getContext('2d');
 
-		[canvasWidth / 6, canvasWidth / 3, canvasWidth / 2].forEach(function (r) {
-			ctx.beginPath();
-			ctx.arc(origin.x, origin.y, r, 0, 2 * Math.PI);
-			ctx.stroke();
-		});
+		// [canvasWidth / 6, canvasWidth / 3, canvasWidth / 2].forEach(function (r) {
+		// 	ctx.beginPath();
+		// 	ctx.arc(origin.x, origin.y, r, 0, 2 * Math.PI);
+		// 	ctx.stroke();
+		// });
 
 		var arc = d3.arc()
 			.innerRadius(0)
@@ -137,25 +144,32 @@ DV3D.RadarChart2.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 
 		ctx.translate(origin.x, origin.y);
 
+		// important for text orientation
+		var viewAngleOffset = new THREE.Vector2(center.x, center.z).sub(new THREE.Vector2(camera.position.x, camera.position.z)).angle() + Math.PI / 2;
+		ctx.rotate(viewAngleOffset);
+
 		sampleVecs.forEach(function (vec, index) {
 
 			var angle = vec.angle();
 
 			var offset = Math.round(acc[index] / maxScalar * 255) * 4;
 
+			var radius = Math.sqrt(vec.length() * maxArea * Math.PI / piAngle);
+
 			ctx.beginPath();
 			ctx.lineWidth = 1.0;
 			ctx.fillStyle = 'rgba(' + scope._palette[offset] + ',' + scope._palette[offset + 1] + ',' + scope._palette[offset + 2] + ', 0.7)';
 			arc({
-				outerRadius: vec.length(),
-				startAngle: angle - piAngle / 2 + Math.PI / 2,
-				endAngle: angle + piAngle / 2 + Math.PI / 2
+				outerRadius: radius, //vec.length(),
+				startAngle: angle - piAngle / 2 + Math.PI / 2 - viewAngleOffset,
+				endAngle: angle + piAngle / 2 + Math.PI / 2 - viewAngleOffset
 			});
 			ctx.stroke();
 			ctx.fill();
 
-			var textPos = new THREE.Vector2(vec.length() - 10,0).rotateAround(new THREE.Vector2(), angle);
+			var textPos = new THREE.Vector2(radius - 14,0).rotateAround(new THREE.Vector2(), angle - viewAngleOffset);
 			ctx.fillStyle = 'black';
+			ctx.font = '14px sans-serif';
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.fillText(acc[index].toFixed(1), textPos.x, textPos.y);

@@ -1928,7 +1928,7 @@ angular.module('dokuvis.viewport',[
 					vecs.push(new THREE.Vector3(0,0,1).applyQuaternion(img.object.quaternion));
 				});
 
-				radarChart2.update(center, vecs);
+				radarChart2.update(camera, center, vecs);
 
 				animateAsync();
 			}

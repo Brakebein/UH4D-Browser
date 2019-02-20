@@ -132,13 +132,22 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 				var index = Math.floor(temp);
 				var t = temp - index;
 
-				acc[index % angleSteps] += t;
+				acc[index % angleSteps] += 1.0 - t;
 				acc[(index + 1) % angleSteps] += t;
 			});
 
 			var maxScalar = 0;
-			acc.forEach(function (value) {
-				maxScalar = Math.max(value, maxScalar);
+			// acc.forEach(function (value) {
+			// 	maxScalar = Math.max(value, maxScalar);
+			// });
+
+			// gaussian blur values [1 4 6 4 1]
+			acc = acc.map(function (value, index) {
+				var blur = (acc[(index + 2) % acc.length] + acc[(index + 1) % acc.length] * 4 + 6 * value + acc[(index - 1 + acc.length) % acc.length]* 4 + acc[(index - 1 + acc.length) % acc.length]) / 16;
+
+				maxScalar = Math.max(blur, maxScalar);
+
+				return blur;
 			});
 
 			var sampleVecs = acc.map(function (value, index) {
