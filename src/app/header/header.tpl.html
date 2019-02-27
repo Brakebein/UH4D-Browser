@@ -11,22 +11,14 @@
 				<a class="nav-link" href="#" ui-sref="root.home">Home</a>
 			</li>
 			<li class="nav-item" ui-sref-active="active">
-				<a class="nav-link" href="#" ui-sref="root.search">Search</a>
+				<a class="nav-link" href="#" ui-sref="root.search">Explore</a>
 			</li>
-			<!--<li class="nav-item" ui-sref-active="active">
-				<a class="nav-link" href="#" ui-sref="root.help">Help</a>
-			</li>-->
 		</ul>
 
-		<form class="form-inline mx-5 search-bar m">
-			<div class="input-group">
-				<div class="input-group-prepend input-group-">
-					<span class="input-group-text">Search</span>
-				</div>
+		<form class="form-inline mx-5 search-bar m" ng-submit="$ctrl.submitSearch()">
+			<div class="form-group">
 				<input class="form-control" type="search" placeholder="Search..." ng-model="$ctrl.searchTerm">
-				<div class="input-group-append">
-					<button class="btn btn-secondary" ng-click="$ctrl.submitSearch()">Go!</button>
-				</div>
+				<button class="fa fa-search" type="submit"></button>
 			</div>
 		</form>
 
@@ -34,10 +26,13 @@
 			<li class="nav-item" ui-sref-active="active">
 				<a class="nav-link" href="#" ui-sref="root.help">Help</a>
 			</li>
+			<li class="nav-item" ui-sref-active="active">
+				<a class="nav-link" href="#" ui-sref="root.legalnotice">Legal notice / Privacy</a>
+			</li>
 		</ul>
 
 		<span class="navbar-text ml-3">
-			UH4D-Browser v0.6.0
+			v0.6.1
 		</span>
 
 	</div>

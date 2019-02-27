@@ -75,7 +75,7 @@ angular.module('uh4d.images', [
 			$ctrl.listTab = 'selection';
 			$ctrl.listMode = 'list';
 			$ctrl.listOrderBy = {
-				prop: 'title',
+				prop: 'date.from',
 				desc: false
 			};
 			$ctrl.page = 0;

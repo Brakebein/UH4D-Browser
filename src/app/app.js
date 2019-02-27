@@ -148,6 +148,11 @@ angular.module('uh4dApp', [
 				name: 'root.help',
 				url: '/help',
 				templateUrl: 'partials/help.html'
+			})
+			.state({
+				name: 'root.legalnotice',
+				url: '/legalnotice',
+				templateUrl: 'partials/legalnotice.html'
 			});
 
 		// defaults

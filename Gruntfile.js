@@ -172,7 +172,7 @@ module.exports = function (grunt) {
 			},
 			html: {
 				options: {
-					prefix: '>\\s*UH4D-Browser\\s+v'
+					prefix: '>\\s*v'
 				},
 				src: ['src/app/header/header.tpl.html']
 			},
