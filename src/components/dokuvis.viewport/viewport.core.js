@@ -51,7 +51,7 @@ angular.module('dokuvis.viewport',[
 			renderer, scene, controls,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
-			octree, rbushTree,
+			octree, rbushTree, clusterTree,
 			ctmloader, textureLoader;
 
 		// lists
@@ -62,7 +62,8 @@ angular.module('dokuvis.viewport',[
 		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radarChart2;
 		var heatMapRadius = 0;
 
-		var isAnimating = false;
+		var isAnimating = false,
+			isLoading = false;
 
 		// navigation flags
 		var mouseDownCoord = new THREE.Vector2(),
@@ -181,7 +182,9 @@ angular.module('dokuvis.viewport',[
 				//undeferred: true
 			});
 
-			rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
+			// rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
+
+			clusterTree = new DV3D.ClusterTree(scene, octree);
 
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
 			// ground.rotation.x = -Math.PI / 2;
@@ -495,9 +498,11 @@ angular.module('dokuvis.viewport',[
 			}
 			else {
 				// update image resolution
-				spatialImages.forEach(function (img) {
-					img.updateTextureByDistance(camera.position, 30);
-				}, true);
+				// spatialImages.forEach(function (img) {
+				// 	img.updateTextureByDistance(camera.position, 30);
+				// }, true);
+				if (!isLoading)
+					clusterTree.update(camera);
 			}
 
 			if (controls) controls.update();
@@ -2039,6 +2044,8 @@ angular.module('dokuvis.viewport',[
 
 			setSelected(null);
 
+			isLoading = true;
+
 			var toBeCreated = [],
 				toBeUpdated = [],
 				toBeRemoved = [];
@@ -2096,10 +2103,30 @@ angular.module('dokuvis.viewport',[
 				.then(function () {
 					$rootScope.$broadcast('spatialImageLoadSuccess');
 					console.log(octree);
-					console.log(rbushTree);
+					//console.log(rbushTree);
 					// addRBushGraph();
 					// $timeout(addOctreeGraph, 500);
-					//buildCluster();
+					// buildCluster();
+					clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+						return si.object;
+					}));
+					// clusterTree.drawDebugGraph();
+
+					isLoading = false;
+
+					// clusterTree.update(camera);
+
+					// clusterTree.getObjectsByThreshold(50, function (obj) {
+					// 	console.log(obj.count);
+					// 	var sphere;
+					// 	if (obj instanceof DV3D.ClusterObject)
+					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
+					// 	else
+					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(3), new THREE.MeshLambertMaterial({color: 0xff0000}));
+					// 	sphere.position.copy(obj.position);
+					// 	scene.add(sphere);
+					// });
+					animateAsync();
 				})
 				.catch(function (reason) {
 					Utilities.throwException('Spatial Image Loading Error', 'An error occurred while loading spatial image', reason);
@@ -2124,8 +2151,8 @@ angular.module('dokuvis.viewport',[
 					a = siCopy[0],
 					b = siCopy[1];
 
-				for (var i = 1, l = siCopy.length; i < l; i++) {
-					for (var j = 0; j < l; j++) {
+				for (var i = 0, l = siCopy.length; i < l; i++) {
+					for (var j = i + 1; j < l; j++) {
 						if (i === j) continue;
 
 						var d = siCopy[i].position.distanceTo(siCopy[j].position);
@@ -2142,8 +2169,8 @@ angular.module('dokuvis.viewport',[
 					count = aCount + bCount;
 
 				var cluster = {
-					position: new THREE.Vector3().addVectors(a.position, b.position).divideScalar(2),
-					// position: new THREE.Vector3().addVectors(a.position.clone().multiplyScalar(aCount / count), b.position.clone().multiplyScalar(bCount / count)),
+					// position: new THREE.Vector3().addVectors(a.position, b.position).divideScalar(2),
+					position: new THREE.Vector3().addVectors(a.position.clone().multiplyScalar(aCount / count), b.position.clone().multiplyScalar(bCount / count)),
 					children: [a, b],
 					depth: depth,
 					distance: tempDist,
@@ -2334,11 +2361,11 @@ angular.module('dokuvis.viewport',[
 			imagepane.applyMatrix(matrix);
 
 
-			scene.add(imagepane);
+			// scene.add(imagepane);
 
 			defer.promise.then(function () {
-				octree.add(imagepane.collisionObject);
-				updateOctreeAsync();
+				// octree.add(imagepane.collisionObject);
+				// updateOctreeAsync();
 
 				// rbushTree.insert({
 				// 	x: imagepane.position.x,
@@ -2422,9 +2449,9 @@ angular.module('dokuvis.viewport',[
 
 		function exitIsolation() {
 			if (!inIsolationMode) return;
-			spatialImages.forEach(function (item) {
-				item.toggle(true);
-			});
+			// spatialImages.forEach(function (item) {
+			// 	item.toggle(true);
+			// });
 			inIsolationMode = false;
 			scope.$broadcast('viewportIsolationExit');
 		}
@@ -2525,6 +2552,7 @@ angular.module('dokuvis.viewport',[
 
 		// add or remove plan or spatialImage from scene
 		function toggleSourceHandler(event) {
+			console.log(event);
 			var target = event.target;
 			// add
 			if (event.visible) {
