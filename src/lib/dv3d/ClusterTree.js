@@ -88,6 +88,18 @@ DV3D.ClusterTree.prototype = {
 		this.root = null;
 	},
 
+	getActiveClusters: function () {
+		return this._activeClusters.filter(function (value) {
+			return value instanceof DV3D.ClusterObject;
+		});
+	},
+
+	getActiveLeaves: function () {
+		return this._activeClusters.filter(function (value) {
+			return !(value instanceof DV3D.ClusterObject);
+		});
+	},
+
 	getObjectsByThreshold: function (threshold, callback) {
 
 		function traverse(node) {
@@ -140,6 +152,14 @@ DV3D.ClusterTree.prototype = {
 	// 		t(this.root);
 	// },
 
+	getCollisionObjects: function () {
+
+		return this._activeClusters.map(function (c) {
+			return c.collisionObject;
+		});
+
+	},
+
 	update: function (camera) {
 
 		var scope = this;
@@ -148,8 +168,9 @@ DV3D.ClusterTree.prototype = {
 
 		// handle outdated objects
 		scope._activeClusters.forEach(function (c) {
-			if (c instanceof DV3D.ClusterObject)
+			if (c instanceof DV3D.ClusterObject) {
 				c.toggle(false);
+			}
 			else {
 				// remove ImagePane
 				scene.remove(c);
@@ -166,6 +187,7 @@ DV3D.ClusterTree.prototype = {
 
 		scope._activeClusters = scope.getObjectsByDistance(camera.position);
 
+		// activate new objects
 		scope._activeClusters.forEach(function (c) {
 			if (c instanceof DV3D.ClusterObject) {
 				c.toggle(true);
@@ -253,72 +275,91 @@ DV3D.ClusterObject.prototype = {
 
 	toggle: function (visible) {
 
+		// create visible objects
 		if (!this.object) {
-			this.object = new THREE.Object3D();
+			this.object = new THREE.Group();
 			this.object.position.copy(this.position);
 
-			var sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
+			var lineVertices = [],
+				bbox = new THREE.Box3(),
+				images = this.getLeaves(),
+				length = Math.min(images.length, 3),
+				planes = [];
 
-			var lineGeo = new THREE.Geometry(),
-				bbox = new THREE.Box3();
-
-			var images = this.getLeaves();
-			var length = images.length < 3 ? images.length : 3;
 			for (var i = 0; i < length; i++) {
 				var img = images[i];
 
 				var offset = new THREE.Vector3(0.5 * i - 0.5 * (length - 1) / 2, Math.random() * 0.3 - 0.15, 0.2 * i - 0.2 * (length - 1) / 2);
 
-				var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height), new THREE.MeshBasicMaterial({map: img.previewTexture}));
+				var plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(img.width, img.height), new THREE.MeshBasicMaterial({ map: img.previewTexture }));
 				plane.position.copy(offset);
+				plane.name = 'image' + i;
+
 				this.object.add(plane);
+				planes.push(plane);
 
 				bbox.expandByObject(plane);
 
 				var tr = img.vertices['top-right'];
-				lineGeo.vertices.push(
-					new THREE.Vector3(tr.x + offset.x, tr.y + offset.y, offset.z),
-					new THREE.Vector3(-tr.x + offset.x, tr.y + offset.y, offset.z),
-					new THREE.Vector3(-tr.x + offset.x, tr.y + offset.y, offset.z),
-					new THREE.Vector3(-tr.x + offset.x, -tr.y + offset.y, offset.z),
-					new THREE.Vector3(-tr.x + offset.x, -tr.y + offset.y, offset.z),
-					new THREE.Vector3(tr.x + offset.x, -tr.y + offset.y, offset.z),
-					new THREE.Vector3(tr.x + offset.x, -tr.y + offset.y, offset.z),
-					new THREE.Vector3(tr.x + offset.x, tr.y + offset.y, offset.z)
+				lineVertices.push(
+					tr.x + offset.x, tr.y + offset.y, offset.z,
+					-tr.x + offset.x, tr.y + offset.y, offset.z,
+					-tr.x + offset.x, tr.y + offset.y, offset.z,
+					-tr.x + offset.x, -tr.y + offset.y, offset.z,
+					-tr.x + offset.x, -tr.y + offset.y, offset.z,
+					tr.x + offset.x, -tr.y + offset.y, offset.z,
+					tr.x + offset.x, -tr.y + offset.y, offset.z,
+					tr.x + offset.x, tr.y + offset.y, offset.z
 				);
 			}
 
-			var lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({color: 0xff4400}));
+			var lineGeo = new THREE.BufferGeometry();
+			lineGeo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVertices), 3));
+			var line = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({ color: DV3D.Defaults.selectionColor }));
+			line.name = 'lines';
 
 			var bbSize = bbox.getSize(),
 				collisionObj = new THREE.Mesh(new THREE.BoxBufferGeometry(bbSize.x, bbSize.y, bbSize.z), new THREE.MeshBasicMaterial({ visible: false }));
 			bbox.getCenter(collisionObj.position);
+			collisionObj.name = 'collisionObject';
 
 			var text = new THREE.Mesh(new THREE.TextBufferGeometry(this.count.toString(), {
 				font: THREE.DokuVisTray.fonts.HelvetikerBold,
 				size: 0.5,
 				height: 0.02,
 				curveSegments: 6
-			}), new THREE.MeshBasicMaterial({color: 0xffdd00, depthWrite: true, depthTest: true}));
+			}), new THREE.MeshBasicMaterial({ color: 0xffdd00, depthWrite: true, depthTest: true }));
 			text.geometry.center();
 			text.position.z = 0.25;
+			text.name = 'text';
 
 			// this.object.add(sphere);
-			this.object.add(lines);
+			this.object.add(line);
 			this.object.add(collisionObj);
 			this.object.add(text);
+
+			this.object.childMap = {
+				images: planes,
+				line: line,
+				text: text,
+				collisionObject: collisionObj
+			};
 
 			this.collisionObject = collisionObj;
 
 			this.object.scale.set(5, 5, 5);
+
+			this.object.cluster = this;
 		}
 
 		if (visible && !this.active) {
 			scene.add(this.object);
+			octree.add(this.collisionObject);
 			this.active = true;
 		}
 		else {
 			scene.remove(this.object);
+			octree.remove(this.collisionObject);
 			this.active = false;
 		}
 
@@ -369,6 +410,117 @@ DV3D.ClusterObject.prototype = {
 		return tmp.map(function (value) {
 			return value.leaf;
 		});
+	},
+
+	explode: function () {
+		var obj = this.object,
+			lineVertices = [];
+
+		this.getLeaves().forEach(function (leaf) {
+			scene.add(leaf);
+			leaf.entry.visible = true;
+			leaf.highlight();
+
+			// var pos = leaf.position.clone().sub(obj.position);
+			lineVertices = lineVertices.concat(obj.position.toArray()).concat(leaf.position.toArray());
+		});
+
+		if (!obj.childMap['explodeLines']) {
+			var lineGeo = new THREE.BufferGeometry();
+			lineGeo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVertices), 3));
+			var line = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
+				color: 0xaaaaaa,
+				depthTest: false
+			}));
+			line.renderOrder = -2;
+			line.name = 'explodeLines';
+			obj.childMap.explodeLines = line;
+		}
+
+		if (!obj.childMap['bullet']) {
+			var bullet =  new THREE.Mesh(new THREE.SphereBufferGeometry(0.1), new THREE.MeshBasicMaterial({ color: DV3D.Defaults.selectionColor, depthTest: true }));
+			bullet.name = 'bullet';
+			obj.childMap.bullet = bullet;
+		}
+
+		obj.remove(obj.childMap.line);
+		obj.remove(obj.childMap.text);
+		// obj.remove(obj.childMap.collisionObject);
+		obj.childMap.images.forEach(function (img) {
+			obj.remove(img);
+		});
+
+		obj.add(obj.childMap.bullet);
+		scene.add(obj.childMap.explodeLines);
+
+		this.isExploded = true;
+	},
+
+	implode: function () {
+		if (!this.isExploded) return;
+
+		this.getLeaves().forEach(function (leaf) {
+			scene.remove(leaf);
+			leaf.entry.visible = false;
+			leaf.dehighlight();
+		});
+
+		var obj = this.object;
+
+		obj.remove(obj.childMap.bullet);
+		scene.remove(obj.childMap.explodeLines);
+
+		obj.add(obj.childMap.line);
+		obj.add(obj.childMap.text);
+		// obj.remove(obj.childMap.collisionObject);
+		obj.childMap.images.forEach(function (img) {
+			obj.add(img);
+		});
+
+	},
+
+	select: function (bool) {
+		this.object.childMap.images.forEach(function (img) {
+			if (bool) {
+				img.material.color.lerp(new THREE.Color(DV3D.Defaults.selectionColor), 0.3);
+			}
+			else {
+				img.material.color.setHex(0xffffff);
+			}
+		});
+		// if (bool)
+		// 	this.object.children.forEach(function (child) {
+		// 		if (/image\d+/.test(child.name)) {
+		// 			child.material.color.lerp(new THREE.Color(DV3D.Defaults.selectionColor), 0.3);
+		// 		}
+		// 	});
+		// else
+		// 	this.object.children.forEach(function (child) {
+		// 		if (/image\d+/.test(child.name)) {
+		// 			child.material.color.setHex(0xffffff);
+		// 		}
+		// 	});
+	},
+
+	deselect: function () {
+		this.object.children.forEach(function (child) {
+			if (/image\d+/.test(child.name)) {
+				child.material.color.setHex(0xffffff);
+			}
+		});
+	},
+
+	highlight: function (bool) {
+		this.object.childMap.images.forEach(function (img) {
+			if (bool)
+				img.material.color.lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3);
+			else
+				img.material.color.setHex(0xffffff);
+		});
+	},
+
+	unhighlight: function () {
+
 	},
 
 	dispose: function () {

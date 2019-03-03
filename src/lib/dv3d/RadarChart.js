@@ -38,7 +38,8 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 		return paletteCtx.getImageData(0, 0, 256, 1).data;
 	},
 
-	update: function (camera, callback) {
+	// update: function (camera, callback) {
+	update: function (camera, clusters) {
 
 		var scope = this;
 		scope.dispose();
@@ -85,23 +86,38 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 		var maxCount = 0;
 
 		var step = 4 / resolution;
-		for (var iy = 0, ly = dimension.y; iy < ly; iy += step) {
-			for (var ix = 0, lx = dimension.x; ix < lx; ix += step) {
-				var pos = new THREE.Vector3(ix + bbox.min.x, 0, iy + bbox.min.y);
+		// for (var iy = 0, ly = dimension.y; iy < ly; iy += step) {
+		// 	for (var ix = 0, lx = dimension.x; ix < lx; ix += step) {
+		// 		var pos = new THREE.Vector3(ix + bbox.min.x, 0, iy + bbox.min.y);
+		//
+		// 		var result = callback(pos);
+		//
+		// 		if (!result.normals.length) continue;
+		//
+		// 		maxCount = Math.max(maxCount, result.normals.length);
+		//
+		// 		this._charts.push({
+		// 			normals: result.normals,
+		// 			radius: result.radius,
+		// 			position: pos
+		// 		});
+		// 	}
+		// }
+		
+		clusters.forEach(function (c) {
+			var normals = [];
 
-				var result = callback(pos);
+			c.getLeaves().forEach(function (leaf) {
+				normals.push(new THREE.Vector3(0, 0, -1).applyQuaternion(leaf.quaternion));
+			});
 
-				if (!result.normals.length) continue;
+			maxCount = Math.max(maxCount, normals.length);
 
-				maxCount = Math.max(maxCount, result.normals.length);
-
-				this._charts.push({
-					normals: result.normals,
-					radius: result.radius,
-					position: pos
-				});
-			}
-		}
+			scope._charts.push({
+				normals: normals,
+				position: c.position
+			});
+		});
 
 		// parameters
 		var canvasWidth = 200,

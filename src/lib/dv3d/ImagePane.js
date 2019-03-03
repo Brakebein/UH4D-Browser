@@ -59,7 +59,9 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			createPyramid.call(this);
 		if (!this.pyramid.parent !== this)
 			this.add(this.pyramid);
-		this.pyramid.material.color.setHex(DV3D.Defaults.selectionColor);
+		// this.pyramid.material.color.setHex(DV3D.Defaults.selectionColor);
+		this.pyramid.material.opacity = 1.0;
+		this.pyramid.material.transparent = false;
 	},
 
 	/**
@@ -67,7 +69,9 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 	 */
 	deselect: function () {
 		// console.log('deselect');
-		this.pyramid.material.color.setHex(0x0000ff);
+		// this.pyramid.material.color.setHex(0x0000ff);
+		this.pyramid.material.opacity = 0.5;
+		this.pyramid.material.transparent = true;
 		this.remove(this.pyramid);
 	},
 
@@ -264,7 +268,8 @@ function createPyramid() {
 		vertices['bottom-right'], vertices['top-right'],
 		vertices['top-right'], vertices['top-left']
 	);
-	var lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+	// var lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
+	var lineMaterial = new THREE.LineBasicMaterial({ color: DV3D.Defaults.selectionColor, transparent: true, opacity: 0.5 });
 
 	this.pyramid = new THREE.LineSegments( lineGeometry, lineMaterial );
 }
