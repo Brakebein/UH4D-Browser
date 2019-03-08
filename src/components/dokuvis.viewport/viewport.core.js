@@ -184,6 +184,22 @@ angular.module('dokuvis.viewport',[
 			// ground.rotation.x = -Math.PI / 2;
 			// scene.add(ground);
 
+			// plan
+			new THREE.OBJLoader().load('img/plans/citymap_1911_2.obj', function (object) {
+				console.log(object);
+				var map = object.getObjectByName('Citymap_1911');
+				scene.add(map);
+
+				var texture = new THREE.TextureLoader().load('img/plans/citymap_1911_2.jpg');
+				texture.anisotropy = 8;
+				map.material.map = texture;
+				map.material.depthTest = false;
+				map.material.depthWrite = false;
+				map.material.renderOrder = -95;
+			}, function () {}, function (error) {
+				console.error(error);
+			});
+
 			// Gizmo
 			gizmoMove = new DV3D.GizmoMove(10, 2.5, 1.2);
 			gizmoMove.addEventListener('change', animate);
