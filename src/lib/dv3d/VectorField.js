@@ -10,9 +10,14 @@ DV3D.VectorField = function () {
 		gradient: {
 			//0.0: '#00ff32',
 			// 0.3: '#2b83ba', // blue
-			0.1: '#85dd58', // cyan
-			0.4: '#ffffbf', // green
-			0.7: '#fdae61', // yellow
+			// // 0.1: '#85dd58', // cyan
+			// 0.4: '#ffffbf', // green
+			// 0.7: '#fdae61', // yellow
+			// 1.0: '#d7191c'  // red
+			0.3: '#2fadf0', // blue
+			0.5: '#abdda4', // cyan
+			0.7: '#ffffbf', // green
+			0.9: '#fdae61', // yellow
 			1.0: '#d7191c'  // red
 		}
 	};
@@ -53,28 +58,32 @@ DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 	},
 
 	update: function (camera, callback, onComplete) {
+
+		var startTime = Date.now();
+
 		this.dispose();
 
-		// ground plane and viewing frustum rays
-		var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+		// ground plane and maximum distance sphere
+		var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0),
+			maxSphere = new THREE.Sphere(camera.position, Math.max(camera.position.y, 1));
+
+		// distance from camera to ground plane -> determine resolution
+		var midRay = new THREE.Ray(camera.position, new THREE.Vector3(0, 0, 0.5).unproject(camera).sub(camera.position).normalize()),
+			midPoint = midRay.intersectPlane(plane);
+		if (!midPoint)
+			midPoint = midRay.intersectSphere(maxSphere);
+		var distance = new THREE.Vector3().subVectors(midPoint, camera.position).length(),
+			resolution = 50 / distance;
+
+		// console.log('Distance', distance, 'Resolution', resolution);
+
+		// viewing frustum rays
 		var rays = [
 			new THREE.Ray(camera.position, new THREE.Vector3(-1, 1, 0.5).unproject(camera).sub(camera.position).normalize()),
 			new THREE.Ray(camera.position, new THREE.Vector3(-1, -1, 0.5).unproject(camera).sub(camera.position).normalize()),
 			new THREE.Ray(camera.position, new THREE.Vector3(1, -1, 0.5).unproject(camera).sub(camera.position).normalize()),
 			new THREE.Ray(camera.position, new THREE.Vector3(1, 1, 0.5).unproject(camera).sub(camera.position).normalize())
 		];
-
-		var maxSphere = new THREE.Sphere(camera.position, Math.max(camera.position.y, 1));
-
-		// distance from camera to ground plane -> determine resolution
-		var midRay = new THREE.Ray(camera.position, new THREE.Vector3(0, 0, 0.5).unproject(camera).sub(camera.position).normalize());
-		var midPoint = midRay.intersectPlane(plane);
-		if (!midPoint)
-			midPoint = midRay.intersectSphere(maxSphere);
-		var distance = new THREE.Vector3().subVectors(midPoint, camera.position).length();
-		var resolution = 50 / distance;
-
-		console.log('Distance', distance, 'Resolution', resolution);
 
 		// determine bounding box around viewing quadrangle
 		var bbox = new THREE.Box2();
@@ -84,7 +93,6 @@ DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 			var intersection = ray.intersectPlane(plane);
 			if (!intersection)
 				intersection = ray.intersectSphere(maxSphere);
-			//console.log(intersection);
 			bbox.expandByPoint(new THREE.Vector2(intersection.x, intersection.z));
 		});
 
@@ -156,6 +164,8 @@ DV3D.VectorField.prototype = Object.assign( Object.create(THREE.Object3D.prototy
 				gradient: this.config.gradient,
 				scale: { min: 0, max: maxCount }
 			});
+
+		console.log('VectorField - Elapsed time', Date.now() - startTime, 'ms');
 	},
 
 	dispose: function () {

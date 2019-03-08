@@ -60,7 +60,7 @@ angular.module('dokuvis.viewport',[
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radarChart2;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radialFan;
 		var heatMapRadius = 0;
 
 		var isAnimating = false,
@@ -651,7 +651,6 @@ angular.module('dokuvis.viewport',[
 		function selectRay(mouse, ctrlKey) {
 			prepareRaycaster(mouse);
 			var testObjects = getRaycastTestObjects('objects', 'plans', 'spatialImages');
-			console.log(testObjects);
 			// raycast
 			var intersection = raycast(testObjects, true);
 
@@ -968,30 +967,43 @@ angular.module('dokuvis.viewport',[
 		function assignHighlightMat(obj) {
 			var hColor = new THREE.Color(DV3D.Defaults.highlightColor);
 
-			if (Array.isArray(obj.material))
-				obj.material = obj.material.map(function (value) {
-					var mat = value.clone();
-					mat.color.lerp(hColor, 0.3);
-					return mat;
-				});
-			else {
-				obj.material = obj.material.clone();
-				obj.material.color.lerp(hColor, 0.3);
+			switch (viewportSettings.shading) {
+				case 'grey':
+					obj.material = materials['highlightMat'];
+					break;
+				case 'transparent':
+					obj.material = materials['transparentHighlightMat'];
+					break;
+				case 'xray':
+					obj.material = materials['xrayHighlightMat'];
+					break;
+				default:
+					if (Array.isArray(obj.material))
+						obj.material = obj.material.map(function (value) {
+							var mat = value.clone();
+							mat.color.lerp(hColor, 0.3);
+							mat.name += '_highlight';
+							return mat;
+						});
+					else {
+						obj.material = obj.material.clone();
+						obj.material.color.lerp(hColor, 0.3);
+						obj.material.name += '_highlight';
+					}
 			}
 		}
 
 		function rejectHighlightMat(obj) {
 			// be sure not to dispose standard or original material
 			if (obj.material === materials[obj.userData.originalMat] ||
-				viewportCache.standardMaterials.indexOf(obj.material.name) !== -1)
-				return;
-
-			if (Array.isArray(obj.material))
-				obj.material.forEach(function (value) {
-					value.dispose();
-				});
-			else
-				obj.material.dispose();
+				viewportCache.standardMaterials.indexOf(obj.material.name) !== -1) {
+				if (Array.isArray(obj.material))
+					obj.material.forEach(function (value) {
+						value.dispose();
+					});
+				else
+					obj.material.dispose();
+			}
 
 			switch (viewportSettings.shading) {
 				case 'grey':
@@ -999,6 +1011,9 @@ angular.module('dokuvis.viewport',[
 					break;
 				case 'transparent':
 					obj.material = materials['transparentMat'];
+					break;
+				case 'xray':
+					obj.material = materials['xrayMat'];
 					break;
 				default:
 					if (Array.isArray(obj.userData.originalMat))
@@ -1939,16 +1954,17 @@ angular.module('dokuvis.viewport',[
 					radarChart.dispose();
 					radarChart = null;
 				}
-				if (radarChart2 && (options.type !== 'radarChart2' || !options.visible)) {
-					scene.remove(radarChart2);
-					radarChart2.dispose();
-					radarChart2 = null;
+				if (radialFan && (options.type !== 'radialFan' || !options.visible)) {
+					scene.remove(radialFan);
+					radialFan.dispose();
+					radialFan = null;
 				}
 
 				if (options.visible) {
 					switch (options.type) {
 						case 'heatMap':
 							heatMap = new DV3D.HeatMap3();
+							heatMap.setRadius(options.radius);
 							scene.add(heatMap);
 							break;
 						case 'objectHeatMap':
@@ -1971,9 +1987,10 @@ angular.module('dokuvis.viewport',[
 							radarChart = new DV3D.RadarChart();
 							scene.add(radarChart);
 							break;
-						case 'radarChart2':
-							radarChart2 = new DV3D.RadarChart2();
-							scene.add(radarChart2);
+						case 'radialFan':
+							// radialFan = new DV3D.RadarChart2();
+							radialFan = new DV3D.RadialFan();
+							scene.add(radialFan);
 							break;
 					}
 
@@ -2001,14 +2018,16 @@ angular.module('dokuvis.viewport',[
 
 			if (options.radiusChange) {
 				heatMapRadius = options.radius;
+				if (heatMap)
+					heatMap.setRadius(options.radius);
 				updateHeatMap();
 			}
 
 			if (options.settingsChange) {
-				if (radarChart2) {
-					radarChart2.setAngleOffset(options.radarChartAngle);
+				if (radialFan) {
+					radialFan.setAngleOffset(options.radarChartAngle);
 					if (options.radarChartResolution)
-						radarChart2.setAngleResolution(options.radarChartResolution);
+						radialFan.setAngleResolution(options.radarChartResolution);
 				}
 				if (windMap) {
 					windMap._useWeight = options.useWeight;
@@ -2022,17 +2041,9 @@ angular.module('dokuvis.viewport',[
 
 		function updateHeatMap() {
 			if (heatMap) {
-				heatMap.update(camera, function (position) {
-					var or = octree.search(position, heatMapRadius);
-
-					var count = 0;
-					or.forEach(function (r) {
-						if (position.clone().sub(r.position).length() < heatMapRadius)
-							count++;
-					});
-
-					return count;
-				}, function (config) {
+				heatMap.update(camera, spatialImages.get().map(function (entry) {
+					return entry.object;
+				}), function (config) {
 					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
@@ -2040,39 +2051,16 @@ angular.module('dokuvis.viewport',[
 			}
 
 			if (radarChart) {
-				// radarChart.update(camera, function (position) {
-				// 	var or = octree.search(position, heatMapRadius);
-				// 	var vecs = [];
-				//
-				// 	or.forEach(function (r) {
-				// 		if (position.clone().sub(r.position).length() < heatMapRadius)
-				// 			vecs.push(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
-				// 	});
-				//
-				// 	return {
-				// 		normals: vecs,
-				// 		radius: heatMapRadius
-				// 	};
-				// });
-
-				// clusterTree.getActiveClusters().forEach(function (cluster) {
-				// 	var vecs = []
-				// });
 				radarChart.update(camera, clusterTree.getActiveClusters());
 
 				animateAsync();
 			}
 
-			if (radarChart2) {
-				var obj = objects.getByName('d1_HJrdAjjfG_Zwinger').object;
-				var center = obj.geometry.boundingBox.getCenter().applyMatrix4(obj.matrixWorld);
+			if (radialFan) {
+				// var obj = objects.getByName('d1_HJrdAjjfG_Zwinger').object;
+				// var center = obj.geometry.boundingBox.getCenter().applyMatrix4(obj.matrixWorld);
 
-				var vecs = [];
-				spatialImages.forEach(function (img) {
-					vecs.push(new THREE.Vector3(0,0,1).applyQuaternion(img.object.quaternion));
-				});
-
-				radarChart2.update(camera, center, vecs);
+				radialFan.update(camera, clusterTree.getActiveClusters());
 
 				animateAsync();
 			}
@@ -2105,7 +2093,8 @@ angular.module('dokuvis.viewport',[
 								count++;
 						}
 
-					}, true);
+					}, false);
+					// }, true);
 
 					return count;
 				}, function (value, total) {
@@ -2121,10 +2110,25 @@ angular.module('dokuvis.viewport',[
 
 					var count = 0, disTmp = 0, disMin = heatMapRadius;
 					var dir = new THREE.Vector3();
+					var items = [];
+
 					or.forEach(function (r) {
-						var distance = position.clone().sub(r.position).length();
+						if (r.object.parent.cluster) {
+							var c = r.object.parent.cluster;
+							var distance = position.clone().sub(c.position).length();
+							if (distance < heatMapRadius + c.distance)
+								items = items.concat(c.getLeaves());
+						}
+						else
+							items.push(r.object.parent);
+					});
+
+					items.forEach(function (item) {
+						// var distance = position.clone().sub(r.position).length();
+						var distance = position.clone().sub(item.position).length();
 						if (distance < heatMapRadius) {
-							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							// dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(item.quaternion));
 							count++;
 							disTmp += distance;
 							disMin = Math.min(disMin, distance);
@@ -2150,10 +2154,25 @@ angular.module('dokuvis.viewport',[
 
 					var count = 0, disTmp = 0, disMin = heatMapRadius;
 					var dir = new THREE.Vector3();
+
+					var items = [];
 					or.forEach(function (r) {
-						var distance = position.clone().sub(r.position).length();
+						if (r.object.parent.cluster) {
+							var c = r.object.parent.cluster;
+							var distance = position.clone().sub(c.position).length();
+							if (distance < heatMapRadius + c.distance)
+								items = items.concat(c.getLeaves());
+						}
+						else
+							items.push(r.object.parent);
+					});
+
+					items.forEach(function (item) {
+						// var distance = position.clone().sub(r.position).length();
+						var distance = position.clone().sub(item.position).length();
 						if (distance < heatMapRadius) {
-							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							// dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(item.quaternion));
 							count++;
 							disTmp += distance;
 							disMin = Math.min(disMin, distance);
@@ -2217,10 +2236,12 @@ angular.module('dokuvis.viewport',[
 					toBeRemoved.push(entry);
 			});
 
+			clusterTree.clean();
+
 			// remove "missing" images
 			toBeRemoved.forEach(function (value) {
-				scene.remove(value.object);
-				octree.remove(value.object.collisionObject);
+				// scene.remove(value.object);
+				// octree.remove(value.object.collisionObject);
 				spatialImages.remove(value);
 				value.dispose();
 			});
@@ -2340,6 +2361,7 @@ angular.module('dokuvis.viewport',[
 		 * @param obj {DV3D.ImagePane} ImagePane object
 		 */
 		function setImageView(obj) {
+			// TODO: update considering clusterTree
 			exitIsolation();
 			enterIsolation(obj, false);
 

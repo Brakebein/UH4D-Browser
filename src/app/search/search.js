@@ -80,26 +80,29 @@ angular.module('uh4dApp')
 
 			var somethingChanged = false;
 
+			// TODO: uniform id/name
+			var id = entry instanceof DV3D.ObjectEntry ? entry.name : entry.id;
+
 			switch (mode) {
 				case 'include':
-					if (includes.indexOf(entry.name) === -1) {
-						includes.push(entry.name);
+					if (includes.indexOf(id) === -1) {
+						includes.push(id);
 						somethingChanged = true;
 					}
 					break;
 				case 'exclude':
-					if (excludes.indexOf(entry.name) === -1) {
-						excludes.push(entry.name);
+					if (excludes.indexOf(id) === -1) {
+						excludes.push(id);
 						somethingChanged = true;
 					}
 					break;
 				default:
-					var index = includes.indexOf(entry.name);
+					var index = includes.indexOf(id);
 					if (index !== -1) {
 						includes.splice(index, 1);
 						somethingChanged = true;
 					}
-					index = excludes.indexOf(entry.name);
+					index = excludes.indexOf(id);
 					if (index !== -1) {
 						excludes.splice(index, 1);
 						somethingChanged = true;

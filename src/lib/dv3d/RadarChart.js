@@ -41,70 +41,24 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 	// update: function (camera, callback) {
 	update: function (camera, clusters) {
 
+		var startTime = Date.now();
+
 		var scope = this;
 		scope.dispose();
 
-		// ground plane and viewing frustum rays
-		var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
-		var rays = [
-			new THREE.Ray(camera.position, new THREE.Vector3(-1, 1, 0.5).unproject(camera).sub(camera.position).normalize()),
-			new THREE.Ray(camera.position, new THREE.Vector3(-1, -1, 0.5).unproject(camera).sub(camera.position).normalize()),
-			new THREE.Ray(camera.position, new THREE.Vector3(1, -1, 0.5).unproject(camera).sub(camera.position).normalize()),
-			new THREE.Ray(camera.position, new THREE.Vector3(1, 1, 0.5).unproject(camera).sub(camera.position).normalize())
-		];
+		// camera frustum
+		var frustum = new THREE.Frustum();
+		frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
 
-		var maxSphere = new THREE.Sphere(camera.position, Math.max(camera.position.y, 1));
-
-		// distance from camera to ground plane -> determine resolution
-		var midRay = new THREE.Ray(camera.position, new THREE.Vector3(0, 0, 0.5).unproject(camera).sub(camera.position).normalize());
-		var midPoint = midRay.intersectPlane(plane);
-		if (!midPoint)
-			midPoint = midRay.intersectSphere(maxSphere);
-		var distance = new THREE.Vector3().subVectors(midPoint, camera.position).length();
-		var resolution = 50 / distance;
-
-		console.log('Distance', distance, 'Resolution', resolution);
-
-		// determine bounding box around viewing quadrangle
-		var bbox = new THREE.Box2();
-		maxSphere.radius = distance * 1.5;
-
-		rays.forEach(function (ray) {
-			var intersection = ray.intersectPlane(plane);
-			if (!intersection)
-				intersection = ray.intersectSphere(maxSphere);
-			//console.log(intersection);
-			bbox.expandByPoint(new THREE.Vector2(intersection.x, intersection.z));
-		});
-
-		// set heat map dimensions
-		var dimension = new THREE.Vector2(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y);
-
-
-		// get data at each grid point
+		// get data for each cluster
 		this._charts = [];
-		var maxCount = 0;
-
-		var step = 4 / resolution;
-		// for (var iy = 0, ly = dimension.y; iy < ly; iy += step) {
-		// 	for (var ix = 0, lx = dimension.x; ix < lx; ix += step) {
-		// 		var pos = new THREE.Vector3(ix + bbox.min.x, 0, iy + bbox.min.y);
-		//
-		// 		var result = callback(pos);
-		//
-		// 		if (!result.normals.length) continue;
-		//
-		// 		maxCount = Math.max(maxCount, result.normals.length);
-		//
-		// 		this._charts.push({
-		// 			normals: result.normals,
-		// 			radius: result.radius,
-		// 			position: pos
-		// 		});
-		// 	}
-		// }
+		var maxCount = 0,
+			minDistance = 1000;
 		
 		clusters.forEach(function (c) {
+			if (!frustum.containsPoint(c.position))
+				return;
+
 			var normals = [];
 
 			c.getLeaves().forEach(function (leaf) {
@@ -112,11 +66,16 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 			});
 
 			maxCount = Math.max(maxCount, normals.length);
+			if (c.parent)
+				minDistance = Math.min(minDistance, c.parent.distance);
 
 			scope._charts.push({
 				normals: normals,
-				position: c.position
+				position: c.position,
+				cluster: c
 			});
+
+			c.explode();
 		});
 
 		// parameters
@@ -153,9 +112,6 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 			});
 
 			var maxScalar = 0;
-			// acc.forEach(function (value) {
-			// 	maxScalar = Math.max(value, maxScalar);
-			// });
 
 			// gaussian blur values [1 4 6 4 1]
 			acc = acc.map(function (value, index) {
@@ -180,7 +136,7 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 			canvas.setAttribute('width', canvasWidth);
 			canvas.setAttribute('height', canvasWidth);
 
-			var geometry = new THREE.PlaneBufferGeometry(Math.round(step * 1.2), Math.round(step * 1.2));
+			var geometry = new THREE.PlaneBufferGeometry(Math.round(minDistance * 1.2), Math.round(minDistance * 1.2));
 			geometry.rotateX(-Math.PI / 2);
 
 			var material = new THREE.MeshBasicMaterial({
@@ -226,12 +182,15 @@ DV3D.RadarChart.prototype = Object.assign( Object.create(THREE.Object3D.prototyp
 
 		});
 
+		console.log('RadarChart - Elapsed time', Date.now() - startTime, 'ms');
+
 	},
 
 	dispose: function () {
 		var scope = this;
 		if (!this._charts) return;
 		this._charts.forEach(function (c) {
+			c.cluster.implode();
 			var obj = c.object;
 			scope.remove(obj);
 			obj.geometry.dispose();

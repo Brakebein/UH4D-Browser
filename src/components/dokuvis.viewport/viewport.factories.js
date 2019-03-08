@@ -162,10 +162,10 @@ angular.module('dokuvis.viewport')
 		// highlight mat
 		materials['highlightMat'] = new THREE.MeshLambertMaterial({
 			name: 'highlightMat',
-			color: 0xffff44 });
+			color: new THREE.Color().lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3).getHex() });
 		materials['transparentHighlightMat'] = new THREE.MeshLambertMaterial({
 			name: 'transparentHighlightMat',
-			color: 0xffff44,
+			color: new THREE.Color().lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3).getHex(),
 			transparent: true,
 			opacity: 0.5 });
 
@@ -194,6 +194,19 @@ angular.module('dokuvis.viewport')
 				"edgefalloff": {type: "f", value: 0.3 },
 				"intensity": {type: "f", value: 1.5},
 				"vColor": {type: "c" , value: new THREE.Color(DV3D.Defaults.selectionColor) } },
+			vertexShader: THREE.XRayShader.vertexShader,
+			fragmentShader: THREE.XRayShader.fragmentShader });
+		materials['xrayHighlightMat'] = new THREE.ShaderMaterial({
+			name: 'xrayHighlightMat',
+			side: THREE.DoubleSide,
+			transparent: true,
+			depthWrite: false,
+			depthTest: false,
+			uniforms: {
+				"ambient": { type: "f", value: 0.05 },
+				"edgefalloff": {type: "f", value: 0.3 },
+				"intensity": {type: "f", value: 1.5},
+				"vColor": {type: "c" , value: new THREE.Color(DV3D.Defaults.highlightColor) } },
 			vertexShader: THREE.XRayShader.vertexShader,
 			fragmentShader: THREE.XRayShader.fragmentShader });
 

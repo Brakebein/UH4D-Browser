@@ -6,12 +6,15 @@ var scene = undefined,
 DV3D.ClusterTree = function (sceneParam, octreeParam) {
 
 	this.root = null;
-	this._scene = scene = sceneParam;
-	this._octree = octree = octreeParam;
+
+	scene = sceneParam;
+	octree = octreeParam;
 
 	this._activeClusters = [];
 
 };
+
+// TODO: clean code
 
 DV3D.ClusterTree.prototype = {
 
@@ -62,8 +65,8 @@ DV3D.ClusterTree.prototype = {
 
 		this.root = tmp[0];
 
-		console.log('Elapsed time', Date.now() - startTime);
-		console.log('Cluster Tree', this.root);
+		console.log('ClusterTree - Build Elapsed time', Date.now() - startTime, 'ms');
+		console.log('ClusterTree - root', this.root);
 
 	},
 
@@ -78,6 +81,8 @@ DV3D.ClusterTree.prototype = {
 				c.entry.visible = false;
 			}
 		});
+
+		this._activeClusters = [];
 
 		if (!this.root) return;
 
@@ -234,7 +239,7 @@ DV3D.ClusterTree.prototype = {
 
 		this._debugGraph = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({vertexColors: THREE.VertexColors, depthWrite: false, depthTest: false}));
 
-		this._scene.add(this._debugGraph);
+		scene.add(this._debugGraph);
 
 	}
 
@@ -261,13 +266,15 @@ DV3D.ClusterObject = function (children, depth, distance) {
 	scope.depth = depth || 0;
 	scope.distance = distance || children[0].position.distanceTo(children[1].position);
 
-	scope.object = undefined;
-
 	scope.parent = undefined;
 
 	scope.position = children.reduce(function (vector, obj) {
 		return vector.add(obj.position.clone().multiplyScalar((obj instanceof DV3D.ClusterObject ? obj.count : 1) / scope.count));
 	}, new THREE.Vector3());
+
+	scope.objectMap = {};
+	scope.object = new THREE.Group();
+	this.object.position.copy(this.position);
 
 };
 
@@ -276,9 +283,7 @@ DV3D.ClusterObject.prototype = {
 	toggle: function (visible) {
 
 		// create visible objects
-		if (!this.object) {
-			this.object = new THREE.Group();
-			this.object.position.copy(this.position);
+		if (!this.objectMap.images) {
 
 			var lineVertices = [],
 				bbox = new THREE.Box3(),
@@ -338,12 +343,12 @@ DV3D.ClusterObject.prototype = {
 			this.object.add(collisionObj);
 			this.object.add(text);
 
-			this.object.childMap = {
+			Object.assign(this.objectMap, {
 				images: planes,
 				line: line,
 				text: text,
 				collisionObject: collisionObj
-			};
+			});
 
 			this.collisionObject = collisionObj;
 
@@ -413,45 +418,65 @@ DV3D.ClusterObject.prototype = {
 	},
 
 	explode: function () {
-		var obj = this.object,
-			lineVertices = [];
+		var scope = this,
+			obj = this.object,
+			lineVertices = [],
+			showLines = obj.parent instanceof THREE.Scene;
+
+		// this.traverse(function (child) {
+		// 	if (child.active) {
+		// 		child.toggle(false);
+		// 		return false;
+		// 	}
+		// });
 
 		this.getLeaves().forEach(function (leaf) {
-			scene.add(leaf);
-			leaf.entry.visible = true;
-			leaf.highlight();
-
+			if (!(leaf.parent instanceof THREE.Scene)) {
+				scene.add(leaf);
+				leaf.entry.visible = true;
+				leaf.highlight(0xaaaaaa);
+				// leaf.highlight(new THREE.Color(0xaaaaaa).lerp(new THREE.Color(DV3D.Defaults.selectionColor), 0.5).getHex());
+			}
 			// var pos = leaf.position.clone().sub(obj.position);
-			lineVertices = lineVertices.concat(obj.position.toArray()).concat(leaf.position.toArray());
+			if (showLines)
+				lineVertices = lineVertices.concat(scope.position.toArray()).concat(leaf.position.toArray());
 		});
 
-		if (!obj.childMap['explodeLines']) {
+		if (showLines && !this.objectMap['explodeLines']) {
 			var lineGeo = new THREE.BufferGeometry();
 			lineGeo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVertices), 3));
 			var line = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
 				color: 0xaaaaaa,
-				depthTest: false
+				transparent: true,
+				opacity: 0.5,
+				depthTest: true,
+				depthWrite: true
 			}));
 			line.renderOrder = -2;
 			line.name = 'explodeLines';
-			obj.childMap.explodeLines = line;
+			this.objectMap.explodeLines = line;
 		}
 
-		if (!obj.childMap['bullet']) {
+		if (showLines && !this.objectMap['bullet']) {
 			var bullet =  new THREE.Mesh(new THREE.SphereBufferGeometry(0.1), new THREE.MeshBasicMaterial({ color: DV3D.Defaults.selectionColor, depthTest: true }));
 			bullet.name = 'bullet';
-			obj.childMap.bullet = bullet;
+			this.objectMap.bullet = bullet;
 		}
 
-		obj.remove(obj.childMap.line);
-		obj.remove(obj.childMap.text);
+		if (this.objectMap.line)
+			obj.remove(this.objectMap.line);
+		if (this.objectMap.text)
+			obj.remove(this.objectMap.text);
 		// obj.remove(obj.childMap.collisionObject);
-		obj.childMap.images.forEach(function (img) {
-			obj.remove(img);
-		});
+		if (this.objectMap.images)
+			this.objectMap.images.forEach(function (img) {
+				obj.remove(img);
+			});
 
-		obj.add(obj.childMap.bullet);
-		scene.add(obj.childMap.explodeLines);
+		if (showLines && this.objectMap.bullet)
+			obj.add(this.objectMap.bullet);
+		if (showLines && this.objectMap.explodeLines)
+			scene.add(this.objectMap.explodeLines);
 
 		this.isExploded = true;
 	},
@@ -467,20 +492,20 @@ DV3D.ClusterObject.prototype = {
 
 		var obj = this.object;
 
-		obj.remove(obj.childMap.bullet);
-		scene.remove(obj.childMap.explodeLines);
+		obj.remove(this.objectMap.bullet);
+		scene.remove(this.objectMap.explodeLines);
 
-		obj.add(obj.childMap.line);
-		obj.add(obj.childMap.text);
+		obj.add(this.objectMap.line);
+		obj.add(this.objectMap.text);
 		// obj.remove(obj.childMap.collisionObject);
-		obj.childMap.images.forEach(function (img) {
+		this.objectMap.images.forEach(function (img) {
 			obj.add(img);
 		});
 
 	},
 
 	select: function (bool) {
-		this.object.childMap.images.forEach(function (img) {
+		this.objectMap.images.forEach(function (img) {
 			if (bool) {
 				img.material.color.lerp(new THREE.Color(DV3D.Defaults.selectionColor), 0.3);
 			}
@@ -511,7 +536,7 @@ DV3D.ClusterObject.prototype = {
 	},
 
 	highlight: function (bool) {
-		this.object.childMap.images.forEach(function (img) {
+		this.objectMap.images.forEach(function (img) {
 			if (bool)
 				img.material.color.lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3);
 			else

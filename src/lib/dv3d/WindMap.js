@@ -36,26 +36,29 @@ DV3D.WindMap.prototype = Object.assign( Object.create(THREE.Mesh.prototype), {
 
 	update: function (camera, callback, onComplete) {
 
-		// ground plane and viewing frustum rays
-		var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+		var startTime = Date.now();
+
+		// ground plane and maximum distance sphere
+		var plane = new THREE.Plane(new THREE.Vector3(0,1,0), 0),
+			maxSphere = new THREE.Sphere(camera.position, Math.max(camera.position.y, 1));
+
+		// distance from camera to ground plane -> determine resolution
+		var midRay = new THREE.Ray(camera.position, new THREE.Vector3(0, 0, 0.5).unproject(camera).sub(camera.position).normalize()),
+			midPoint = midRay.intersectPlane(plane);
+		if (!midPoint)
+			midPoint = midRay.intersectSphere(maxSphere);
+		var distance = new THREE.Vector3().subVectors(midPoint, camera.position).length(),
+			resolution = 200 / distance;
+
+		// console.log('Distance', distance, 'Resolution', resolution);
+
+		// viewing frustum rays
 		var rays = [
 			new THREE.Ray(camera.position, new THREE.Vector3(-1, 1, 0.5).unproject(camera).sub(camera.position).normalize()),
 			new THREE.Ray(camera.position, new THREE.Vector3(-1, -1, 0.5).unproject(camera).sub(camera.position).normalize()),
 			new THREE.Ray(camera.position, new THREE.Vector3(1, -1, 0.5).unproject(camera).sub(camera.position).normalize()),
 			new THREE.Ray(camera.position, new THREE.Vector3(1, 1, 0.5).unproject(camera).sub(camera.position).normalize())
 		];
-
-		var maxSphere = new THREE.Sphere(camera.position, Math.max(camera.position.y, 1));
-
-		// distance from camera to ground plane -> determine resolution
-		var midRay = new THREE.Ray(camera.position, new THREE.Vector3(0, 0, 0.5).unproject(camera).sub(camera.position).normalize());
-		var midPoint = midRay.intersectPlane(plane);
-		if (!midPoint)
-			midPoint = midRay.intersectSphere(maxSphere);
-		var distance = new THREE.Vector3().subVectors(midPoint, camera.position).length();
-		var resolution = 200 / distance;
-
-		console.log('Distance', distance, 'Resolution', resolution);
 
 		// determine bounding box around viewing quadrangle
 		var bbox = new THREE.Box2();
@@ -69,11 +72,11 @@ DV3D.WindMap.prototype = Object.assign( Object.create(THREE.Mesh.prototype), {
 		});
 
 		// set dimensions
-		var dimension = new THREE.Vector2(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y);
-		var width = Math.ceil(dimension.x * resolution);
-		var height = Math.ceil(dimension.y * resolution);
+		var dimension = new THREE.Vector2(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y),
+			width = Math.ceil(dimension.x * resolution),
+			height = Math.ceil(dimension.y * resolution);
 
-		console.log(width, height);
+		// console.log(width, height);
 
 		// set new plane geometry
 		var geometry = new THREE.PlaneBufferGeometry(dimension.x, dimension.y);
@@ -164,6 +167,7 @@ DV3D.WindMap.prototype = Object.assign( Object.create(THREE.Mesh.prototype), {
 				scale: { min: 0, max: maxCount }
 			});
 
+		console.log('WindMap - Elapsed time', Date.now() - startTime, 'ms');
 	},
 
 	draw: function () {

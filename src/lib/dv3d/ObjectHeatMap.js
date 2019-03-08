@@ -70,7 +70,7 @@ DV3D.ObjectHeatMap.prototype = {
 
 		var startTime = Date.now();
 
-		console.log('start callback');
+		// console.log('start callback');
 
 		// for (var iy = 0; iy < resHeight; iy++) {
 		//
@@ -127,7 +127,7 @@ DV3D.ObjectHeatMap.prototype = {
 		}
 
 		function finish() {
-			console.log('end callback', (Date.now() - startTime) / 1000);
+			console.log('ObjectHeatMap - Elapsed time:', (Date.now() - startTime) / 1000, 'sec');
 
 			// update heat map
 			scope._heatmap.setData({
