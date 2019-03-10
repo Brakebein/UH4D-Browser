@@ -75,6 +75,7 @@ angular.module('dokuvis.viewport')
 			vertexColors: THREE.VertexColors,
 			transparent: true
 		});
+		grid.renderOrder = -90;
 		scene.add(grid);
 
 		// Light
@@ -84,8 +85,8 @@ angular.module('dokuvis.viewport')
 		scene.add(directionalLight);
 
 		// Sky box
-		var skyGeo = new THREE.SphereBufferGeometry(4000, 32, 15);
-		var skyMat = new THREE.ShaderMaterial({
+		var skyGeo = new THREE.SphereBufferGeometry(4000, 32, 15),
+			skyMat = new THREE.ShaderMaterial({
 			uniforms: {
 				topColor: { value: new THREE.Color().setHSL(0.6, 1, 0.6) },
 				horizonColor: { value: new THREE.Color(0xffffff) },
@@ -94,33 +95,15 @@ angular.module('dokuvis.viewport')
 				topExponent: { value: 0.6 },
 				bottomExponent: { value: 0.3 }
 			},
-			vertexShader: '\
-					varying vec3 vWorldPosition;\
-					\
-					void main() {\
-						vec4 worldPosition = modelMatrix * vec4(position, 1.0);\
-						vWorldPosition = worldPosition.xyz;\
-						gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\
-					}',
-			fragmentShader: '\
-					uniform vec3 topColor;\
-					uniform vec3 horizonColor;\
-					uniform vec3 bottomColor;\
-					uniform float offset;\
-					uniform float topExponent;\
-					uniform float bottomExponent;\
-					varying vec3 vWorldPosition;\
-					\
-					void main() {\
-						float h = normalize(vWorldPosition + offset).y;\
-						if (h > 0.0)\
-							gl_FragColor = vec4( mix( horizonColor, topColor, max( pow( h, topExponent ), 0.0 ) ), 1.0);\
-						else\
-							gl_FragColor = vec4( mix( horizonColor, bottomColor, max( pow( abs(h), bottomExponent ), 0.0 ) ), 1.0);\
-					}',
+			// language=GLSL
+			vertexShader: 'varying vec3 vWorldPosition;\n\nvoid main() {\n\n\tvec4 worldPosition = modelMatrix * vec4(position, 1.0);\n\tvWorldPosition = worldPosition.xyz;\n\tgl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n\n}',
+			fragmentShader: 'uniform vec3 topColor;\nuniform vec3 horizonColor;\nuniform vec3 bottomColor;\nuniform float offset;\nuniform float topExponent;\nuniform float bottomExponent;\nvarying vec3 vWorldPosition;\n\nvoid main() {\n\n\tfloat h = normalize(vWorldPosition + offset).y;\n\tif (h > 0.0)\n\t\tgl_FragColor = vec4( mix( horizonColor, topColor, max( pow( h, topExponent ), 0.0 ) ), 1.0);\n\telse\n\t\tgl_FragColor = vec4( mix( horizonColor, bottomColor, max( pow( abs(h), bottomExponent ), 0.0 ) ), 1.0);\n\n}',
 			side: THREE.BackSide
-		});
-		scene.add(new THREE.Mesh(skyGeo, skyMat));
+		}),
+			skyMesh = new THREE.Mesh(skyGeo, skyMat);
+		skyMesh.renderOrder = -100;
+
+		scene.add(skyMesh);
 
 		///// GEOMETRIES
 
@@ -179,10 +162,10 @@ angular.module('dokuvis.viewport')
 		// highlight mat
 		materials['highlightMat'] = new THREE.MeshLambertMaterial({
 			name: 'highlightMat',
-			color: 0xffff44 });
+			color: new THREE.Color().lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3).getHex() });
 		materials['transparentHighlightMat'] = new THREE.MeshLambertMaterial({
 			name: 'transparentHighlightMat',
-			color: 0xffff44,
+			color: new THREE.Color().lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3).getHex(),
 			transparent: true,
 			opacity: 0.5 });
 
@@ -211,6 +194,19 @@ angular.module('dokuvis.viewport')
 				"edgefalloff": {type: "f", value: 0.3 },
 				"intensity": {type: "f", value: 1.5},
 				"vColor": {type: "c" , value: new THREE.Color(DV3D.Defaults.selectionColor) } },
+			vertexShader: THREE.XRayShader.vertexShader,
+			fragmentShader: THREE.XRayShader.fragmentShader });
+		materials['xrayHighlightMat'] = new THREE.ShaderMaterial({
+			name: 'xrayHighlightMat',
+			side: THREE.DoubleSide,
+			transparent: true,
+			depthWrite: false,
+			depthTest: false,
+			uniforms: {
+				"ambient": { type: "f", value: 0.05 },
+				"edgefalloff": {type: "f", value: 0.3 },
+				"intensity": {type: "f", value: 1.5},
+				"vColor": {type: "c" , value: new THREE.Color(DV3D.Defaults.highlightColor) } },
 			vertexShader: THREE.XRayShader.vertexShader,
 			fragmentShader: THREE.XRayShader.fragmentShader });
 

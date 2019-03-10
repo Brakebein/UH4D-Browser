@@ -732,6 +732,7 @@ angular.module('dokuvis.viewport')
 				overlay: false,
 				radius: 40,
 				disWeight: false,
+				radarChartAngle: 0,
 				toggle: function () {
 					$ctrl.legend = null;
 					viewportHeatMapUpdate({typeChange: true, overlayChange: true});
@@ -758,9 +759,19 @@ angular.module('dokuvis.viewport')
 				visible: $ctrl.analysis.visible,
 				overlay: $ctrl.analysis.overlay,
 				radius: $ctrl.analysis.radius,
-				useWeight: $ctrl.analysis.disWeight ? 'disWeight': 'countWeight'
+				useWeight: $ctrl.analysis.disWeight ? 'disWeight': 'countWeight',
+				radarChartAngle: $ctrl.analysis.radarChartAngle
 			}));
 		}
+
+		this.incrementRadarChartAngle = function (incr) {
+			$ctrl.analysis.radarChartAngle += incr * Math.PI / 180;
+			viewportHeatMapUpdate({settingsChange: true});
+		};
+
+		this.setRadarChartResolution = function (resolution) {
+			viewportHeatMapUpdate({settingsChange: true, radarChartResolution: resolution});
+		};
 
 		this.linkToObjects = function () {
 			$scope.$parent.linkToObjects();
@@ -775,6 +786,35 @@ angular.module('dokuvis.viewport')
 				gradient: config.gradient,
 				domain: [config.scale.min, config.scale.max]
 			};
+		});
+
+	}]
+
+})
+
+.component('viewportProgressBar', {
+
+	// template: '<div class="border border-light"><uib-progressbar value="$ctrl.percent"><b>{{$ctrl.percent}} %</b></uib-progressbar></div>',
+	template: '<div class="border border-light"><div class="progress"><div class="progress-bar" ng-style="{width: $ctrl.percent+\'%\'}"><b>{{$ctrl.percent}} %</b></div></div></div>',
+
+	controller: ['$scope', '$timeout', function ($scope, $timeout) {
+
+		var $ctrl = this;
+
+		$ctrl.$onInit = function () {
+
+			$ctrl.percent = 0;
+
+		};
+
+		$scope.$on('viewportProgressUpdate', function (event, value, total) {
+
+			$ctrl.percent = Math.min(Math.round(value / total * 100), 100);
+
+			$scope.$applyAsync();
+			if ($ctrl.percent === 100)
+				$timeout($scope.$parent.close, 100);
+
 		});
 
 	}]

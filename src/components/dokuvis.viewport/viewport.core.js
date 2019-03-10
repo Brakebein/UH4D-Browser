@@ -38,7 +38,8 @@ angular.module('dokuvis.viewport',[
 
 		var contextMenuElement, contextMenuScope,
 			tooltipElement, tooltipScope,
-			spatializeManualElement , spatializeManualScope;
+			spatializeManualElement, spatializeManualScope,
+			progressBarElement, progressBarScope;
 
 		// constants frustum clipping
 		var NEAR = viewportSettings.defaults.NEAR,
@@ -50,18 +51,20 @@ angular.module('dokuvis.viewport',[
 			renderer, scene, controls,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
-			octree,
+			octree, rbushTree, clusterTree,
 			ctmloader, textureLoader;
 
 		// lists
-		var selected = [], highlighted = [], marked = [];
+		var selected = [], highlighted = null, marked = [],
+			hoverObject = null;
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, vectorField, windMap;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radialFan;
 		var heatMapRadius = 0;
 
-		var isAnimating = false;
+		var isAnimating = false,
+			isLoading = false;
 
 		// navigation flags
 		var mouseDownCoord = new THREE.Vector2(),
@@ -180,6 +183,10 @@ angular.module('dokuvis.viewport',[
 				//undeferred: true
 			});
 
+			// rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
+
+			clusterTree = new DV3D.ClusterTree(scene, octree);
+
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
 			// ground.rotation.x = -Math.PI / 2;
 			// scene.add(ground);
@@ -297,6 +304,7 @@ angular.module('dokuvis.viewport',[
 				el = $compile('<viewport-analysis-tools></viewport-analysis-tools>')(elScope);
 				$animate.enter(el, element);
 			}
+
 		};
 
 
@@ -335,8 +343,53 @@ angular.module('dokuvis.viewport',[
 		 * Delay tooltip instantiation
 		 */
 		var hoverDebounce = $debounce(function (entry, position) {
-			openTooltip(entry, position);
+			if (entry instanceof DV3D.ClusterObject) {
+				entry.explode();
+				animateAsync();
+			}
+			else
+				openTooltip(entry, position);
 		}, 500, false, false);
+
+		function enterHover(entry, position) {
+			hoverObject = entry;
+
+			if (hoverObject instanceof DV3D.ClusterObject)
+				hoverObject.highlight(true);
+
+			else if (entry instanceof DV3D.ObjectEntry)
+				assignHighlightMat(entry.object);
+				// entry.highlight(true);
+
+			else if (entry instanceof DV3D.ImageEntry)
+				entry.highlight(true);
+			// else
+			// 	spatialImages.dehighlight();
+
+			animateThrottle20();
+
+			hoverDebounce(entry, position);
+		}
+
+		function exitHover() {
+			if (hoverObject instanceof DV3D.ClusterObject) {
+				hoverObject.implode();
+				hoverObject.highlight(false);
+			}
+			else if (hoverObject instanceof DV3D.ObjectEntry) {
+				rejectHighlightMat(hoverObject.object);
+			}
+			else if (hoverObject instanceof DV3D.ImageEntry) {
+				hoverObject.highlight(false);
+			}
+
+			animateThrottle20();
+			// animateAsync();
+
+			hoverObject = null;
+
+			closeTooltip();
+		}
 
 		function openTooltip(entry, position) {
 			tooltipScope = scope.$new(false);
@@ -356,6 +409,24 @@ angular.module('dokuvis.viewport',[
 				$animate.leave(tooltipElement);
 				tooltipElement = null;
 				scope.$applyAsync();
+			}
+		}
+
+		function openProgressBar() {
+			progressBarScope = scope.$new(false);
+			progressBarScope.close = closeProgressBar;
+			progressBarElement = $compile('<viewport-progress-bar></viewport-progress-bar>')(progressBarScope);
+			$animate.enter(progressBarElement, element);
+		}
+
+		function closeProgressBar() {
+			if (progressBarScope) {
+				progressBarScope.$destroy();
+				progressBarScope = null;
+			}
+			if (progressBarElement) {
+				$animate.leave(progressBarElement);
+				progressBarElement = null;
 			}
 		}
 
@@ -489,9 +560,11 @@ angular.module('dokuvis.viewport',[
 			}
 			else {
 				// update image resolution
-				spatialImages.forEach(function (img) {
-					img.updateTextureByDistance(camera.position, 30);
-				}, true);
+				// spatialImages.forEach(function (img) {
+				// 	img.updateTextureByDistance(camera.position, 30);
+				// }, true);
+				if (!isLoading)
+					clusterTree.update(camera);
 			}
 
 			if (controls) controls.update();
@@ -579,8 +652,8 @@ angular.module('dokuvis.viewport',[
 			if (args.indexOf('spatialImages') !== -1)
 				octree.search(raycaster.ray.origin, 0, true, raycaster.ray.direction)
 					.forEach(function (item) {
-						if (item.object.parent.entry.visible)
-							testObjects.push(item.object);
+						//if (item.object.parent.entry.visible)
+						testObjects.push(item.object);
 					});
 
 			return testObjects;
@@ -594,7 +667,6 @@ angular.module('dokuvis.viewport',[
 		function selectRay(mouse, ctrlKey) {
 			prepareRaycaster(mouse);
 			var testObjects = getRaycastTestObjects('objects', 'plans', 'spatialImages');
-
 			// raycast
 			var intersection = raycast(testObjects, true);
 
@@ -605,6 +677,8 @@ angular.module('dokuvis.viewport',[
 					setSelected(intersection.object.entry, ctrlKey);
 				else if (intersection.object.parent.entry instanceof DV3D.Entry)
 					setSelected(intersection.object.parent.entry, ctrlKey);
+				else if (intersection.object.parent.cluster instanceof DV3D.ClusterObject)
+					setSelected(intersection.object.parent.cluster, ctrlKey);
 				else
 					$log.warn('Raycast hit unknown object', intersection);
 			}
@@ -754,36 +828,44 @@ angular.module('dokuvis.viewport',[
 
 		// apply selection material/color to entry's object and activate entry
 		function selectEntry(entry) {
-			if (entry instanceof DV3D.ObjectEntry) {
-				assignSelectionMaterial(entry);
-				entry.children.forEach(function (child) {
-					selectEntry(child);
-				});
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					assignSelectionMaterial(entry);
+					entry.children.forEach(function (child) {
+						selectEntry(child);
+					});
+				} else if (entry instanceof DV3D.PlanEntry) {
+					entry.object.select();
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.object.select();
+				}
+				entry.select(null, true);
 			}
-			else if (entry instanceof DV3D.PlanEntry) {
-				entry.object.select();
+			else if (entry instanceof DV3D.ClusterObject) {
+				entry.implode();
+				entry.select(true);
 			}
-			else if (entry instanceof DV3D.ImageEntry) {
-				entry.object.select();
-			}
-			entry.select(null, true);
 		}
 
 		// apply original material/color to entry's object and deactivate entry
 		function deselectEntry(entry) {
-			if (entry instanceof DV3D.ObjectEntry) {
-				rejectSelectionMaterial(entry);
-				entry.children.forEach(function (child) {
-					deselectEntry(child);
-				});
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					rejectSelectionMaterial(entry);
+					entry.children.forEach(function (child) {
+						deselectEntry(child);
+					});
+				} else if (entry instanceof DV3D.PlanEntry) {
+					entry.object.deselect();
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.object.deselect();
+				}
+				entry.select(null, false);
 			}
-			else if (entry instanceof DV3D.PlanEntry) {
-				entry.object.deselect();
+			else if (entry instanceof DV3D.ClusterObject) {
+				// entry.implode();
+				entry.select(false);
 			}
-			else if (entry instanceof DV3D.ImageEntry) {
-				entry.object.deselect();
-			}
-			entry.select(null, false);
 		}
 
 		/**
@@ -824,6 +906,58 @@ angular.module('dokuvis.viewport',[
 			}
 		}
 
+		function setHighlighted(entry) {
+			var highlightChanged = false;
+
+			if (highlighted && highlighted !== entry) {
+				unhighlightEntry(highlighted);
+				highlighted = null;
+				highlightChanged = true;
+			}
+
+			if (entry && highlighted === null) {
+				highlightEntry(entry);
+				highlighted = entry;
+				highlightChanged = true;
+			}
+
+			if (highlightChanged)
+				animateAsync();
+		}
+
+		function highlightEntry(entry) {
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					assignHighlightMat(entry.object);
+					entry.children.forEach(function (child) {
+						highlightEntry(child);
+					});
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.highlight(true);
+				}
+			}
+			else if (entry instanceof DV3D.ClusterObject) {
+				entry.highlight(true);
+			}
+		}
+
+		function unhighlightEntry(entry) {
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					rejectHighlightMat(entry.object);
+					entry.children.forEach(function (child) {
+						unhighlightEntry(child);
+					});
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.highlight(false);
+				}
+			}
+			else if (entry instanceof DV3D.ClusterObject) {
+				entry.implode();
+				entry.highlight(false);
+			}
+		}
+
 		function highlightObject(obj) {
 			// if object is marked, do nothing
 			if (marked.indexOf(obj) !== -1) return;
@@ -847,19 +981,46 @@ angular.module('dokuvis.viewport',[
 		}
 
 		function assignHighlightMat(obj) {
-			obj.material = obj.material.clone();
-			var hcolor = new THREE.Color(0xffff00); //materials['highlightMat'].color.clone();
-			obj.material.color.lerp(hcolor, 0.5);
-			obj.material.name += '_highlight';
+			var hColor = new THREE.Color(DV3D.Defaults.highlightColor);
+
+			switch (viewportSettings.shading) {
+				case 'grey':
+					obj.material = materials['highlightMat'];
+					break;
+				case 'transparent':
+					obj.material = materials['transparentHighlightMat'];
+					break;
+				case 'xray':
+					obj.material = materials['xrayHighlightMat'];
+					break;
+				default:
+					if (Array.isArray(obj.material))
+						obj.material = obj.material.map(function (value) {
+							var mat = value.clone();
+							mat.color.lerp(hColor, 0.3);
+							mat.name += '_highlight';
+							return mat;
+						});
+					else {
+						obj.material = obj.material.clone();
+						obj.material.color.lerp(hColor, 0.3);
+						obj.material.name += '_highlight';
+					}
+			}
 		}
 
 		function rejectHighlightMat(obj) {
 			// be sure not to dispose standard or original material
 			if (obj.material === materials[obj.userData.originalMat] ||
-				viewportCache.standardMaterials.indexOf(obj.material.name) !== -1)
-				return;
+				viewportCache.standardMaterials.indexOf(obj.material.name) !== -1) {
+				if (Array.isArray(obj.material))
+					obj.material.forEach(function (value) {
+						value.dispose();
+					});
+				else
+					obj.material.dispose();
+			}
 
-			obj.material.dispose();
 			switch (viewportSettings.shading) {
 				case 'grey':
 					obj.material = materials['defaultDoublesideMat'];
@@ -867,8 +1028,16 @@ angular.module('dokuvis.viewport',[
 				case 'transparent':
 					obj.material = materials['transparentMat'];
 					break;
+				case 'xray':
+					obj.material = materials['xrayMat'];
+					break;
 				default:
-					obj.material = materials[obj.userData.originalMat];
+					if (Array.isArray(obj.userData.originalMat))
+						obj.material = obj.userData.originalMat.map(function (value) {
+							return materials[value];
+						});
+					else
+						obj.material = materials[obj.userData.originalMat];
 					break;
 			}
 		}
@@ -1224,7 +1393,8 @@ angular.module('dokuvis.viewport',[
 			event.preventDefault();
 			var mouse = mouseToViewportCoords(event);
 
-			closeTooltip();
+			//exitHover();
+				closeTooltip();
 
 			if (dummyCreationMode && dummyOrigin) {
 				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
@@ -1275,17 +1445,20 @@ angular.module('dokuvis.viewport',[
 
 				var intersection = raycast(testObjects, true);
 				if (intersection) {
-					var entry = intersection.object.entry || intersection.object.parent.entry;
-					if (entry instanceof DV3D.ImageEntry)
-						entry.highlight(true);
-					else
-						spatialImages.dehighlight();
+					var entry = intersection.object.entry || intersection.object.parent.entry || intersection.object.parent.cluster;
 
+					// if (entry instanceof DV3D.ImageEntry)
+					// 	entry.highlight(true);
+					// else
+					// 	spatialImages.dehighlight();
+					setHighlighted(entry);
 					hoverDebounce(entry, new THREE.Vector2(event.offsetX, event.offsetY));
 				}
 				else {
-					spatialImages.dehighlight();
+					// spatialImages.dehighlight();
+					setHighlighted();
 					hoverDebounce.cancel();
+
 				}
 			}
 
@@ -1356,6 +1529,7 @@ angular.module('dokuvis.viewport',[
 				}
 				// click selection
 				else if (mouse.equals(mouseDownCoord)) {
+					hoverDebounce.cancel();
 					selectRay(mouse, event.ctrlKey);
 					animate();
 				}
@@ -1399,6 +1573,8 @@ angular.module('dokuvis.viewport',[
 			isMouseDown = -1;
 			closeContextMenu();
 			closeTooltip();
+			setHighlighted();
+			hoverDebounce.cancel();
 
 			if (navigation.default) {
 				// complete navigation
@@ -1773,6 +1949,11 @@ angular.module('dokuvis.viewport',[
 					heatMap.dispose();
 					heatMap = null;
 				}
+				if (objHeatMap && (options.type !== 'objectHeatMap' || !options.visible)) {
+					// scene.remove(objHeatMap);
+					objHeatMap.dispose();
+					objHeatMap = null;
+				}
 				if (vectorField && (options.type !== 'vectorField' || !options.visible)) {
 					scene.remove(vectorField);
 					vectorField.dispose();
@@ -1784,12 +1965,27 @@ angular.module('dokuvis.viewport',[
 					windMap = null;
 					stopAnimation();
 				}
+				if (radarChart && (options.type !== 'radarChart' || !options.visible)) {
+					scene.remove(radarChart);
+					radarChart.dispose();
+					radarChart = null;
+				}
+				if (radialFan && (options.type !== 'radialFan' || !options.visible)) {
+					scene.remove(radialFan);
+					radialFan.dispose();
+					radialFan = null;
+				}
 
 				if (options.visible) {
 					switch (options.type) {
 						case 'heatMap':
 							heatMap = new DV3D.HeatMap3();
+							heatMap.setRadius(options.radius);
 							scene.add(heatMap);
+							break;
+						case 'objectHeatMap':
+							objHeatMap = new DV3D.ObjectHeatMap(objects.getByName('d1_HJrdAjjfG_Zwinger').object, camera);
+							// objHeatMap = new DV3D.ObjectHeatMap(objects.getByName('d1_HyHLA6jGf_node-schloss_nord').object, camera);
 							break;
 						case 'vectorField':
 							vectorField = new DV3D.VectorField();
@@ -1802,6 +1998,15 @@ angular.module('dokuvis.viewport',[
 							});
 							windMap._useWeight = options.useWeight;
 							scene.add(windMap);
+							break;
+						case 'radarChart':
+							radarChart = new DV3D.RadarChart();
+							scene.add(radarChart);
+							break;
+						case 'radialFan':
+							// radialFan = new DV3D.RadarChart2();
+							radialFan = new DV3D.RadialFan();
+							scene.add(radialFan);
 							break;
 					}
 
@@ -1829,10 +2034,17 @@ angular.module('dokuvis.viewport',[
 
 			if (options.radiusChange) {
 				heatMapRadius = options.radius;
+				if (heatMap)
+					heatMap.setRadius(options.radius);
 				updateHeatMap();
 			}
 
 			if (options.settingsChange) {
+				if (radialFan) {
+					radialFan.setAngleOffset(options.radarChartAngle);
+					if (options.radarChartResolution)
+						radialFan.setAngleResolution(options.radarChartResolution);
+				}
 				if (windMap) {
 					windMap._useWeight = options.useWeight;
 				}
@@ -1845,21 +2057,67 @@ angular.module('dokuvis.viewport',[
 
 		function updateHeatMap() {
 			if (heatMap) {
-				heatMap.update(camera, function (position) {
-					var or = octree.search(position, heatMapRadius);
-
-					var count = 0;
-					or.forEach(function (r) {
-						if (position.clone().sub(r.position).length() < heatMapRadius)
-							count++;
-					});
-
-					return count;
-				}, function (config) {
+				heatMap.update(camera, spatialImages.get().map(function (entry) {
+					return entry.object;
+				}), function (config) {
 					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
 				animateAsync();
+			}
+
+			if (radarChart) {
+				radarChart.update(camera, clusterTree.getActiveClusters());
+
+				animateAsync();
+			}
+
+			if (radialFan) {
+				// var obj = objects.getByName('d1_HJrdAjjfG_Zwinger').object;
+				// var center = obj.geometry.boundingBox.getCenter().applyMatrix4(obj.matrixWorld);
+
+				radialFan.update(camera, clusterTree.getActiveClusters());
+
+				animateAsync();
+			}
+
+			if (objHeatMap) {
+				objHeatMap.computeUVs();
+
+				openProgressBar();
+
+				objHeatMap.computeMap(function (vpCoord, object) {
+					prepareRaycaster(vpCoord);
+					var intersection = raycast([object]);
+					if (!intersection) return 0;
+
+					var point = intersection.point,
+						normal = intersection.face.normal.clone().applyQuaternion(object.quaternion),
+						count = 0;
+
+					spatialImages.forEach(function (img) {
+
+						var normalToImage = img.object.position.clone().sub(point).normalize();
+						var normalImage = new THREE.Vector3(0,0,-1).applyQuaternion(img.object.quaternion);
+
+						if (normal.dot(normalToImage) > 0 && normalToImage.dot(normalImage) < img.object.fov / 180 - 1) {
+							var distance = point.distanceTo(img.object.position);
+							raycaster.set(point.clone().add(normal), normalToImage);
+							var is = raycast([object]);
+
+							if (!is || is.distance > distance)
+								count++;
+						}
+
+					}, false);
+					// }, true);
+
+					return count;
+				}, function (value, total) {
+					scope.$broadcast('viewportProgressUpdate', value, total);
+				}, function () {
+					animateAsync();
+				});
 			}
 
 			if (vectorField) {
@@ -1868,10 +2126,25 @@ angular.module('dokuvis.viewport',[
 
 					var count = 0, disTmp = 0, disMin = heatMapRadius;
 					var dir = new THREE.Vector3();
+					var items = [];
+
 					or.forEach(function (r) {
-						var distance = position.clone().sub(r.position).length();
+						if (r.object.parent.cluster) {
+							var c = r.object.parent.cluster;
+							var distance = position.clone().sub(c.position).length();
+							if (distance < heatMapRadius + c.distance)
+								items = items.concat(c.getLeaves());
+						}
+						else
+							items.push(r.object.parent);
+					});
+
+					items.forEach(function (item) {
+						// var distance = position.clone().sub(r.position).length();
+						var distance = position.clone().sub(item.position).length();
 						if (distance < heatMapRadius) {
-							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							// dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(item.quaternion));
 							count++;
 							disTmp += distance;
 							disMin = Math.min(disMin, distance);
@@ -1897,10 +2170,25 @@ angular.module('dokuvis.viewport',[
 
 					var count = 0, disTmp = 0, disMin = heatMapRadius;
 					var dir = new THREE.Vector3();
+
+					var items = [];
 					or.forEach(function (r) {
-						var distance = position.clone().sub(r.position).length();
+						if (r.object.parent.cluster) {
+							var c = r.object.parent.cluster;
+							var distance = position.clone().sub(c.position).length();
+							if (distance < heatMapRadius + c.distance)
+								items = items.concat(c.getLeaves());
+						}
+						else
+							items.push(r.object.parent);
+					});
+
+					items.forEach(function (item) {
+						// var distance = position.clone().sub(r.position).length();
+						var distance = position.clone().sub(item.position).length();
 						if (distance < heatMapRadius) {
-							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							// dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(item.quaternion));
 							count++;
 							disTmp += distance;
 							disMin = Math.min(disMin, distance);
@@ -1929,6 +2217,8 @@ angular.module('dokuvis.viewport',[
 		scope.$on('spatialImageLoadStart', function (event, images) {
 
 			setSelected(null);
+
+			isLoading = true;
 
 			var toBeCreated = [],
 				toBeUpdated = [],
@@ -1962,10 +2252,12 @@ angular.module('dokuvis.viewport',[
 					toBeRemoved.push(entry);
 			});
 
+			clusterTree.clean();
+
 			// remove "missing" images
 			toBeRemoved.forEach(function (value) {
-				scene.remove(value.object);
-				octree.remove(value.object.collisionObject);
+				// scene.remove(value.object);
+				// octree.remove(value.object.collisionObject);
 				spatialImages.remove(value);
 				value.dispose();
 			});
@@ -1986,6 +2278,31 @@ angular.module('dokuvis.viewport',[
 			$q.all(promises)
 				.then(function () {
 					$rootScope.$broadcast('spatialImageLoadSuccess');
+					console.log(octree);
+					//console.log(rbushTree);
+					// addRBushGraph();
+					// $timeout(addOctreeGraph, 500);
+					// buildCluster();
+					clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+						return si.object;
+					}));
+					// clusterTree.drawDebugGraph();
+
+					isLoading = false;
+
+					// clusterTree.update(camera);
+
+					// clusterTree.getObjectsByThreshold(50, function (obj) {
+					// 	console.log(obj.count);
+					// 	var sphere;
+					// 	if (obj instanceof DV3D.ClusterObject)
+					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
+					// 	else
+					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(3), new THREE.MeshLambertMaterial({color: 0xff0000}));
+					// 	sphere.position.copy(obj.position);
+					// 	scene.add(sphere);
+					// });
+					animateAsync();
 				})
 				.catch(function (reason) {
 					Utilities.throwException('Spatial Image Loading Error', 'An error occurred while loading spatial image', reason);
@@ -1993,6 +2310,7 @@ angular.module('dokuvis.viewport',[
 
 			updateHeatMap();
 		});
+
 
 		/**
 		 * Loads spatialized image into the scene.
@@ -2025,11 +2343,17 @@ angular.module('dokuvis.viewport',[
 			imagepane.applyMatrix(matrix);
 
 
-			scene.add(imagepane);
+			// scene.add(imagepane);
 
 			defer.promise.then(function () {
-				octree.add(imagepane.collisionObject);
-				updateOctreeAsync();
+				// octree.add(imagepane.collisionObject);
+				// updateOctreeAsync();
+
+				// rbushTree.insert({
+				// 	x: imagepane.position.x,
+				// 	y: imagepane.position.z,
+				// 	image: imagepane
+				// });
 			});
 
 			imagepane.name = img.spatial.id;
@@ -2053,6 +2377,7 @@ angular.module('dokuvis.viewport',[
 		 * @param obj {DV3D.ImagePane} ImagePane object
 		 */
 		function setImageView(obj) {
+			// TODO: update considering clusterTree
 			exitIsolation();
 			enterIsolation(obj, false);
 
@@ -2107,9 +2432,9 @@ angular.module('dokuvis.viewport',[
 
 		function exitIsolation() {
 			if (!inIsolationMode) return;
-			spatialImages.forEach(function (item) {
-				item.toggle(true);
-			});
+			// spatialImages.forEach(function (item) {
+			// 	item.toggle(true);
+			// });
 			inIsolationMode = false;
 			scope.$broadcast('viewportIsolationExit');
 		}
@@ -2210,6 +2535,7 @@ angular.module('dokuvis.viewport',[
 
 		// add or remove plan or spatialImage from scene
 		function toggleSourceHandler(event) {
+			console.log(event);
 			var target = event.target;
 			// add
 			if (event.visible) {
