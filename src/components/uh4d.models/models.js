@@ -42,10 +42,70 @@ angular.module('uh4d.models', [
 				transformResponse: function (json) {
 					return createHierarchy(angular.fromJson(json));
 				}
+			},
+			update: {
+				method: 'PUT'
 			}
 		});
 
 		return resource;
 
 	}
-]);
+])
+
+.component('objectModal', {
+	templateUrl: 'components/uh4d.models/objectModal.tpl.html',
+	controller: ['$state', '$timeout', 'DigitalObject', 'Utilities', function ($state, $timeout, DigitalObject, Utilities) {
+
+		var $ctrl = this;
+
+		$ctrl.$onInit = function () {
+			$timeout(function () {
+				getObject();
+			}, 0, false);
+		};
+
+		function getObject() {
+			DigitalObject.get({ id: $state.params.objectId }).$promise
+				.then(function (result) {
+					console.log(result);
+					$ctrl.object = result;
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('DigitalObject.get', reason);
+				});
+		}
+
+		$ctrl.updateObject = function (prop, data) {
+			if ($ctrl.object[prop] === data) return false;
+
+			var oldValue = $ctrl.object[prop];
+
+			// if (prop === 'tags')
+			// 	$ctrl.image.tags = data.map(function (t) {
+			// 		return t.text;
+			// 	});
+			if (prop === 'date')
+				$ctrl.image[prop] = { value: data };
+			else
+				$ctrl.object[prop] = data;
+
+			return $ctrl.object.$update({ prop: prop })
+				.then(function (result) {
+					console.log(result);
+					// imageUpdate($ctrl.image);
+					return false;
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('DigitalObject.update', reason);
+					$ctrl.object[prop] = oldValue;
+					return false;
+				});
+		};
+
+		$ctrl.close = function () {
+			$state.go('^');
+		};
+
+	}]
+});

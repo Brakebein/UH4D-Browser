@@ -630,8 +630,13 @@ angular.module('dokuvis.viewport')
 			}
 		};
 
-		this.openDetails = function () {
+		this.openImageDetails = function () {
 			$state.go('.image', { imageId: this.entry.source.id });
+			$scope.$parent.close();
+		};
+
+		this.openObjectDetails = function () {
+			$state.go('.object', { objectId: this.entry.name });
 			$scope.$parent.close();
 		};
 

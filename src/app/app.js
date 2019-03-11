@@ -115,6 +115,21 @@ angular.module('uh4dApp', [
 				}]
 			})
 			.state({
+				name: 'root.search.object',
+				url: '/object/:objectId',
+				resolve: {
+					objectModalInstance: ['$uibModal', function ($uibModal) {
+						return $uibModal.open({
+							component: 'objectModal',
+							size: 'large'
+						});
+					}]
+				},
+				onExit: ['objectModalInstance', function (objectModalInstance) {
+					objectModalInstance.close();
+				}]
+			})
+			.state({
 				name: 'root.search.compare',
 				url: '/compare?imageId1&imageId2',
 				redirectTo: function (trans) {

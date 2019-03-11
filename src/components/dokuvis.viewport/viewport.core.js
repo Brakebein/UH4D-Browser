@@ -185,6 +185,7 @@ angular.module('dokuvis.viewport',[
 
 			// rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
 
+			// clusterTree
 			clusterTree = new DV3D.ClusterTree(scene, octree);
 
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
@@ -227,13 +228,17 @@ angular.module('dokuvis.viewport',[
 				entry.addEventListener('toggle', toggleSourceHandler);
 				entry.addEventListener('select', selectHandler);
 				entry.addEventListener('focus', focusHandler);
-				octree.add(entry.object.collisionObject);
+				// octree.add(entry.object.collisionObject);
 			});
+
+			clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+				return si.object;
+			}));
 
 			animate();
 			viewportCameraMove(camera);
 
-			octree.update();
+			// octree.update();
 
 
 			///// STATIC COMPONENTS
@@ -3137,6 +3142,8 @@ angular.module('dokuvis.viewport',[
 			clearMarked();
 			exitIsolation();
 			//if (scope.snapshot.active) scope.abortSnapshot();
+
+			clusterTree.clean();
 
 			if (scope.spatialize)
 				clearMarkers();
