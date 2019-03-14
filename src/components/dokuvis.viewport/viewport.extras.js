@@ -636,7 +636,7 @@ angular.module('dokuvis.viewport')
 		};
 
 		this.openObjectDetails = function () {
-			$state.go('.object', { objectId: this.entry.name });
+			$state.go('.object', { objectId: this.entry.node.id });
 			$scope.$parent.close();
 		};
 

@@ -42,6 +42,20 @@ angular.module('uh4dApp')
 				});
 		};
 
+		function queryObjects() {
+			DigitalObject.query({
+				modelDate: $state.params.modelDate
+			}).$promise
+				.then(function (results) {
+					console.log(results);
+					$rootScope.showModelLoadPanel = false;
+					modelQuerySuccess(results);
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('DigitalObject.query', reason);
+				});
+		}
+
 		function imageQuerySuccess(values) {
 			$rootScope.$broadcast('imageQuerySuccess', values);
 		}
@@ -67,8 +81,8 @@ angular.module('uh4dApp')
 			spatialImageLoadStart(spatials);
 		}
 
-		$scope.$on('filterByDate', function (event, from, to, undated) {
-			$state.go('root.search', { from: from, to: to, undated: undated });
+		$scope.$on('filterByDate', function (event, from, to, modelDate, undated) {
+			$state.go('root.search', { from: from, to: to, modelDate: modelDate, undated: undated });
 		});
 
 		// populate params filter arrays
@@ -114,7 +128,7 @@ angular.module('uh4dApp')
 
 		});
 
-		// watch for state/url params change and perform search
+		// watch for state/url params change and perform image search
 		$scope.$watchGroup([
 			function () { return $state.params.query; },
 			function () { return $state.params.from; },
@@ -124,6 +138,13 @@ angular.module('uh4dApp')
 			function () { return $state.params.filterObjExcl.length; }
 		], function () {
 			performSearch();
+		});
+
+		// watch for state/url params change and query objects
+		$scope.$watchGroup([
+			function () { return $state.params.modelDate }
+		], function () {
+			queryObjects();
 		});
 
 

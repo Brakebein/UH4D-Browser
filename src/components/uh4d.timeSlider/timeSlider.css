@@ -35,6 +35,16 @@ time-slider {
     time-slider svg .from-handle > rect, time-slider svg .to-handle > rect {
       fill: transparent;
       cursor: w-resize; }
+    time-slider svg .obj-handle > path {
+      fill: none;
+      stroke: #5bc0de;
+      stroke-width: 2px; }
+    time-slider svg .obj-handle > text {
+      fill: #5bc0de;
+      font-size: 12px; }
+    time-slider svg .obj-handle > rect {
+      fill: transparent;
+      cursor: w-resize; }
   time-slider .time-options {
     flex: 0 0 auto;
     background-color: rgba(0, 0, 0, 0.8);

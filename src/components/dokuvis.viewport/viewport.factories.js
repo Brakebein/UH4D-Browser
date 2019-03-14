@@ -31,7 +31,11 @@ angular.module('dokuvis.viewport')
 				objectColor: 0xdddddd,
 				edgeColor: 0x33ff33,
 				gridSize: 3000,
-				gridDivisions: 100
+				gridDivisions: 100,
+				viewpoint: {
+					cameraPosition: new THREE.Vector3(603, 630, 692),
+					controlsTarget: new THREE.Vector3(603, 52, -462)
+				}
 			},
 
 			shadings: shadings,
@@ -235,16 +239,25 @@ angular.module('dokuvis.viewport')
 			fonts['HelvetikerBold'] = font;
 		});
 
+		var loadingManager = new THREE.LoadingManager();
+
 		THREE.DokuVisTray = {
 
 			scene: scene,
 			grid: grid,
 			directionalLight: directionalLight,
 
-			geometries: geometries,
-			materials: materials,
-			standardGeometries: Object.keys(geometries),
-			standardMaterials: Object.keys(materials),
+			// geometries: geometries,
+			geometries: new DV3D.GeometryManager(loadingManager, {
+				pathPrefix: 'data/'
+			}),
+			// materials: materials,
+			materials: new DV3D.MaterialManager(loadingManager, {
+				pathPrefix: 'data/'
+			}),
+			// standardGeometries: Object.keys(geometries),
+			// standardMaterials: Object.keys(materials),
+			loadingManager: loadingManager,
 
 			fonts: fonts,
 

@@ -14,6 +14,7 @@ angular.module('uh4d.timeSlider', [])
 			timeScaleInit, timeScale,
 			zoom,
 			from, to, start, end,
+			modelHandle,
 			yearSpan,
 			getDateYear = d3.timeFormat("%Y");
 		
@@ -45,6 +46,11 @@ angular.module('uh4d.timeSlider', [])
 					};
 					to = {
 						date: $state.params.to ? Math.min(end.date, new Date($state.params.to)) : end.date,
+						x: 0,
+						element: null
+					};
+					modelHandle = {
+						date: $state.params.modelDate ? Math.min(end.date, Math.max(start.date, new Date($state.params.modelDate))) : new Date(start.date.getTime() + (end.date.getTime() - start.date.getTime()) / 2),
 						x: 0,
 						element: null
 					};
@@ -153,6 +159,28 @@ angular.module('uh4d.timeSlider', [])
 					.on('end', triggerFilterByDate)
 				);
 
+			modelHandle.element = container.append('g')
+				.attr('class', 'obj-handle');
+			modelHandle.element.append('path')
+				.attr('d', 'M 0 16 V 46 M -4 46 H 4 M -4 16 H 4');
+			modelHandle.element.append('text')
+				.attr('text-anchor', 'middle')
+				.attr('x', 0)
+				.attr('y', 12);
+			modelHandle.element.append('rect')
+				.attr('x', -10)
+				.attr('width', 20)
+				.attr('height', '100%')
+				.call(d3.drag()
+					.container(container.node())
+					.on('drag', function () {
+						modelHandle.x = Math.max(Math.min(d3.event.x, WIDTH), 0);
+						modelHandle.date = timeScale.invert(modelHandle.x);
+						updateModelHandle(false);
+					})
+					.on('end', triggerFilterByDate)
+				);
+
 			tickContainer = container.append('g')
 				.attr('class', 'tick-container')
 				.attr('transform', 'translate(0,25)')
@@ -191,6 +219,7 @@ angular.module('uh4d.timeSlider', [])
 			tickAll.exit().remove();
 
 			updateTimeSpan();
+			updateModelHandle();
 		}
 
 		function updateTimeSpan(calcPosition) {
@@ -221,8 +250,19 @@ angular.module('uh4d.timeSlider', [])
 				.text(getDateYear(to.date));
 		}
 
+		function updateModelHandle(calcPosition) {
+			if (calcPosition !== false) {
+				// new x positions
+				modelHandle.x = timeScale(modelHandle.date);
+			}
+
+			modelHandle.element.attr('transform', 'translate(' + modelHandle.x + ',0)');
+			modelHandle.element.select('text')
+				.text(getDateYear(modelHandle.date));
+		}
+
 		function triggerFilterByDate() {
-			$rootScope.$broadcast('filterByDate', moment(from.date).format('YYYY-MM-DD'), moment(to.date).format('YYYY-MM-DD'), $ctrl.includeUndated);
+			$rootScope.$broadcast('filterByDate', moment(from.date).format('YYYY-MM-DD'), moment(to.date).format('YYYY-MM-DD'), moment(modelHandle.date).format('YYYY-MM-DD'), $ctrl.includeUndated);
 		}
 
 		function resize() {

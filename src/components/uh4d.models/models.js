@@ -5,42 +5,19 @@ angular.module('uh4d.models', [
 .factory('DigitalObject', ['$resource',
 	function ($resource) {
 
-		function createHierarchy(data) {
-			for (var i = 0; i < data.length; i++) {
-				var obj = data[i];
-				if (!obj.children) obj.children = [];
-				if (obj.parent) {
-					var parent = getObjectById(data, obj.parent);
-					if (parent) {
-						if (!parent.children) parent.children = [];
-						parent.children.push(new resource(obj));
-						data.splice(i, 1);
-						i--;
-					}
-				}
-			}
-			return data;
-		}
-
-		function getObjectById(data, id) {
-			for (var i = 0; i < data.length; i++) {
-				if (data[i].id === id) return data[i];
-				if (data[i].children) {
-					var obj = getObjectById(data[i].children, id);
-					if (obj !== undefined) return obj;
-				}
-			}
-			return undefined;
-		}
-
-		var resource = $resource('api/model/:id', {
+		return $resource('api/model/:id', {
 			id: '@id'
 		}, {
 			query: {
 				method: 'GET',
 				isArray: true,
 				transformResponse: function (json) {
-					return createHierarchy(angular.fromJson(json));
+					var data = angular.fromJson(json);
+					data.forEach(function (value) {
+						value.object.node = value;
+						// TODO: node is no resource object
+					});
+					return data;
 				}
 			},
 			update: {
@@ -48,14 +25,12 @@ angular.module('uh4d.models', [
 			}
 		});
 
-		return resource;
-
 	}
 ])
 
 .component('objectModal', {
 	templateUrl: 'components/uh4d.models/objectModal.tpl.html',
-	controller: ['$state', '$timeout', 'DigitalObject', 'Utilities', function ($state, $timeout, DigitalObject, Utilities) {
+	controller: ['$rootScope', '$state', '$timeout', 'DigitalObject', 'viewportCache', 'moment', 'Utilities', function ($rootScope, $state, $timeout, DigitalObject, viewportCache, moment, Utilities) {
 
 		var $ctrl = this;
 
@@ -85,15 +60,46 @@ angular.module('uh4d.models', [
 			// 	$ctrl.image.tags = data.map(function (t) {
 			// 		return t.text;
 			// 	});
-			if (prop === 'date')
-				$ctrl.image[prop] = { value: data };
-			else
-				$ctrl.object[prop] = data;
+			switch (prop) {
+				case 'from':
+					var fromDate = moment(data, 'YYYY-MM-DD');
+					if (!fromDate.isValid()) {
+						Utilities.dangerAlert('Wrong date format! Use "YYYY-MM-DD".');
+						return false;
+					}
+					if ($ctrl.object.date.to && moment($ctrl.object.date.to).isAfter(fromDate)) {
+						Utilities.dangerAlert('Date must be before destruction date!');
+						return false;
+					}
+					$ctrl.object.date.from = fromDate.format('YYYY-MM-DD');
+					break;
+				case 'to':
+					var toDate = moment(data, 'YYYY-MM-DD');
+					if (!toDate.isValid()) {
+						Utilities.dangerAlert('Wrong date format! Use "YYYY-MM-DD".');
+						return false;
+					}
+					if ($ctrl.object.date.from && moment($ctrl.object.date.from).isBefore(toDate)) {
+						Utilities.dangerAlert('Date must be after erection date!');
+						return false;
+					}
+					$ctrl.object.date.to = toDate.format('YYYY-MM-DD');
+					break;
+				default:
+					$ctrl.object[prop] = data;
+			}
 
 			return $ctrl.object.$update({ prop: prop })
 				.then(function (result) {
 					console.log(result);
-					// imageUpdate($ctrl.image);
+					// objectUpdate(result);
+					// update entry
+					var entry = viewportCache.objects.getByName(result.object.id);
+					if (entry) {
+						entry.label = result.name;
+						entry.node = result;
+						entry.object.userData.node = result;
+					}
 					return false;
 				})
 				.catch(function (reason) {
@@ -102,6 +108,10 @@ angular.module('uh4d.models', [
 					return false;
 				});
 		};
+
+		// function objectUpdate(item) {
+		// 	$rootScope.$broadcast('objectUpdate', item);
+		// }
 
 		$ctrl.close = function () {
 			$state.go('^');
