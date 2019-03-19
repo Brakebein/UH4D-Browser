@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Brakebein/UH4D-Browser#readme",
   "devDependencies": {
+    "angular-file-upload": "^2.5.0",
     "bootstrap": "^4.1.3",
     "bootswatch": "^4.1.3",
     "clamp-js-main": "^0.11.5",

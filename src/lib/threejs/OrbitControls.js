@@ -126,8 +126,8 @@
 		// right and down are positive
 		this.pan = function ( deltaX, deltaY, screenWidth, screenHeight ) {
 
-			//if ( scope.object instanceof THREE.PerspectiveCamera ) {
-			if ( scope.object.inPerspectiveMode ) {
+			if ( scope.object instanceof THREE.PerspectiveCamera ) {
+			// if ( scope.object.inPerspectiveMode ) {
 
 				// perspective
 				var position = scope.object.position;
@@ -141,8 +141,8 @@
 				scope.panLeft( 2 * deltaX * targetDistance / screenHeight );
 				scope.panUp( 2 * deltaY * targetDistance / screenHeight );
 
-			//} else if ( scope.object instanceof THREE.OrthographicCamera ) {
-			} else if ( scope.object.inOrthographicMode ) {
+			} else if ( scope.object instanceof THREE.OrthographicCamera ) {
+			// } else if ( scope.object.inOrthographicMode ) {
 
 				// orthographic
 				scope.panLeft( deltaX * 1/scope.object.zoom * ( scope.object.right - scope.object.left ) / screenWidth );
@@ -159,13 +159,13 @@
 
 		this.dollyIn = function ( dollyScale ) {
 
-			//if ( scope.object instanceof THREE.PerspectiveCamera ) {
-			if ( scope.object.inPerspectiveMode ) {
+			if ( scope.object instanceof THREE.PerspectiveCamera ) {
+			// if ( scope.object.inPerspectiveMode ) {
 
 				scale /= dollyScale;
 
-			//} else if ( scope.object instanceof THREE.OrthographicCamera ) {
-			} else if ( scope.object.inOrthographicMode ) {
+			} else if ( scope.object instanceof THREE.OrthographicCamera ) {
+			// } else if ( scope.object.inOrthographicMode ) {
 
 				scope.object.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom * dollyScale ) );
 				//scope.object.setZoom( Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom * dollyScale ) ) );
@@ -182,13 +182,13 @@
 
 		this.dollyOut = function ( dollyScale ) {
 
-			//if ( scope.object instanceof THREE.PerspectiveCamera ) {
-			if ( scope.object.inPerspectiveMode ) {
+			if ( scope.object instanceof THREE.PerspectiveCamera ) {
+			// if ( scope.object.inPerspectiveMode ) {
 
 				scale *= dollyScale;
 
-			//} else if ( scope.object instanceof THREE.OrthographicCamera ) {
-			} else if ( scope.object.inOrthographicMode ) {
+			} else if ( scope.object instanceof THREE.OrthographicCamera ) {
+			// } else if ( scope.object.inOrthographicMode ) {
 				
 				scope.object.zoom = Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom / dollyScale ) );
 				//scope.object.setZoom( Math.max( this.minZoom, Math.min( this.maxZoom, this.object.zoom / dollyScale ) ) );

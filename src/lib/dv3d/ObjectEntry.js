@@ -10,9 +10,11 @@
 DV3D.ObjectEntry = function (obj) {
 	DV3D.Entry.call( this, obj );
 
-	this.label = obj.userData.name;
+	this.label = obj.userData.node.name;
 	this.layer = obj.userData.layer || 0;
 	this.type = obj.userData.type;
+
+	this.node = obj.userData.node;
 
 	this.edges = null;
 

@@ -1,3 +1,8 @@
+/**
+ * Code slightly modified from https://github.com/mrdoob/three.js/issues/6188#issuecomment-185720546
+ * @param geometry {THREE.BufferGeometry}
+ * @return {THREE.BufferGeometry}
+ */
 THREE.BufferGeometry.prototype.merge = function ( geometry ) {
 
 	if ( geometry instanceof THREE.BufferGeometry === false ) {

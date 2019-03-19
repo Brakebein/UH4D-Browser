@@ -38,7 +38,9 @@ angular.module('dokuvis.viewport',[
 
 		var contextMenuElement, contextMenuScope,
 			tooltipElement, tooltipScope,
-			spatializeManualElement , spatializeManualScope;
+			spatializeManualElement, spatializeManualScope,
+			progressBarElement, progressBarScope,
+			modelUploadElement, modelUploadScope;
 
 		// constants frustum clipping
 		var NEAR = viewportSettings.defaults.NEAR,
@@ -47,21 +49,24 @@ angular.module('dokuvis.viewport',[
 		// general
 		var SCREEN_WIDTH, SCREEN_HEIGHT,
 			canvas,
-			renderer, scene, controls,
+			renderer, scene, controls, transformControls,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
-			octree,
+			octree, rbushTree, clusterTree,
 			ctmloader, textureLoader;
 
 		// lists
-		var selected = [], highlighted = [], marked = [];
+		var selected = [], highlighted = null, marked = [],
+			hoverObject = null,
+			transformObject = null;
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, vectorField, windMap;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radialFan;
 		var heatMapRadius = 0;
 
-		var isAnimating = false;
+		var isAnimating = false,
+			isLoading = false;
 
 		// navigation flags
 		var mouseDownCoord = new THREE.Vector2(),
@@ -108,9 +113,12 @@ angular.module('dokuvis.viewport',[
 			console.log('viewport size: ', SCREEN_WIDTH, SCREEN_HEIGHT);
 
 			// Camera
-			camera = new THREE.CombinedCamera(SCREEN_WIDTH, SCREEN_HEIGHT, 35, NEAR, FAR, NEAR, FAR);
-			if (viewportCache.viewpoint) camera.position.copy(viewportCache.viewpoint.cameraPosition);
-			else camera.position.set(-100, 60, 100);
+			// camera = new THREE.CombinedCamera(SCREEN_WIDTH, SCREEN_HEIGHT, 35, NEAR, FAR, NEAR, FAR);
+			camera = new THREE.PerspectiveCamera(35, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR);
+			if (viewportCache.viewpoint)
+				camera.position.copy(viewportCache.viewpoint.cameraPosition);
+			else
+				camera.position.copy(viewportSettings.defaults.viewpoint.cameraPosition);
 
 			// Scene
 			scene = viewportCache.scene;
@@ -131,8 +139,10 @@ angular.module('dokuvis.viewport',[
 			// Controls (for navigation)
 			controls = new THREE.OrbitControls(camera, renderer.domElement);
 			controls.zoomSpeed = 1.0;
-			// if (viewportCache.viewpoint) controls.target = viewportCache.viewpoint.controlsPosition.clone();
-			if (viewportCache.viewpoint) controls.target.copy(viewportCache.viewpoint.controlsTarget);
+			if (viewportCache.viewpoint)
+				controls.target.copy(viewportCache.viewpoint.controlsTarget);
+			else
+				controls.target.copy(viewportSettings.defaults.viewpoint.controlsTarget);
 			camera.target = controls.target;
 			controls.addEventListener('change', onControlsChange);
 			controls.addEventListener('end', function () {
@@ -143,15 +153,16 @@ angular.module('dokuvis.viewport',[
 			dlight = viewportCache.directionalLight;
 
 			// loading progress bar
-			var manager = new THREE.LoadingManager();
+			// var manager = new THREE.LoadingManager();
+			var manager = viewportCache.loadingManager;
 			manager.onProgress = viewportLoadProgress;
 			manager.onLoad = function () {
-				focusAll();
+				//focusAll();
 			};
 
 			// objloader = new THREE.OBJMTLLoader(manager);
-			ctmloader = new THREE.CTMLoader(manager);
-			textureLoader = new THREE.TextureLoader(manager);
+			// ctmloader = new THREE.CTMLoader(manager);
+			// textureLoader = new THREE.TextureLoader(manager);
 
 			// bind event listeners
 			canvas.on('mousedown', mousedown);
@@ -180,9 +191,48 @@ angular.module('dokuvis.viewport',[
 				//undeferred: true
 			});
 
+			// rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
+
+			// clusterTree
+			clusterTree = new DV3D.ClusterTree(scene, octree);
+
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
 			// ground.rotation.x = -Math.PI / 2;
 			// scene.add(ground);
+
+			// plan
+			new THREE.OBJLoader().load('data/plans/citymap_1911_2.obj', function (object) {
+				console.log(object);
+				var map = object.getObjectByName('Citymap_1911');
+				scene.add(map);
+
+				var texture = new THREE.TextureLoader().load('data/plans/citymap_1911_2.jpg');
+				texture.anisotropy = 8;
+				map.material.map = texture;
+				map.material.depthTest = false;
+				map.material.depthWrite = false;
+				map.material.renderOrder = -95;
+			}, function () {}, function (error) {
+				console.error(error);
+			});
+
+			transformControls = new THREE.TransformControls(camera, renderer.domElement);
+			transformControls.addEventListener('change', onControlsChange);
+			transformControls.addEventListener('dragging-changed', function (event) {
+				controls.enabled = ! event.value;
+			});
+			// transformControls.addEventListener('objectChange', function (event) {
+			// 	console.log('objectChange', event);
+			// });
+
+			scene.add(transformControls);
+
+			// // collada
+			// new THREE.ColladaLoader().load('data/temp/taschenberg_ruine.DAE', function (collada) {
+			// 	console.log(collada);
+			// 	scene.add(collada.scene);
+			// 	transformControls.attach(collada.scene);
+			// });
 
 			// Gizmo
 			gizmoMove = new DV3D.GizmoMove(10, 2.5, 1.2);
@@ -204,13 +254,17 @@ angular.module('dokuvis.viewport',[
 				entry.addEventListener('toggle', toggleSourceHandler);
 				entry.addEventListener('select', selectHandler);
 				entry.addEventListener('focus', focusHandler);
-				octree.add(entry.object.collisionObject);
+				// octree.add(entry.object.collisionObject);
 			});
+
+			clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+				return si.object;
+			}));
 
 			animate();
 			viewportCameraMove(camera);
 
-			octree.update();
+			// octree.update();
 
 
 			///// STATIC COMPONENTS
@@ -281,6 +335,7 @@ angular.module('dokuvis.viewport',[
 				el = $compile('<viewport-analysis-tools></viewport-analysis-tools>')(elScope);
 				$animate.enter(el, element);
 			}
+
 		};
 
 
@@ -319,8 +374,53 @@ angular.module('dokuvis.viewport',[
 		 * Delay tooltip instantiation
 		 */
 		var hoverDebounce = $debounce(function (entry, position) {
-			openTooltip(entry, position);
+			if (entry instanceof DV3D.ClusterObject) {
+				entry.explode();
+				animateAsync();
+			}
+			else
+				openTooltip(entry, position);
 		}, 500, false, false);
+
+		function enterHover(entry, position) {
+			hoverObject = entry;
+
+			if (hoverObject instanceof DV3D.ClusterObject)
+				hoverObject.highlight(true);
+
+			else if (entry instanceof DV3D.ObjectEntry)
+				assignHighlightMat(entry.object);
+				// entry.highlight(true);
+
+			else if (entry instanceof DV3D.ImageEntry)
+				entry.highlight(true);
+			// else
+			// 	spatialImages.dehighlight();
+
+			animateThrottle20();
+
+			hoverDebounce(entry, position);
+		}
+
+		function exitHover() {
+			if (hoverObject instanceof DV3D.ClusterObject) {
+				hoverObject.implode();
+				hoverObject.highlight(false);
+			}
+			else if (hoverObject instanceof DV3D.ObjectEntry) {
+				rejectHighlightMat(hoverObject.object);
+			}
+			else if (hoverObject instanceof DV3D.ImageEntry) {
+				hoverObject.highlight(false);
+			}
+
+			animateThrottle20();
+			// animateAsync();
+
+			hoverObject = null;
+
+			closeTooltip();
+		}
 
 		function openTooltip(entry, position) {
 			tooltipScope = scope.$new(false);
@@ -340,6 +440,62 @@ angular.module('dokuvis.viewport',[
 				$animate.leave(tooltipElement);
 				tooltipElement = null;
 				scope.$applyAsync();
+			}
+		}
+
+		function openProgressBar() {
+			progressBarScope = scope.$new(false);
+			progressBarScope.close = closeProgressBar;
+			progressBarElement = $compile('<viewport-progress-bar></viewport-progress-bar>')(progressBarScope);
+			$animate.enter(progressBarElement, element);
+		}
+
+		function closeProgressBar() {
+			if (progressBarScope) {
+				progressBarScope.$destroy();
+				progressBarScope = null;
+			}
+			if (progressBarElement) {
+				$animate.leave(progressBarElement);
+				progressBarElement = null;
+			}
+		}
+
+		function openModelUploadCtrls(entry) {
+			modelUploadScope = scope.$new(false);
+			modelUploadScope.entry = entry;
+			modelUploadScope.reset = function (type) {
+				if (type === 'position' || type === 'quaternion' || type === 'scale') {
+					transformObject[type].copy(transformObject.userData[type + '0']);
+					animateAsync();
+				}
+			};
+			modelUploadScope.close = function () {
+				transformControls.detach();
+				transformObject.matrixAutoUpdate = false;
+				transformObject = null;
+				closeModelUploadCtrls();
+				animateAsync();
+			};
+			modelUploadScope.abort = function () {
+				transformControls.detach();
+				removeObject(transformObject.entry);
+				transformObject = null;
+				closeModelUploadCtrls();
+				animateAsync();
+			};
+			modelUploadElement = $compile('<viewport-upload-ctrls></viewport-upload-ctrls>')(modelUploadScope);
+			$animate.enter(modelUploadElement, element);
+		}
+
+		function closeModelUploadCtrls() {
+			if (modelUploadScope) {
+				modelUploadScope.$destroy();
+				modelUploadScope = null;
+			}
+			if (modelUploadElement) {
+				$animate.leave(modelUploadElement);
+				modelUploadElement = null;
 			}
 		}
 
@@ -473,9 +629,11 @@ angular.module('dokuvis.viewport',[
 			}
 			else {
 				// update image resolution
-				spatialImages.forEach(function (img) {
-					img.updateTextureByDistance(camera.position, 30);
-				}, true);
+				// spatialImages.forEach(function (img) {
+				// 	img.updateTextureByDistance(camera.position, 30);
+				// }, true);
+				if (!isLoading)
+					clusterTree.update(camera);
 			}
 
 			if (controls) controls.update();
@@ -563,8 +721,8 @@ angular.module('dokuvis.viewport',[
 			if (args.indexOf('spatialImages') !== -1)
 				octree.search(raycaster.ray.origin, 0, true, raycaster.ray.direction)
 					.forEach(function (item) {
-						if (item.object.parent.entry.visible)
-							testObjects.push(item.object);
+						//if (item.object.parent.entry.visible)
+						testObjects.push(item.object);
 					});
 
 			return testObjects;
@@ -578,17 +736,24 @@ angular.module('dokuvis.viewport',[
 		function selectRay(mouse, ctrlKey) {
 			prepareRaycaster(mouse);
 			var testObjects = getRaycastTestObjects('objects', 'plans', 'spatialImages');
-
 			// raycast
 			var intersection = raycast(testObjects, true);
 
 			if (intersection) {
 				$log.debug(intersection);
 
-				if (intersection.object.entry instanceof DV3D.Entry)
-					setSelected(intersection.object.entry, ctrlKey);
+				if (intersection.object.entry instanceof DV3D.ObjectEntry) {
+					// get root entry
+					var entry = intersection.object.entry;
+					while (entry.parent) {
+						entry = entry.parent;
+					}
+					setSelected(entry, ctrlKey);
+				}
 				else if (intersection.object.parent.entry instanceof DV3D.Entry)
 					setSelected(intersection.object.parent.entry, ctrlKey);
+				else if (intersection.object.parent.cluster instanceof DV3D.ClusterObject)
+					setSelected(intersection.object.parent.cluster, ctrlKey);
 				else
 					$log.warn('Raycast hit unknown object', intersection);
 			}
@@ -738,36 +903,44 @@ angular.module('dokuvis.viewport',[
 
 		// apply selection material/color to entry's object and activate entry
 		function selectEntry(entry) {
-			if (entry instanceof DV3D.ObjectEntry) {
-				assignSelectionMaterial(entry);
-				entry.children.forEach(function (child) {
-					selectEntry(child);
-				});
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					assignSelectionMaterial(entry);
+					entry.children.forEach(function (child) {
+						selectEntry(child);
+					});
+				} else if (entry instanceof DV3D.PlanEntry) {
+					entry.object.select();
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.object.select();
+				}
+				entry.select(null, true);
 			}
-			else if (entry instanceof DV3D.PlanEntry) {
-				entry.object.select();
+			else if (entry instanceof DV3D.ClusterObject) {
+				entry.implode();
+				entry.select(true);
 			}
-			else if (entry instanceof DV3D.ImageEntry) {
-				entry.object.select();
-			}
-			entry.select(null, true);
 		}
 
 		// apply original material/color to entry's object and deactivate entry
 		function deselectEntry(entry) {
-			if (entry instanceof DV3D.ObjectEntry) {
-				rejectSelectionMaterial(entry);
-				entry.children.forEach(function (child) {
-					deselectEntry(child);
-				});
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					rejectSelectionMaterial(entry);
+					entry.children.forEach(function (child) {
+						deselectEntry(child);
+					});
+				} else if (entry instanceof DV3D.PlanEntry) {
+					entry.object.deselect();
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.object.deselect();
+				}
+				entry.select(null, false);
 			}
-			else if (entry instanceof DV3D.PlanEntry) {
-				entry.object.deselect();
+			else if (entry instanceof DV3D.ClusterObject) {
+				// entry.implode();
+				entry.select(false);
 			}
-			else if (entry instanceof DV3D.ImageEntry) {
-				entry.object.deselect();
-			}
-			entry.select(null, false);
 		}
 
 		/**
@@ -778,14 +951,16 @@ angular.module('dokuvis.viewport',[
 			if (entry.type !== 'object') return;
 
 			switch (viewportSettings.shading) {
-				case 'xray': entry.object.material = materials['xraySelectionMat']; break;
+				case 'xray':
+					entry.object.material = materials.get('xraySelectionMat');
+				break;
 			}
 
 			if (entry.edges) {
-				if (entry.edges.material === materials['edgesMat'])
-					entry.edges.material = materials['edgesSelectionMat'];
+				if (entry.edges.material.name === 'edgesMat')
+					entry.edges.material = materials.get('edgesSelectionMat');
 				else
-					entry.edges.material.color = materials['edgesSelectionMat'].color;
+					entry.edges.material.color = materials.get('edgesSelectionMat').color;
 			}
 		}
 
@@ -797,14 +972,68 @@ angular.module('dokuvis.viewport',[
 			if (entry.type !== 'object') return;
 
 			switch (viewportSettings.shading) {
-				case 'xray': entry.object.material = materials['xrayMat']; break;
+				case 'xray':
+					entry.object.material = materials.get('xrayMat');
+					break;
 			}
 
 			if (entry.edges) {
-				if (entry.edges.material === materials['edgesSelectionMat'])
-					entry.edges.material = materials['edgesMat'];
+				if (entry.edges.material.name === 'edgesSelectionMat')
+					entry.edges.material = materials.get('edgesMat');
 				else
-					entry.edges.material.color = materials['edgesMat'].color;
+					entry.edges.material.color = materials.get('edgesMat').color;
+			}
+		}
+
+		function setHighlighted(entry) {
+			var highlightChanged = false;
+
+			if (highlighted && highlighted !== entry) {
+				unhighlightEntry(highlighted);
+				highlighted = null;
+				highlightChanged = true;
+			}
+
+			if (entry && highlighted === null) {
+				highlightEntry(entry);
+				highlighted = entry;
+				highlightChanged = true;
+			}
+
+			if (highlightChanged)
+				animateAsync();
+		}
+
+		function highlightEntry(entry) {
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					assignHighlightMat(entry.object);
+					entry.children.forEach(function (child) {
+						highlightEntry(child);
+					});
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.highlight(true);
+				}
+			}
+			else if (entry instanceof DV3D.ClusterObject) {
+				entry.highlight(true);
+			}
+		}
+
+		function unhighlightEntry(entry) {
+			if (entry instanceof DV3D.Entry) {
+				if (entry instanceof DV3D.ObjectEntry) {
+					rejectHighlightMat(entry.object);
+					entry.children.forEach(function (child) {
+						unhighlightEntry(child);
+					});
+				} else if (entry instanceof DV3D.ImageEntry) {
+					entry.highlight(false);
+				}
+			}
+			else if (entry instanceof DV3D.ClusterObject) {
+				entry.implode();
+				entry.highlight(false);
 			}
 		}
 
@@ -831,28 +1060,70 @@ angular.module('dokuvis.viewport',[
 		}
 
 		function assignHighlightMat(obj) {
-			obj.material = obj.material.clone();
-			var hcolor = new THREE.Color(0xffff00); //materials['highlightMat'].color.clone();
-			obj.material.color.lerp(hcolor, 0.5);
-			obj.material.name += '_highlight';
+			if (obj.entry.type !== 'object') return;
+
+			var hColor = new THREE.Color(DV3D.Defaults.highlightColor);
+
+			switch (viewportSettings.shading) {
+				case 'grey':
+					obj.material = materials.get('highlightMat');
+					break;
+				case 'transparent':
+					obj.material = materials.get('transparentHighlightMat');
+					break;
+				case 'xray':
+					obj.material = materials.get('xrayHighlightMat');
+					break;
+				default:
+					if (Array.isArray(obj.material))
+						obj.material = obj.material.map(function (value) {
+							var mat = value.clone();
+							mat.color.lerp(hColor, 0.3);
+							mat.name += '_highlight';
+							materials.assign(mat);
+							return mat;
+						});
+					else {
+						obj.material = obj.material.clone();
+						obj.material.color.lerp(hColor, 0.3);
+						obj.material.name += '_highlight';
+						materials.assign(obj.material);
+					}
+			}
 		}
 
 		function rejectHighlightMat(obj) {
-			// be sure not to dispose standard or original material
-			if (obj.material === materials[obj.userData.originalMat] ||
-				viewportCache.standardMaterials.indexOf(obj.material.name) !== -1)
-				return;
+			if (obj.entry.type !== 'object') return;
 
-			obj.material.dispose();
+			// be sure not to dispose standard or original material
+			// if (obj.material === materials.get(obj.userData.originalMat) /*||
+			// 	viewportCache.standardMaterials.indexOf(obj.material.name) !== -1*/) {
+				materials.remove(obj.material);
+				// if (Array.isArray(obj.material))
+				// 	obj.material.forEach(function (value) {
+				// 		value.dispose();
+				// 	});
+				// else
+				// 	obj.material.dispose();
+			// }
+
 			switch (viewportSettings.shading) {
 				case 'grey':
-					obj.material = materials['defaultDoublesideMat'];
+					obj.material = materials.get('defaultDoublesideMat');
 					break;
 				case 'transparent':
-					obj.material = materials['transparentMat'];
+					obj.material = materials.get('transparentMat');
+					break;
+				case 'xray':
+					obj.material = materials.get('xrayMat');
 					break;
 				default:
-					obj.material = materials[obj.userData.originalMat];
+					if (Array.isArray(obj.userData.originalMat))
+						obj.material = obj.userData.originalMat.map(function (value) {
+							return materials.get(value);
+						});
+					else
+						obj.material = materials.get(obj.userData.originalMat);
 					break;
 			}
 		}
@@ -983,24 +1254,24 @@ angular.module('dokuvis.viewport',[
 					// 	obj.object.material = materials[obj.object.userData.originalMat];
 					// 	break;
 					case 'grey':
-						obj.object.material = materials['defaultDoublesideMat'];
+						obj.object.material = materials.get('defaultDoublesideMat');
 						break;
 					case 'transparent':
-						obj.object.material = materials['transparentMat'];
+						obj.object.material = materials.get('transparentMat');
 						break;
 					case 'xray':
 						if (selected.indexOf(obj) !== -1)
-							obj.object.material = materials['xraySelectionMat'];
+							obj.object.material = materials.get('xraySelectionMat');
 						else
-							obj.object.material = materials['xrayMat'];
+							obj.object.material = materials.get('xrayMat');
 						break;
 					default:
 						if (Array.isArray(obj.object.userData.originalMat))
 							obj.object.material = obj.object.userData.originalMat.map(function (value) {
-								return materials[value];
+								return materials.get(value);
 							});
 						else
-							obj.object.material = materials[obj.object.userData.originalMat];
+							obj.object.material = materials.get(obj.object.userData.originalMat);
 						break;
 				}
 			});
@@ -1184,7 +1455,7 @@ angular.module('dokuvis.viewport',[
 				}
 			}
 			else if (navigation.rotate) {
-				if (event.button === 0 && camera.inPerspectiveMode) {
+				if (event.button === 0) { //&& camera.inPerspectiveMode) {
 					controls.onMouseDown(event.originalEvent, 0);
 					isRotatingView = true;
 				}
@@ -1208,7 +1479,8 @@ angular.module('dokuvis.viewport',[
 			event.preventDefault();
 			var mouse = mouseToViewportCoords(event);
 
-			closeTooltip();
+			//exitHover();
+				closeTooltip();
 
 			if (dummyCreationMode && dummyOrigin) {
 				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
@@ -1240,7 +1512,7 @@ angular.module('dokuvis.viewport',[
 					element.find('#select-rectangle').css(getSelectRectangleCSS(mouseDownCoord, mouse));
 				}
 
-				else if (isMouseDown === 0 && camera.inPerspectiveMode && !mouseDownCoord.equals(mouse)) {
+				else if (isMouseDown === 0 /*&& camera.inPerspectiveMode*/ && !mouseDownCoord.equals(mouse)) {
 					controls.onMouseDown(mouseDownEvent.originalEvent, 0);
 					canvas.addClass('cursor_orbit');
 					isRotatingView = true;
@@ -1259,17 +1531,25 @@ angular.module('dokuvis.viewport',[
 
 				var intersection = raycast(testObjects, true);
 				if (intersection) {
-					var entry = intersection.object.entry || intersection.object.parent.entry;
-					if (entry instanceof DV3D.ImageEntry)
-						entry.highlight(true);
-					else
-						spatialImages.dehighlight();
+					var entry = intersection.object.entry || intersection.object.parent.entry || intersection.object.parent.cluster;
 
+					// if (entry instanceof DV3D.ImageEntry)
+					// 	entry.highlight(true);
+					// else
+					// 	spatialImages.dehighlight();
+					if (entry instanceof DV3D.ObjectEntry) {
+						while (entry.parent) {
+							entry = entry.parent;
+						}
+					}
+					setHighlighted(entry);
 					hoverDebounce(entry, new THREE.Vector2(event.offsetX, event.offsetY));
 				}
 				else {
-					spatialImages.dehighlight();
+					// spatialImages.dehighlight();
+					setHighlighted();
 					hoverDebounce.cancel();
+
 				}
 			}
 
@@ -1340,6 +1620,7 @@ angular.module('dokuvis.viewport',[
 				}
 				// click selection
 				else if (mouse.equals(mouseDownCoord)) {
+					hoverDebounce.cancel();
 					selectRay(mouse, event.ctrlKey);
 					animate();
 				}
@@ -1383,6 +1664,8 @@ angular.module('dokuvis.viewport',[
 			isMouseDown = -1;
 			closeContextMenu();
 			closeTooltip();
+			setHighlighted();
+			hoverDebounce.cancel();
 
 			if (navigation.default) {
 				// complete navigation
@@ -1475,11 +1758,29 @@ angular.module('dokuvis.viewport',[
 		function keyup(event) {
 			if (['INPUT', 'TEXTAREA'].indexOf(event.target.tagName) !== -1) return;
 
-			switch (event.keyCode) {
-				case 70: setCameraMode('front'); break;			// F
-				case 76: setCameraMode('left'); break;			// L
-				case 80: setCameraMode('perspective'); break;	// P
-				case 84: setCameraMode('top'); break;			// T
+			// TODO: update key usage
+			// switch (event.keyCode) {
+			// 	case 70: setCameraMode('front'); break;			// F
+			// 	case 76: setCameraMode('left'); break;			// L
+			// 	case 80: setCameraMode('perspective'); break;	// P
+			// 	case 84: setCameraMode('top'); break;			// T
+			// }
+
+			if (transformControls) {
+				switch (event.keyCode) {
+					case 81: // Q
+						transformControls.setSpace(transformControls.space === 'local' ? 'world' : 'local');
+						break;
+					case 87: // W
+						transformControls.setMode('translate');
+						break;
+					case 69: // E
+						transformControls.setMode('rotate');
+						break;
+					case 82: // R
+						transformControls.setMode('scale');
+						break;
+				}
 			}
 		}
 
@@ -1757,6 +2058,11 @@ angular.module('dokuvis.viewport',[
 					heatMap.dispose();
 					heatMap = null;
 				}
+				if (objHeatMap && (options.type !== 'objectHeatMap' || !options.visible)) {
+					// scene.remove(objHeatMap);
+					objHeatMap.dispose();
+					objHeatMap = null;
+				}
 				if (vectorField && (options.type !== 'vectorField' || !options.visible)) {
 					scene.remove(vectorField);
 					vectorField.dispose();
@@ -1768,12 +2074,27 @@ angular.module('dokuvis.viewport',[
 					windMap = null;
 					stopAnimation();
 				}
+				if (radarChart && (options.type !== 'radarChart' || !options.visible)) {
+					scene.remove(radarChart);
+					radarChart.dispose();
+					radarChart = null;
+				}
+				if (radialFan && (options.type !== 'radialFan' || !options.visible)) {
+					scene.remove(radialFan);
+					radialFan.dispose();
+					radialFan = null;
+				}
 
 				if (options.visible) {
 					switch (options.type) {
 						case 'heatMap':
 							heatMap = new DV3D.HeatMap3();
+							heatMap.setRadius(options.radius);
 							scene.add(heatMap);
+							break;
+						case 'objectHeatMap':
+							objHeatMap = new DV3D.ObjectHeatMap(objects.getByName('d1_HJrdAjjfG_Zwinger').object, camera);
+							// objHeatMap = new DV3D.ObjectHeatMap(objects.getByName('d1_HyHLA6jGf_node-schloss_nord').object, camera);
 							break;
 						case 'vectorField':
 							vectorField = new DV3D.VectorField();
@@ -1786,6 +2107,15 @@ angular.module('dokuvis.viewport',[
 							});
 							windMap._useWeight = options.useWeight;
 							scene.add(windMap);
+							break;
+						case 'radarChart':
+							radarChart = new DV3D.RadarChart();
+							scene.add(radarChart);
+							break;
+						case 'radialFan':
+							// radialFan = new DV3D.RadarChart2();
+							radialFan = new DV3D.RadialFan();
+							scene.add(radialFan);
 							break;
 					}
 
@@ -1813,10 +2143,17 @@ angular.module('dokuvis.viewport',[
 
 			if (options.radiusChange) {
 				heatMapRadius = options.radius;
+				if (heatMap)
+					heatMap.setRadius(options.radius);
 				updateHeatMap();
 			}
 
 			if (options.settingsChange) {
+				if (radialFan) {
+					radialFan.setAngleOffset(options.radarChartAngle);
+					if (options.radarChartResolution)
+						radialFan.setAngleResolution(options.radarChartResolution);
+				}
 				if (windMap) {
 					windMap._useWeight = options.useWeight;
 				}
@@ -1829,21 +2166,67 @@ angular.module('dokuvis.viewport',[
 
 		function updateHeatMap() {
 			if (heatMap) {
-				heatMap.update(camera, function (position) {
-					var or = octree.search(position, heatMapRadius);
-
-					var count = 0;
-					or.forEach(function (r) {
-						if (position.clone().sub(r.position).length() < heatMapRadius)
-							count++;
-					});
-
-					return count;
-				}, function (config) {
+				heatMap.update(camera, spatialImages.get().map(function (entry) {
+					return entry.object;
+				}), function (config) {
 					scope.$broadcast('viewportHeatMapComplete', config);
 				});
 
 				animateAsync();
+			}
+
+			if (radarChart) {
+				radarChart.update(camera, clusterTree.getActiveClusters());
+
+				animateAsync();
+			}
+
+			if (radialFan) {
+				// var obj = objects.getByName('d1_HJrdAjjfG_Zwinger').object;
+				// var center = obj.geometry.boundingBox.getCenter().applyMatrix4(obj.matrixWorld);
+
+				radialFan.update(camera, clusterTree.getActiveClusters());
+
+				animateAsync();
+			}
+
+			if (objHeatMap) {
+				objHeatMap.computeUVs();
+
+				openProgressBar();
+
+				objHeatMap.computeMap(function (vpCoord, object) {
+					prepareRaycaster(vpCoord);
+					var intersection = raycast([object]);
+					if (!intersection) return 0;
+
+					var point = intersection.point,
+						normal = intersection.face.normal.clone().applyQuaternion(object.quaternion),
+						count = 0;
+
+					spatialImages.forEach(function (img) {
+
+						var normalToImage = img.object.position.clone().sub(point).normalize();
+						var normalImage = new THREE.Vector3(0,0,-1).applyQuaternion(img.object.quaternion);
+
+						if (normal.dot(normalToImage) > 0 && normalToImage.dot(normalImage) < img.object.fov / 180 - 1) {
+							var distance = point.distanceTo(img.object.position);
+							raycaster.set(point.clone().add(normal), normalToImage);
+							var is = raycast([object]);
+
+							if (!is || is.distance > distance)
+								count++;
+						}
+
+					}, false);
+					// }, true);
+
+					return count;
+				}, function (value, total) {
+					scope.$broadcast('viewportProgressUpdate', value, total);
+				}, function () {
+					animateAsync();
+				});
 			}
 
 			if (vectorField) {
@@ -1852,10 +2235,25 @@ angular.module('dokuvis.viewport',[
 
 					var count = 0, disTmp = 0, disMin = heatMapRadius;
 					var dir = new THREE.Vector3();
+					var items = [];
+
 					or.forEach(function (r) {
-						var distance = position.clone().sub(r.position).length();
+						if (r.object.parent.cluster) {
+							var c = r.object.parent.cluster;
+							var distance = position.clone().sub(c.position).length();
+							if (distance < heatMapRadius + c.distance)
+								items = items.concat(c.getLeaves());
+						}
+						else
+							items.push(r.object.parent);
+					});
+
+					items.forEach(function (item) {
+						// var distance = position.clone().sub(r.position).length();
+						var distance = position.clone().sub(item.position).length();
 						if (distance < heatMapRadius) {
-							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							// dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(item.quaternion));
 							count++;
 							disTmp += distance;
 							disMin = Math.min(disMin, distance);
@@ -1881,10 +2279,25 @@ angular.module('dokuvis.viewport',[
 
 					var count = 0, disTmp = 0, disMin = heatMapRadius;
 					var dir = new THREE.Vector3();
+
+					var items = [];
 					or.forEach(function (r) {
-						var distance = position.clone().sub(r.position).length();
+						if (r.object.parent.cluster) {
+							var c = r.object.parent.cluster;
+							var distance = position.clone().sub(c.position).length();
+							if (distance < heatMapRadius + c.distance)
+								items = items.concat(c.getLeaves());
+						}
+						else
+							items.push(r.object.parent);
+					});
+
+					items.forEach(function (item) {
+						// var distance = position.clone().sub(r.position).length();
+						var distance = position.clone().sub(item.position).length();
 						if (distance < heatMapRadius) {
-							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							// dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(r.object.parent.quaternion));
+							dir.add(new THREE.Vector3(0, 0, -1).applyQuaternion(item.quaternion));
 							count++;
 							disTmp += distance;
 							disMin = Math.min(disMin, distance);
@@ -1913,6 +2326,8 @@ angular.module('dokuvis.viewport',[
 		scope.$on('spatialImageLoadStart', function (event, images) {
 
 			setSelected(null);
+
+			isLoading = true;
 
 			var toBeCreated = [],
 				toBeUpdated = [],
@@ -1946,10 +2361,12 @@ angular.module('dokuvis.viewport',[
 					toBeRemoved.push(entry);
 			});
 
+			clusterTree.clean();
+
 			// remove "missing" images
 			toBeRemoved.forEach(function (value) {
-				scene.remove(value.object);
-				octree.remove(value.object.collisionObject);
+				// scene.remove(value.object);
+				// octree.remove(value.object.collisionObject);
 				spatialImages.remove(value);
 				value.dispose();
 			});
@@ -1970,6 +2387,31 @@ angular.module('dokuvis.viewport',[
 			$q.all(promises)
 				.then(function () {
 					$rootScope.$broadcast('spatialImageLoadSuccess');
+					console.log(octree);
+					//console.log(rbushTree);
+					// addRBushGraph();
+					// $timeout(addOctreeGraph, 500);
+					// buildCluster();
+					clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+						return si.object;
+					}));
+					// clusterTree.drawDebugGraph();
+
+					isLoading = false;
+
+					// clusterTree.update(camera);
+
+					// clusterTree.getObjectsByThreshold(50, function (obj) {
+					// 	console.log(obj.count);
+					// 	var sphere;
+					// 	if (obj instanceof DV3D.ClusterObject)
+					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
+					// 	else
+					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(3), new THREE.MeshLambertMaterial({color: 0xff0000}));
+					// 	sphere.position.copy(obj.position);
+					// 	scene.add(sphere);
+					// });
+					animateAsync();
 				})
 				.catch(function (reason) {
 					Utilities.throwException('Spatial Image Loading Error', 'An error occurred while loading spatial image', reason);
@@ -1977,6 +2419,7 @@ angular.module('dokuvis.viewport',[
 
 			updateHeatMap();
 		});
+
 
 		/**
 		 * Loads spatialized image into the scene.
@@ -2009,11 +2452,17 @@ angular.module('dokuvis.viewport',[
 			imagepane.applyMatrix(matrix);
 
 
-			scene.add(imagepane);
+			// scene.add(imagepane);
 
 			defer.promise.then(function () {
-				octree.add(imagepane.collisionObject);
-				updateOctreeAsync();
+				// octree.add(imagepane.collisionObject);
+				// updateOctreeAsync();
+
+				// rbushTree.insert({
+				// 	x: imagepane.position.x,
+				// 	y: imagepane.position.z,
+				// 	image: imagepane
+				// });
 			});
 
 			imagepane.name = img.spatial.id;
@@ -2037,6 +2486,7 @@ angular.module('dokuvis.viewport',[
 		 * @param obj {DV3D.ImagePane} ImagePane object
 		 */
 		function setImageView(obj) {
+			// TODO: update considering clusterTree
 			exitIsolation();
 			enterIsolation(obj, false);
 
@@ -2091,9 +2541,9 @@ angular.module('dokuvis.viewport',[
 
 		function exitIsolation() {
 			if (!inIsolationMode) return;
-			spatialImages.forEach(function (item) {
-				item.toggle(true);
-			});
+			// spatialImages.forEach(function (item) {
+			// 	item.toggle(true);
+			// });
 			inIsolationMode = false;
 			scope.$broadcast('viewportIsolationExit');
 		}
@@ -2194,6 +2644,7 @@ angular.module('dokuvis.viewport',[
 
 		// add or remove plan or spatialImage from scene
 		function toggleSourceHandler(event) {
+			console.log(event);
 			var target = event.target;
 			// add
 			if (event.visible) {
@@ -2235,16 +2686,113 @@ angular.module('dokuvis.viewport',[
 
 		///// LOADING
 
+		// listen to modelUploadSuccess event
+		scope.$on('modelUploadSuccess', function (event, node) {
+			loadHierarchyObjects([node])
+				.then(function () {
+					console.log('uploaded objects loaded', node);
+
+					$timeout(function () {
+						var entry = objects.getByName(node.object.id);
+						console.log(entry);
+						entry.focus();
+						entry.object.matrixAutoUpdate = true;
+						transformControls.attach(entry.object);
+						entry.object.userData.position0 = entry.object.position.clone();
+						entry.object.userData.quaternion0 = entry.object.quaternion.clone();
+						entry.object.userData.scale0 = entry.object.scale.clone();
+						transformObject = entry.object;
+						console.log(transformControls);
+						openModelUploadCtrls(entry);
+						console.log(materials);
+					}, 1000, false);
+
+					animateAsync();
+				})
+				.catch(function (err) {
+					Utilities.throwException('Loading Error', 'An error occurred while loading objects. See concole for details.', err);
+				});
+		});
+
 		// listen to modelQuerySuccess event, start loading objects
 		scope.$on('modelQuerySuccess', function (event, entries) {
-			resetScene();
-			ctmloader.manager.reset();
+			// resetScene();
+			// ctmloader.manager.reset();
+			setSelected();
 
-			viewportLoadProgress('init', 0, 1);
+			var toBeCreated = [],
+				toBeUpdated = [],
+				toBeRemoved = [];
 
-			loadHierarchyObjects(entries)
+			var newObjects;
+			if (Array.isArray(entries))
+				newObjects = entries;
+			else
+				newObjects = [entries];
+
+			// look if search results are already part of entries or not
+			newObjects.forEach(function (node) {
+				var obj = objects.getByName(node.object.id);
+				if (obj)
+					toBeUpdated.push({
+						entry: obj,
+						resource: node
+					});
+				else
+					toBeCreated.push(node);
+			});
+
+			// get all entries that are not part of search results anymore
+			objects.forEach(function (entry) {
+				if (entry.parent) return;
+				if (!newObjects.find(function (node) {
+					return entry.name === node.object.id;
+				}))
+					toBeRemoved.push(entry);
+			});
+
+			// clusterTree.clean();
+
+			// remove "missing" objects
+			toBeRemoved.forEach(function (entry) {
+				// scene.remove(value.object);
+				// octree.remove(value.object.collisionObject);
+				// spatialImages.remove(value);
+				// value.dispose();
+				// remove from scene and collection
+				removeObject(entry);
+
+				// obj.object.parent.remove(obj.object);
+				// if (obj.edges) scene.remove(obj.edges);
+				// geometries.remove(obj.object.geometry);
+				// if (Array.isArray(obj.object.userData.originalMat))
+				// 	obj.object.userData.originalMat.forEach(function (value) {
+				// 		materials.remove(materials.get(value));
+				// 	});
+				// else
+				// 	materials.remove(materials.get(obj.object.userData.originalMat));
+				// if (obj.edges) {
+				// 	geometries.remove(obj.edges.geometry);
+				// 	materials.remove(obj.edges.material);
+				// }
+				// objects.remove(obj);
+				// obj.dispose();
+			});
+
+
+
+			// update still existing images
+			// toBeUpdated.forEach(function (value) {
+			// 	value.entry.source = value.resource;
+			// 	value.entry.object.userData.source = value.resource;
+			// });
+
+			// viewportLoadProgress('init', 0, 1);
+
+			loadHierarchyObjects(toBeCreated)
 				.then(function () {
 					$log.debug('objects loaded');
+					animateAsync();
 				})
 				.catch(function (err) {
 					Utilities.throwException('Loading Error', 'An error occurred while loading objects. See concole for details.', err);
@@ -2253,12 +2801,13 @@ angular.module('dokuvis.viewport',[
 
 		function loadHierarchyObjects(nodes) {
 			return nodes.reduce(function (promise, node) {
+				var object = node.file ? node : node.object;
 				return promise
 					.then(function () {
-						return loadObject(node);
+						return loadObject(object);
 					})
 					.then(function () {
-						return loadHierarchyObjects(node.children);
+						return loadHierarchyObjects(object.children);
 					});
 			}, $q.resolve());
 		}
@@ -2274,7 +2823,7 @@ angular.module('dokuvis.viewport',[
 					obj = new THREE.Group();
 					break;
 				case 'object':
-					obj = new THREE.Mesh(geometries['initGeo'], materials['defaultMat']);
+					obj = new THREE.Mesh(geometries.get('initGeo'), materials.get('defaultMat'));
 					break;
 				default:
 					defer.reject('Unsupported type');
@@ -2321,6 +2870,7 @@ angular.module('dokuvis.viewport',[
 			if (parent) parent.add(obj);
 			else scene.add(obj);
 
+			obj.userData.node = entry.node || parent.userData.node;
 
 			// create ObjectEntry and add to collection
 			var objentry = new DV3D.ObjectEntry(obj);
@@ -2333,228 +2883,93 @@ angular.module('dokuvis.viewport',[
 
 			// load geometry / ctm file
 			if (entry.obj.type === 'object') {
-				var geomId = Array.isArray(entry.file.mesh) ?
-					entry.file.mesh.reduce(function (acc, next) { return acc + next;	}) :
-					entry.file.mesh;
 
-				// if geometry already exists, use this one
-				if (geomId in geometries)
-					ctmHandler(geometries[geomId].mesh);
+				// set geometries
+				var meshPath = Array.isArray(entry.file.mesh) ? entry.file.mesh.map(function (file) { return entry.file.path + file; }) : entry.file.path + entry.file.mesh;
 
-				// load multi-material objects
-				if (Array.isArray(entry.file.mesh)) {
-					var geoParts = [];
-					entry.file.mesh.reduce(function (promise, file) {
-						return promise.then(function () {
-							var deferGeo = $q.defer();
+				geometries.loadCTMGeometry(meshPath)
+					.then(function (geometry) {
+						obj.geometry = geometry;
 
-							ctmloader.load('data/' + entry.file.path + file, function (geo) {
-								geoParts.push(geo);
-								deferGeo.resolve();
-							}, { useWorker: false });
+						animateThrottle500();
+					})
+					.catch(function (reason) {
+						console.error(reason);
+					});
 
-							return deferGeo.promise;
-						});
-					}, $q.resolve())
-						.then(function () {
-							ctmHandler(geoParts);
+				// set materials
+				// TODO: consider current shading
+				materials.setMaterial(entry.materials)
+					.then(function (material) {
+						obj.material = material;
+						obj.userData.originalMat = Array.isArray(material) ? material.map(function (mat) {
+							return mat.name;
+						}) : material.name;
+
+						animateThrottle500();
+					})
+					.catch(function (reason) {
+						console.error(reason);
+						obj.material = materials.assign('defaultDoubleSideMat');
+						obj.userData.originalMat = obj.material.name;
+					});
+
+				// set edges
+				if (entry.file.edges) {
+					var edgesPath = Array.isArray(entry.file.edges) ? entry.file.edges.map(function (file) { return entry.file.path + file; }) : entry.file.path + entry.file.edges;
+
+					geometries.loadEdgesGeometry(edgesPath)
+						.then(function (geometry) {
+							var edges = new THREE.LineSegments(geometry, materials.assign('edgesMat'));
+							edges.matrix = obj.matrixWorld;
+							edges.matrixAutoUpdate = false;
+
+							scene.add(edges);
+							objentry.addEdges(edges);
+
+							animateThrottle500();
+						})
+						.catch(function (reason) {
+							console.error(reason);
 						});
 				}
-
-				// load normal objects
-				else
-					ctmloader.load('data/' + entry.file.path + entry.file.mesh, ctmHandler, { useWorker: false });
 			}
 
 			defer.resolve();
 
 
-			function ctmHandler(geometry) {
-
-				// merge geometry parts
-				if (Array.isArray(geometry)) {
-					var geometryParts = geometry;
-					geometry = geometryParts[0];
-					geometry.clearGroups();
-					geometry.addGroup(0, geometry.index.count, 0);
-
-					for (var i = 1; i < geometryParts.length; i++) {
-						geometry.merge(geometryParts[i]);
-						var count = geometryParts[i].index.count;
-						geometry.addGroup(geometry.index.count - count, count, i);
-						geometryParts[i].dispose();
-					}
-
-					if (!geometry.name) geometry.name = entry.file.mesh.reduce(function (acc, next) {
-						return acc + next;
-					});
-				}
-				else {
-					geometry.clearGroups();
-					geometry.addGroup(0, geometry.index.count, 0);
-
-					if (!geometry.name) geometry.name = entry.file.mesh;
-				}
-
-				// add to geometry list
-				if (!(geometry.name in geometries)) {
-					geometries[geometry.name] = { mesh: geometry };
-				}
-
-				geometry.computeBoundingBox();
-
-				obj.geometry = geometry;
-
-				// set material
-				if (entry.materials && Array.isArray(entry.materials)) {
-					if (entry.materials.length !== 1) {
-						obj.material = entry.materials.map(prepareMaterial);
-						obj.userData.originalMat = entry.materials.map(function (m) {
-							return m.id;
-						});
-					}
-					else {
-						obj.material = prepareMaterial(entry.materials[0]);
-						obj.userData.originalMat = entry.materials[0].id;
-					}
-				}
-				else {
-					obj.material = materials['defaultDoublesideMat'];
-					obj.userData.originalMat = 'defaultDoublesideMat';
-				}
-
-				// load edges of normal object
-				if (entry.file.edges && !Array.isArray(entry.file.edges)) {
-					loadEdges('data/' + entry.file.path + entry.file.edges)
-						.then(function (edgesGeo) {
-							var edges = new THREE.LineSegments(edgesGeo, materials['edgesMat']);
-							edges.matrix = obj.matrixWorld;
-							edges.matrixAutoUpdate = false;
-
-							scene.add(edges);
-							geometries[geometry.name].edges = edgesGeo;
-							// objects[obj.id].edges = edges;
-							objentry.addEdges(edges);
-							animateThrottle500();
-						})
-						.catch(function (err) {
-							if (err)
-								Utilities.throwException('Loading Error', 'Some error occurred while loading objects. See console for details.', err);
-						});
-				}
-				// load edges of multi-material object
-				else if (entry.file.edges && Array.isArray(entry.file.edges)) {
-					var edgesParts = [];
-					entry.file.edges.reduce(function (promise, file) {
-						return promise.then(function () {
-							return loadEdges('data/' + entry.file.path + file)
-								.then(function (edgesGeo) {
-									edgesParts.push(edgesGeo);
-									return $q.resolve();
-								});
-						});
-					}, $q.resolve())
-						.then(function () {
-							var edgesGeo = edgesParts[0];
-							for (var i = 1; i < edgesParts.length; i++) {
-								edgesGeo.merge(edgesParts[i]);
-								edgesParts[i].dispose();
-							}
-
-							var edges = new THREE.LineSegments(edgesGeo, materials['edgesMat']);
-							edges.matrix = obj.matrixWorld;
-							edges.matrixAutoUpdate = false;
-
-							scene.add(edges);
-							geometries[geometry.name].edges = edgesGeo;
-							// objects[obj.id].edges = edges;
-							objentry.addEdges(edges);
-							animateThrottle500();
-						})
-						.catch(function (err) {
-							if (err)
-								Utilities.throwException('Loading Error', 'Some error occurred while loading objects. See console for details.', err);
-						});
-				}
-
-				animateThrottle500();
-			}
 
 			return defer.promise;
 		}
 
-		function prepareMaterial(m) {
-			// if material with id/name already exists, use existing instance
-			if (m.id in materials)
-				return materials[m.id];
+		// remove entry from scene and collection
+		function removeObject(entry) {
 
-			// else create new material instance
-			var material = new THREE.MeshLambertMaterial();
-			material.name = m.id;
-
-			// set diffuse color/map
-			if (Array.isArray(m.diffuse)) {
-				material.color = new THREE.Color(m.diffuse[0], m.diffuse[1], m.diffuse[2]);
-				material.color.convertLinearToGamma();
-			}
-			else if (typeof m.diffuse === 'string') {
-				textureLoader.load('data/' + m.path + m.diffuse, function (map) {
-					material.map = map;
-					material.needsUpdate = true;
-				}, null, function (xhr) {
-					$log.warn('Couldn\'t load texture', xhr.path[0].src);
-				});
-			}
-
-			// set alpha map
-			if (m.alpha) {
-				textureLoader.load('data/' + m.path + m.alpha, function (map) {
-					material.alphaMap = map;
-					material.transparent = true;
-					material.needsUpdate = true;
-				}, null, function (xhr) {
-					$log.warn('Couldn\'t load texture', xhr.path[0].src);
-				});
-
-			}
-
-			material.side = THREE.DoubleSide;
-
-			// add to materials list
-			materials[m.id] = material;
-
-			return material;
-		}
-
-		// load edges from zipped json file
-		function loadEdges(file) {
-			var defer = $q.defer();
-
-			JSZipUtils.getBinaryContent(file, function (err, data) {
-				if (err) {
-					defer.reject(err);
-					return;
-				}
-
-				JSZip.loadAsync(data)
-					.then(function (zip) {
-						var files = zip.file(/.+\.json$/i);
-						return files[0].async('text');
-					})
-					.then(function (json) {
-						json = JSON.parse(json);
-						var vertices = new Float32Array(json.data.attributes.position.array);
-						var geometry = new THREE.BufferGeometry();
-						geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-						defer.resolve(geometry);
-					})
-					.catch(function (err) {
-						Utilities.throwException('JSZip Error', 'Failed to load or extract zip file.', err);
-						defer.reject();
-					});
+			var children = [].concat(entry.children);
+			children.forEach(function (child) {
+				removeObject(child);
 			});
 
-			return defer.promise;
+			entry.object.parent.remove(entry.object);
+
+			if (entry.type === 'object') {
+				geometries.remove(entry.object.geometry);
+				if (Array.isArray(entry.object.userData.originalMat))
+					entry.object.userData.originalMat.forEach(function (value) {
+						materials.remove(materials.get(value));
+					});
+				else
+					materials.remove(materials.get(entry.object.userData.originalMat));
+
+				if (entry.edges) {
+					scene.remove(entry.edges);
+					geometries.remove(entry.edges.geometry);
+					materials.remove(entry.edges.material);
+				}
+			}
+
+			objects.remove(entry);
+			entry.dispose();
 		}
 
 		// clear scene and dispose geometries and materials
@@ -2720,8 +3135,8 @@ angular.module('dokuvis.viewport',[
 			var newpos = new THREE.Vector3().addVectors(boundingSphere.center, s.setLength(h));
 
 			// adjust camera frustum (near, far)
-			camera.cameraP.near = boundingSphere.radius / 100;
-			camera.cameraP.far = Math.max(boundingSphere.radius * 100, viewportSettings.defaults.FAR);
+			camera.near = boundingSphere.radius / 100;
+			camera.far = Math.max(boundingSphere.radius * 100, viewportSettings.defaults.FAR);
 			camera.updateProjectionMatrix();
 
 			// animate camera.position and controls.target
@@ -2778,8 +3193,8 @@ angular.module('dokuvis.viewport',[
 			SCREEN_HEIGHT = element.height();
 			$log.debug('resize called', SCREEN_WIDTH, SCREEN_HEIGHT);
 
-			camera.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-			camera.cameraP.updateProjectionMatrix();
+			camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+			camera.updateProjectionMatrix();
 
 			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -2796,9 +3211,12 @@ angular.module('dokuvis.viewport',[
 			exitIsolation();
 			//if (scope.snapshot.active) scope.abortSnapshot();
 
+			clusterTree.clean();
+
 			if (scope.spatialize)
 				clearMarkers();
 
+			// TODO: cleanup all visualizations
 			if (heatMap) {
 				scene.remove(heatMap);
 				heatMap.dispose();
@@ -2816,6 +3234,7 @@ angular.module('dokuvis.viewport',[
 			viewportCache.viewpoint.controlsTarget.copy(controls.target);
 
 			controls.dispose();
+			transformControls.dispose();
 
 			renderer.forceContextLoss();
 			renderer.dispose();

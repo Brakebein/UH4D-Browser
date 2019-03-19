@@ -48,7 +48,7 @@ angular.module('uh4dApp', [
 			})
 			.state({
 				name: 'root.search',
-				url: '/search?query&from&to&undated&page&filterObjIncl&filterObjExcl',
+				url: '/search?query&from&to&modelDate&undated&page&filterObjIncl&filterObjExcl',
 				component: 'search',
 				params: {
 					query: {
@@ -62,6 +62,11 @@ angular.module('uh4dApp', [
 						value: null
 					},
 					to: {
+						type: 'query',
+						dynamic: true,
+						value: null
+					},
+					modelDate: {
 						type: 'query',
 						dynamic: true,
 						value: null
@@ -112,6 +117,36 @@ angular.module('uh4dApp', [
 				},
 				onExit: ['imageModalInstance', function (imageModalInstance) {
 					imageModalInstance.close();
+				}]
+			})
+			.state({
+				name: 'root.search.object',
+				url: '/object/:objectId',
+				resolve: {
+					objectModalInstance: ['$uibModal', function ($uibModal) {
+						return $uibModal.open({
+							component: 'objectModal',
+							size: 'large'
+						});
+					}]
+				},
+				onExit: ['objectModalInstance', function (objectModalInstance) {
+					objectModalInstance.close();
+				}]
+			})
+			.state({
+				name: 'root.search.uploadModel',
+				url: '/uploadModel',
+				resolve: {
+					uploadModalInstance: ['$uibModal', function ($uibModal) {
+						return $uibModal.open({
+							component: 'uploadModal'
+						});
+					}]
+				},
+				onExit: ['uploadModalInstance', 'ModelUploader', function (uploadModalInstance, ModelUploader) {
+					uploadModalInstance.close();
+					ModelUploader.clearQueue();
 				}]
 			})
 			.state({

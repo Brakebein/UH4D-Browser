@@ -39,9 +39,12 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container, image-viewer .ct
       margin: 0 0 3px; }
       viewport .ctrl-container > div > .row:last-of-type, viewport-object-tree .ctrl-container > div > .row:last-of-type, image-viewer .ctrl-container > div > .row:last-of-type {
         margin: 0; }
-  viewport .ctrl-container.ctrl-center, viewport-object-tree .ctrl-container.ctrl-center, image-viewer .ctrl-container.ctrl-center {
+  viewport .ctrl-container.ctrl-center-h, viewport-object-tree .ctrl-container.ctrl-center-h, image-viewer .ctrl-container.ctrl-center-h {
     width: 100%;
     justify-content: center; }
+  viewport .ctrl-container.ctrl-center-v, viewport-object-tree .ctrl-container.ctrl-center-v, image-viewer .ctrl-container.ctrl-center-v {
+    height: 100%;
+    align-items: center; }
   viewport .ctrl-container.ctrl-top, viewport-object-tree .ctrl-container.ctrl-top, image-viewer .ctrl-container.ctrl-top {
     top: 0; }
     viewport .ctrl-container.ctrl-top > div, viewport-object-tree .ctrl-container.ctrl-top > div, image-viewer .ctrl-container.ctrl-top > div {
@@ -104,6 +107,18 @@ viewport .ctrl-container, viewport-object-tree .ctrl-container, image-viewer .ct
       border-bottom: none;
       border-right: none;
       border-radius: 10px 0 0 0; }
+  viewport .ctrl-container.ctrl-left, viewport-object-tree .ctrl-container.ctrl-left, image-viewer .ctrl-container.ctrl-left {
+    left: 0; }
+    viewport .ctrl-container.ctrl-left > div, viewport-object-tree .ctrl-container.ctrl-left > div, image-viewer .ctrl-container.ctrl-left > div {
+      background-color: rgba(51, 51, 51, 0.8);
+      border: 1px solid #999;
+      color: #fafafa;
+      font-size: 12px;
+      border-left: none;
+      border-radius: 0 10px 10px 0; }
+  viewport .ctrl-container hr, viewport-object-tree .ctrl-container hr, image-viewer .ctrl-container hr {
+    border-color: #fafafa;
+    margin: 0.25em 0; }
 viewport .ctrl-group, viewport-object-tree .ctrl-group, image-viewer .ctrl-group {
   float: left;
   height: 100%;
@@ -443,5 +458,18 @@ viewport-analysis-tools > .heatmap {
   width: 100%;
   height: 100%;
   pointer-events: none; }
+
+viewport-progress-bar {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10%;
+  background-color: rgba(51, 51, 51, 0.2);
+  z-index: 80; }
+  viewport-progress-bar .progress-bar {
+    color: white; }
 
 /*# sourceMappingURL=viewport.css.map */
