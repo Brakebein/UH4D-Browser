@@ -1,5 +1,6 @@
 angular.module('uh4d.models', [
-	'ngResource'
+	'ngResource',
+	'angularFileUpload'
 ])
 
 .factory('DigitalObject', ['$resource',
@@ -22,11 +23,114 @@ angular.module('uh4d.models', [
 			},
 			update: {
 				method: 'PUT'
+			},
+			save: {
+				url: 'api/model',
+				method: 'POST'
+			},
+			deleteTemp: {
+				url: 'api/model/temp',
+				method: 'POST',
+				hasBody: true
 			}
 		});
 
 	}
 ])
+
+.factory('ModelUploader', ['$rootScope', 'FileUploader', 'Utilities', function ($rootScope, FileUploader, Utilities) {
+
+	var uploader = new FileUploader({
+		url: 'api/model/upload',
+		alias: 'uploadModelFile',
+		queueLimit: 1
+	});
+
+	// FILTER
+	var modelType = ['dae'];
+
+	uploader.filters.push({
+		name: 'modelFilter',
+		fn: function (item) {
+			var type = item.name.slice(item.name.lastIndexOf('.') + 1).toLowerCase();
+			return modelType.indexOf(type) !== -1;
+		}
+	});
+
+	// CALLBACKS
+	uploader.onWhenAddingFileFailed = function (item, filter, options) {
+		// if there is already another file in the queue, replace it by the new file
+		if (filter.name === 'queueLimit') {
+			uploader.clearQueue();
+			uploader.addToQueue(item);
+		}
+		else if (filter.name === 'modelFilter') {
+			Utilities.dangerAlert('Model type not supported! Use Collada (.dae).');
+		}
+		else {
+			console.warn('onWhenAddingFileFailed', item, filter, options);
+			Utilities.dangerAlert('Unkown error. See console.');
+		}
+	};
+
+	uploader.onSuccessItem = function (item, response) {
+		if (!(response instanceof Object) || response.error) {
+			Utilities.throwApiException('#model/upload', response);
+		}
+		else {
+			console.log(item, response);
+			response.object.node = response;
+			$rootScope.$broadcast('modelUploadSuccess', response);
+		}
+	};
+
+	uploader.onErrorItem = function (item, response, status, headers) {
+		console.error('onErrorItem', item, response, status, headers);
+		Utilities.throwApiException('#model/upload', response);
+	};
+
+	return uploader;
+
+}])
+
+.component('uploadModal', {
+	templateUrl: 'components/uh4d.models/uploadModal.tpl.html',
+	controller: ['$scope', '$state', 'ModelUploader', 'Utilities', function ($scope, $state, ModelUploader, Utilities) {
+
+		var $ctrl = this;
+
+		$ctrl.$onInit = function () {
+
+			$ctrl.uploader = ModelUploader;
+
+		};
+
+		// watch first queue item and assign to scope
+		$scope.$watch(function () {
+			return ModelUploader.queue[0];
+		}, function (item) {
+			if (item)
+				$ctrl.fileItem = item;
+			else
+				$ctrl.fileItem = null;
+		});
+
+		$ctrl.upload = function () {
+			if (!$ctrl.fileItem) return;
+
+			$ctrl.fileItem.upload();
+		};
+
+		$scope.$on('modelUploadSuccess', function () {
+			$ctrl.close();
+		});
+
+		$ctrl.close = function () {
+			$state.go('^');
+		};
+
+	}]
+})
 
 .component('objectModal', {
 	templateUrl: 'components/uh4d.models/objectModal.tpl.html',
@@ -67,7 +171,7 @@ angular.module('uh4d.models', [
 						Utilities.dangerAlert('Wrong date format! Use "YYYY-MM-DD".');
 						return false;
 					}
-					if ($ctrl.object.date.to && moment($ctrl.object.date.to).isAfter(fromDate)) {
+					if ($ctrl.object.date.to && moment($ctrl.object.date.to).isBefore(fromDate)) {
 						Utilities.dangerAlert('Date must be before destruction date!');
 						return false;
 					}
@@ -79,7 +183,7 @@ angular.module('uh4d.models', [
 						Utilities.dangerAlert('Wrong date format! Use "YYYY-MM-DD".');
 						return false;
 					}
-					if ($ctrl.object.date.from && moment($ctrl.object.date.from).isBefore(toDate)) {
+					if ($ctrl.object.date.from && moment($ctrl.object.date.from).isAfter(toDate)) {
 						Utilities.dangerAlert('Date must be after erection date!');
 						return false;
 					}

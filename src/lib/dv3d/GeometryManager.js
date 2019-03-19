@@ -124,6 +124,7 @@ DV3D.GeometryManager.prototype = {
 					resolve(geo);
 				}
 				else
+					// : TODO: check Promise.mapSeries issue
 					Promise.mapSeries(path, function (file) {
 						return new Promise(function (resolve, reject) {
 							ctmLoader.load(config.pathPrefix + file, function (geometry) {

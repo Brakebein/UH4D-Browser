@@ -824,4 +824,58 @@ angular.module('dokuvis.viewport')
 
 	}]
 
+})
+
+.component('viewportUploadCtrls', {
+
+	templateUrl: 'components/dokuvis.viewport/viewportUploadCtrls.tpl.html',
+
+	controller: ['$scope', 'DigitalObject', 'Utilities', function ($scope, DigitalObject, Utilities) {
+
+		var $ctrl = this;
+
+		var entry;
+
+		$ctrl.$onInit = function () {
+			entry = $scope.$parent.entry;
+			console.log(entry);
+		};
+
+		$ctrl.reset = function (type) {
+			$scope.$parent.reset(type);
+		};
+
+		$ctrl.save = function () {
+			var data = entry.node;
+			delete data.object.node;
+
+			// update matrix
+			data.object.obj.matrix = entry.object.matrixWorld.toArray();
+
+			DigitalObject.save(data).$promise
+				.then(function (result) {
+					console.log(result);
+					data.object.node = entry.node;
+					$scope.$parent.close();
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('DigitalObject.save', reason);
+				});
+		};
+
+		$ctrl.abort = function () {
+			var data = entry.node;
+			delete data.object.node;
+
+			DigitalObject.deleteTemp(data).$promise
+				.then(function () {
+					$scope.$parent.abort();
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('DigitalObject.deleteTemp', reason);
+				});
+		};
+
+	}]
+
 });

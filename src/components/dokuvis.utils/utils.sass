@@ -8,25 +8,26 @@ file-drop-area, [file-drop-area]
 		display: flex
 		align-items: center
 		justify-content: center
-		background-color: #f5f5f5
-		border: 5px dashed #ddd
+		background-color: $light
+		border: 5px dashed $gray-400
 		border-radius: 5px
 		text-align: center
 		font-weight: bold
 		font-size: 16px
-		color: #ccc
-		fill: #ccc
+		color: $gray-400
+		fill: $gray-400
 		cursor: pointer
-		transition: color 0.3s, fill 0.3s, border-color 0.3s
+		transition: color 0.3s, fill 0.3s, border-color 0.3s, background-color 0.3s
 
 		&:hover
-			color: #aaa
-			fill: #aaa
-			border-color: #bbb
+			color: $gray-100
+			fill: $gray-100
+			border-color: $gray-100
 		&.nv-file-over
-			color: $dvGreenColor
-			fill: $dvGreenColor
-			border-color: $dvGreenColor
+			color: $green
+			fill: $green
+			border-color: $green
+			background-color: $gray-100
 		& > svg
 			flex: 0 0 40px
 			width: 40px

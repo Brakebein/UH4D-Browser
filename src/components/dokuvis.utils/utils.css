@@ -7,24 +7,25 @@ file-drop-area, [file-drop-area] {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f5f5f5;
-    border: 5px dashed #ddd;
+    background-color: #8d9dad;
+    border: 5px dashed #ced4da;
     border-radius: 5px;
     text-align: center;
     font-weight: bold;
     font-size: 16px;
-    color: #ccc;
-    fill: #ccc;
+    color: #ced4da;
+    fill: #ced4da;
     cursor: pointer;
-    transition: color 0.3s, fill 0.3s, border-color 0.3s; }
+    transition: color 0.3s, fill 0.3s, border-color 0.3s, background-color 0.3s; }
     file-drop-area > div:hover, [file-drop-area] > div:hover {
-      color: #aaa;
-      fill: #aaa;
-      border-color: #bbb; }
+      color: #EBEBEB;
+      fill: #EBEBEB;
+      border-color: #EBEBEB; }
     file-drop-area > div.nv-file-over, [file-drop-area] > div.nv-file-over {
       color: #5cb85c;
       fill: #5cb85c;
-      border-color: #5cb85c; }
+      border-color: #5cb85c;
+      background-color: #EBEBEB; }
     file-drop-area > div > svg, [file-drop-area] > div > svg {
       flex: 0 0 40px;
       width: 40px;

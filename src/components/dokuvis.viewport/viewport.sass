@@ -49,9 +49,12 @@ viewport, viewport-object-tree, image-viewer
 				&:last-of-type
 					margin: 0
 
-		&.ctrl-center
+		&.ctrl-center-h
 			width: 100%
 			justify-content: center
+		&.ctrl-center-v
+			height: 100%
+			align-items: center
 		&.ctrl-top
 			top: 0
 			& > div
@@ -80,7 +83,14 @@ viewport, viewport-object-tree, image-viewer
 			right: 0
 			& > div
 				+dark-panel('bottom-right')
+		&.ctrl-left
+			left: 0
+			& > div
+				+dark-panel('left')
 
+		hr
+			border-color: $panelFontColor
+			margin: 0.25em 0
 
 
 	.ctrl-group

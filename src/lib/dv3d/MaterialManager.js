@@ -153,8 +153,10 @@ DV3D.MaterialManager.prototype = {
 		var mat;
 		if (key instanceof THREE.Material)
 			mat = this.add(key);
-		else
+		else if (typeof key === 'string')
 			mat = this.get(key);
+		else
+			console.warn('Invalid key!');
 
 		if (!mat) {
 			console.warn('Material not found!');
@@ -212,13 +214,9 @@ DV3D.MaterialManager.prototype = {
 				}
 				else {
 					// set each material
-					return prepareMaterial(map)
-						.then(function (material) {
-							// add material to manager
-							scope.assign(material);
-
-							return material;
-						});
+					var material = prepareMaterial(map);
+					scope.assign(material);
+					return material;
 				}
 			})
 				.then(function (materials) {
@@ -237,47 +235,43 @@ DV3D.MaterialManager.prototype = {
 
 function prepareMaterial(map) {
 
-	return new Promise(function (resolve, reject) {
+	var material = new THREE.MeshLambertMaterial();
 
-		var material = new THREE.MeshLambertMaterial();
+	// set diffuse color/map
+	if (Array.isArray(map.diffuse)) {
+		material.color = new THREE.Color(map.diffuse[0], map.diffuse[1], map.diffuse[2]);
+		material.color.convertLinearToGamma();
+	}
+	else if (typeof map.diffuse === 'string') {
+		textureLoader.load(config.pathPrefix + map.path + map.diffuse, function (texture) {
+			material.map = texture;
+			material.needsUpdate = true
+		}, null, function (xhr) {
+			material.dispose();
+			throw new Error('Couldn\'t load texture ' + xhr.path[0].src);
+		});
+	}
 
-		// set diffuse color/map
-		if (Array.isArray(map.diffuse)) {
-			material.color = new THREE.Color(map.diffuse[0], map.diffuse[1], map.diffuse[2]);
-			material.color.convertLinearToGamma();
-		}
-		else if (typeof map.diffuse === 'string') {
-			textureLoader.load(config.pathPrefix + map.path + map.diffuse, function (texture) {
-				material.map = texture;
-				material.needsUpdate = true
-			}, null, function (xhr) {
-				reject('Couldn\'t load texture ' + xhr.path[0].src);
-				material.dispose();
-			});
-		}
+	// st alpha map
+	if (map.alpha) {
+		textureLoader.load(config.pathPrefix + map.path + map.alpha, function (texture) {
+			material.alphaMap = texture;
+			material.transparent = true;
+			material.needsUpdate = true;
+		}, null, function (xhr) {
+			if (material.map)
+				material.map.dispose();
+			material.dispose();
+			throw new Error('Couldn\'t load texture ' + xhr.path[0].src);
+		});
+	}
 
-		// st alpha map
-		if (map.alpha) {
-			textureLoader.load(config.pathPrefix + map.path + map.alpha, function (texture) {
-				material.alphaMap = texture;
-				material.transparent = true;
-				material.needsUpdate = true;
-			}, null, function (xhr) {
-				reject('Couldn\'t load texture ' + xhr.path[0].src);
-				if (material.map)
-					material.map.dispose();
-				material.dispose();
-			});
-		}
+	material.side = THREE.DoubleSide;
 
-		material.side = THREE.DoubleSide;
+	material.name = map.id;
+	Object.assign(material.userData, map);
 
-		material.name = map.id;
-		Object.assign(material.userData, map);
-
-		resolve(material);
-
-	});
+	return material;
 }
 
 function disposeMaterial(material) {

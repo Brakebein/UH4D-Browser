@@ -39,7 +39,8 @@ angular.module('dokuvis.viewport',[
 		var contextMenuElement, contextMenuScope,
 			tooltipElement, tooltipScope,
 			spatializeManualElement, spatializeManualScope,
-			progressBarElement, progressBarScope;
+			progressBarElement, progressBarScope,
+			modelUploadElement, modelUploadScope;
 
 		// constants frustum clipping
 		var NEAR = viewportSettings.defaults.NEAR,
@@ -48,7 +49,7 @@ angular.module('dokuvis.viewport',[
 		// general
 		var SCREEN_WIDTH, SCREEN_HEIGHT,
 			canvas,
-			renderer, scene, controls,
+			renderer, scene, controls, transformControls,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
 			octree, rbushTree, clusterTree,
@@ -56,7 +57,8 @@ angular.module('dokuvis.viewport',[
 
 		// lists
 		var selected = [], highlighted = null, marked = [],
-			hoverObject = null;
+			hoverObject = null,
+			transformObject = null;
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
@@ -111,7 +113,8 @@ angular.module('dokuvis.viewport',[
 			console.log('viewport size: ', SCREEN_WIDTH, SCREEN_HEIGHT);
 
 			// Camera
-			camera = new THREE.CombinedCamera(SCREEN_WIDTH, SCREEN_HEIGHT, 35, NEAR, FAR, NEAR, FAR);
+			// camera = new THREE.CombinedCamera(SCREEN_WIDTH, SCREEN_HEIGHT, 35, NEAR, FAR, NEAR, FAR);
+			camera = new THREE.PerspectiveCamera(35, SCREEN_WIDTH / SCREEN_HEIGHT, NEAR, FAR);
 			if (viewportCache.viewpoint)
 				camera.position.copy(viewportCache.viewpoint.cameraPosition);
 			else
@@ -198,12 +201,12 @@ angular.module('dokuvis.viewport',[
 			// scene.add(ground);
 
 			// plan
-			new THREE.OBJLoader().load('img/plans/citymap_1911_2.obj', function (object) {
+			new THREE.OBJLoader().load('data/plans/citymap_1911_2.obj', function (object) {
 				console.log(object);
 				var map = object.getObjectByName('Citymap_1911');
 				scene.add(map);
 
-				var texture = new THREE.TextureLoader().load('img/plans/citymap_1911_2.jpg');
+				var texture = new THREE.TextureLoader().load('data/plans/citymap_1911_2.jpg');
 				texture.anisotropy = 8;
 				map.material.map = texture;
 				map.material.depthTest = false;
@@ -212,6 +215,24 @@ angular.module('dokuvis.viewport',[
 			}, function () {}, function (error) {
 				console.error(error);
 			});
+
+			transformControls = new THREE.TransformControls(camera, renderer.domElement);
+			transformControls.addEventListener('change', onControlsChange);
+			transformControls.addEventListener('dragging-changed', function (event) {
+				controls.enabled = ! event.value;
+			});
+			// transformControls.addEventListener('objectChange', function (event) {
+			// 	console.log('objectChange', event);
+			// });
+
+			scene.add(transformControls);
+
+			// // collada
+			// new THREE.ColladaLoader().load('data/temp/taschenberg_ruine.DAE', function (collada) {
+			// 	console.log(collada);
+			// 	scene.add(collada.scene);
+			// 	transformControls.attach(collada.scene);
+			// });
 
 			// Gizmo
 			gizmoMove = new DV3D.GizmoMove(10, 2.5, 1.2);
@@ -437,6 +458,44 @@ angular.module('dokuvis.viewport',[
 			if (progressBarElement) {
 				$animate.leave(progressBarElement);
 				progressBarElement = null;
+			}
+		}
+
+		function openModelUploadCtrls(entry) {
+			modelUploadScope = scope.$new(false);
+			modelUploadScope.entry = entry;
+			modelUploadScope.reset = function (type) {
+				if (type === 'position' || type === 'quaternion' || type === 'scale') {
+					transformObject[type].copy(transformObject.userData[type + '0']);
+					animateAsync();
+				}
+			};
+			modelUploadScope.close = function () {
+				transformControls.detach();
+				transformObject.matrixAutoUpdate = false;
+				transformObject = null;
+				closeModelUploadCtrls();
+				animateAsync();
+			};
+			modelUploadScope.abort = function () {
+				transformControls.detach();
+				removeObject(transformObject.entry);
+				transformObject = null;
+				closeModelUploadCtrls();
+				animateAsync();
+			};
+			modelUploadElement = $compile('<viewport-upload-ctrls></viewport-upload-ctrls>')(modelUploadScope);
+			$animate.enter(modelUploadElement, element);
+		}
+
+		function closeModelUploadCtrls() {
+			if (modelUploadScope) {
+				modelUploadScope.$destroy();
+				modelUploadScope = null;
+			}
+			if (modelUploadElement) {
+				$animate.leave(modelUploadElement);
+				modelUploadElement = null;
 			}
 		}
 
@@ -1001,6 +1060,8 @@ angular.module('dokuvis.viewport',[
 		}
 
 		function assignHighlightMat(obj) {
+			if (obj.entry.type !== 'object') return;
+
 			var hColor = new THREE.Color(DV3D.Defaults.highlightColor);
 
 			switch (viewportSettings.shading) {
@@ -1032,6 +1093,8 @@ angular.module('dokuvis.viewport',[
 		}
 
 		function rejectHighlightMat(obj) {
+			if (obj.entry.type !== 'object') return;
+
 			// be sure not to dispose standard or original material
 			// if (obj.material === materials.get(obj.userData.originalMat) /*||
 			// 	viewportCache.standardMaterials.indexOf(obj.material.name) !== -1*/) {
@@ -1191,24 +1254,24 @@ angular.module('dokuvis.viewport',[
 					// 	obj.object.material = materials[obj.object.userData.originalMat];
 					// 	break;
 					case 'grey':
-						obj.object.material = materials['defaultDoublesideMat'];
+						obj.object.material = materials.get('defaultDoublesideMat');
 						break;
 					case 'transparent':
-						obj.object.material = materials['transparentMat'];
+						obj.object.material = materials.get('transparentMat');
 						break;
 					case 'xray':
 						if (selected.indexOf(obj) !== -1)
-							obj.object.material = materials['xraySelectionMat'];
+							obj.object.material = materials.get('xraySelectionMat');
 						else
-							obj.object.material = materials['xrayMat'];
+							obj.object.material = materials.get('xrayMat');
 						break;
 					default:
 						if (Array.isArray(obj.object.userData.originalMat))
 							obj.object.material = obj.object.userData.originalMat.map(function (value) {
-								return materials[value];
+								return materials.get(value);
 							});
 						else
-							obj.object.material = materials[obj.object.userData.originalMat];
+							obj.object.material = materials.get(obj.object.userData.originalMat);
 						break;
 				}
 			});
@@ -1392,7 +1455,7 @@ angular.module('dokuvis.viewport',[
 				}
 			}
 			else if (navigation.rotate) {
-				if (event.button === 0 && camera.inPerspectiveMode) {
+				if (event.button === 0) { //&& camera.inPerspectiveMode) {
 					controls.onMouseDown(event.originalEvent, 0);
 					isRotatingView = true;
 				}
@@ -1449,7 +1512,7 @@ angular.module('dokuvis.viewport',[
 					element.find('#select-rectangle').css(getSelectRectangleCSS(mouseDownCoord, mouse));
 				}
 
-				else if (isMouseDown === 0 && camera.inPerspectiveMode && !mouseDownCoord.equals(mouse)) {
+				else if (isMouseDown === 0 /*&& camera.inPerspectiveMode*/ && !mouseDownCoord.equals(mouse)) {
 					controls.onMouseDown(mouseDownEvent.originalEvent, 0);
 					canvas.addClass('cursor_orbit');
 					isRotatingView = true;
@@ -1474,6 +1537,11 @@ angular.module('dokuvis.viewport',[
 					// 	entry.highlight(true);
 					// else
 					// 	spatialImages.dehighlight();
+					if (entry instanceof DV3D.ObjectEntry) {
+						while (entry.parent) {
+							entry = entry.parent;
+						}
+					}
 					setHighlighted(entry);
 					hoverDebounce(entry, new THREE.Vector2(event.offsetX, event.offsetY));
 				}
@@ -1691,11 +1759,28 @@ angular.module('dokuvis.viewport',[
 			if (['INPUT', 'TEXTAREA'].indexOf(event.target.tagName) !== -1) return;
 
 			// TODO: update key usage
-			switch (event.keyCode) {
-				case 70: setCameraMode('front'); break;			// F
-				case 76: setCameraMode('left'); break;			// L
-				case 80: setCameraMode('perspective'); break;	// P
-				case 84: setCameraMode('top'); break;			// T
+			// switch (event.keyCode) {
+			// 	case 70: setCameraMode('front'); break;			// F
+			// 	case 76: setCameraMode('left'); break;			// L
+			// 	case 80: setCameraMode('perspective'); break;	// P
+			// 	case 84: setCameraMode('top'); break;			// T
+			// }
+
+			if (transformControls) {
+				switch (event.keyCode) {
+					case 81: // Q
+						transformControls.setSpace(transformControls.space === 'local' ? 'world' : 'local');
+						break;
+					case 87: // W
+						transformControls.setMode('translate');
+						break;
+					case 69: // E
+						transformControls.setMode('rotate');
+						break;
+					case 82: // R
+						transformControls.setMode('scale');
+						break;
+				}
 			}
 		}
 
@@ -2601,6 +2686,34 @@ angular.module('dokuvis.viewport',[
 
 		///// LOADING
 
+		// listen to modelUploadSuccess event
+		scope.$on('modelUploadSuccess', function (event, node) {
+			loadHierarchyObjects([node])
+				.then(function () {
+					console.log('uploaded objects loaded', node);
+
+					$timeout(function () {
+						var entry = objects.getByName(node.object.id);
+						console.log(entry);
+						entry.focus();
+						entry.object.matrixAutoUpdate = true;
+						transformControls.attach(entry.object);
+						entry.object.userData.position0 = entry.object.position.clone();
+						entry.object.userData.quaternion0 = entry.object.quaternion.clone();
+						entry.object.userData.scale0 = entry.object.scale.clone();
+						transformObject = entry.object;
+						console.log(transformControls);
+						openModelUploadCtrls(entry);
+						console.log(materials);
+					}, 1000, false);
+
+					animateAsync();
+				})
+				.catch(function (err) {
+					Utilities.throwException('Loading Error', 'An error occurred while loading objects. See concole for details.', err);
+				});
+		});
+
 		// listen to modelQuerySuccess event, start loading objects
 		scope.$on('modelQuerySuccess', function (event, entries) {
 			// resetScene();
@@ -2631,6 +2744,7 @@ angular.module('dokuvis.viewport',[
 
 			// get all entries that are not part of search results anymore
 			objects.forEach(function (entry) {
+				if (entry.parent) return;
 				if (!newObjects.find(function (node) {
 					return entry.name === node.object.id;
 				}))
@@ -2640,20 +2754,29 @@ angular.module('dokuvis.viewport',[
 			// clusterTree.clean();
 
 			// remove "missing" objects
-			toBeRemoved.forEach(function (obj) {
+			toBeRemoved.forEach(function (entry) {
 				// scene.remove(value.object);
 				// octree.remove(value.object.collisionObject);
 				// spatialImages.remove(value);
 				// value.dispose();
 				// remove from scene and collection
-				obj.object.parent.remove(obj.object);
-				if (obj.edges) scene.remove(obj.edges);
-				geometries.remove(obj.object.geometry);
-				geometries.remove(obj.edges.geometry);
-				materials.remove(obj.object.material);
-				materials.remove(obj.edges.material);
-				objects.remove(obj);
-				obj.dispose();
+				removeObject(entry);
+
+				// obj.object.parent.remove(obj.object);
+				// if (obj.edges) scene.remove(obj.edges);
+				// geometries.remove(obj.object.geometry);
+				// if (Array.isArray(obj.object.userData.originalMat))
+				// 	obj.object.userData.originalMat.forEach(function (value) {
+				// 		materials.remove(materials.get(value));
+				// 	});
+				// else
+				// 	materials.remove(materials.get(obj.object.userData.originalMat));
+				// if (obj.edges) {
+				// 	geometries.remove(obj.edges.geometry);
+				// 	materials.remove(obj.edges.material);
+				// }
+				// objects.remove(obj);
+				// obj.dispose();
 			});
 
 
@@ -2775,6 +2898,7 @@ angular.module('dokuvis.viewport',[
 					});
 
 				// set materials
+				// TODO: consider current shading
 				materials.setMaterial(entry.materials)
 					.then(function (material) {
 						obj.material = material;
@@ -2792,7 +2916,7 @@ angular.module('dokuvis.viewport',[
 
 				// set edges
 				if (entry.file.edges) {
-					var edgesPath = Array.isArray(entry.file.edges) ? entry.file.edgesh.map(function (file) { return entry.file.path + file; }) : entry.file.path + entry.file.edges;
+					var edgesPath = Array.isArray(entry.file.edges) ? entry.file.edges.map(function (file) { return entry.file.path + file; }) : entry.file.path + entry.file.edges;
 
 					geometries.loadEdgesGeometry(edgesPath)
 						.then(function (geometry) {
@@ -2816,6 +2940,36 @@ angular.module('dokuvis.viewport',[
 
 
 			return defer.promise;
+		}
+
+		// remove entry from scene and collection
+		function removeObject(entry) {
+
+			var children = [].concat(entry.children);
+			children.forEach(function (child) {
+				removeObject(child);
+			});
+
+			entry.object.parent.remove(entry.object);
+
+			if (entry.type === 'object') {
+				geometries.remove(entry.object.geometry);
+				if (Array.isArray(entry.object.userData.originalMat))
+					entry.object.userData.originalMat.forEach(function (value) {
+						materials.remove(materials.get(value));
+					});
+				else
+					materials.remove(materials.get(entry.object.userData.originalMat));
+
+				if (entry.edges) {
+					scene.remove(entry.edges);
+					geometries.remove(entry.edges.geometry);
+					materials.remove(entry.edges.material);
+				}
+			}
+
+			objects.remove(entry);
+			entry.dispose();
 		}
 
 		// clear scene and dispose geometries and materials
@@ -2981,8 +3135,8 @@ angular.module('dokuvis.viewport',[
 			var newpos = new THREE.Vector3().addVectors(boundingSphere.center, s.setLength(h));
 
 			// adjust camera frustum (near, far)
-			camera.cameraP.near = boundingSphere.radius / 100;
-			camera.cameraP.far = Math.max(boundingSphere.radius * 100, viewportSettings.defaults.FAR);
+			camera.near = boundingSphere.radius / 100;
+			camera.far = Math.max(boundingSphere.radius * 100, viewportSettings.defaults.FAR);
 			camera.updateProjectionMatrix();
 
 			// animate camera.position and controls.target
@@ -3039,8 +3193,8 @@ angular.module('dokuvis.viewport',[
 			SCREEN_HEIGHT = element.height();
 			$log.debug('resize called', SCREEN_WIDTH, SCREEN_HEIGHT);
 
-			camera.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-			camera.cameraP.updateProjectionMatrix();
+			camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+			camera.updateProjectionMatrix();
 
 			renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -3080,6 +3234,7 @@ angular.module('dokuvis.viewport',[
 			viewportCache.viewpoint.controlsTarget.copy(controls.target);
 
 			controls.dispose();
+			transformControls.dispose();
 
 			renderer.forceContextLoss();
 			renderer.dispose();

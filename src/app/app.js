@@ -135,6 +135,21 @@ angular.module('uh4dApp', [
 				}]
 			})
 			.state({
+				name: 'root.search.uploadModel',
+				url: '/uploadModel',
+				resolve: {
+					uploadModalInstance: ['$uibModal', function ($uibModal) {
+						return $uibModal.open({
+							component: 'uploadModal'
+						});
+					}]
+				},
+				onExit: ['uploadModalInstance', 'ModelUploader', function (uploadModalInstance, ModelUploader) {
+					uploadModalInstance.close();
+					ModelUploader.clearQueue();
+				}]
+			})
+			.state({
 				name: 'root.search.compare',
 				url: '/compare?imageId1&imageId2',
 				redirectTo: function (trans) {
