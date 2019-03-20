@@ -14,12 +14,12 @@
 				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 			</div>
 			<div class="media-flags">
-				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
-				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
+				<i title="Add to collection" class="far fa-star" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
+				<i title="Remove from collection" class="fas fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
 			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, $ctrl.selection[$index-1], $ctrl.selection[$index])">
-				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
+				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange-alt"></i></button>
 			</div>
 		</li>
 	</ul>
@@ -38,12 +38,12 @@
 				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 			</div>
 			<div class="media-flags">
-				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
-				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
+				<i title="Add to collection" class="far fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
+				<i title="Remove from collection" class="fas fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
 			<div class="media-compare-btn" ng-show="$index" ng-click="$ctrl.openCompareModal($event, $ctrl.collection[$index-1], $ctrl.collection[$index])">
-				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange"></i></button>
+				<button title="Compare" class="btn btn-sm btn-primary"><i class="fa fa-exchange-alt"></i></button>
 			</div>
 		</li>
 
@@ -72,8 +72,8 @@
 			<option value="date.from">Date</option>
 		</select>
 		<div class="input-group-append">
-			<button class="btn btn-sm" ng-class="{'btn-primary': !$ctrl.listOrderBy.desc, 'btn-secondary': $ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = false"><i class="fa fa-sort-alpha-asc"></i></button>
-			<button class="btn btn-sm" ng-class="{'btn-primary': $ctrl.listOrderBy.desc, 'btn-secondary': !$ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = true"><i class="fa fa-sort-alpha-desc"></i></button>
+			<button class="btn btn-sm" ng-class="{'btn-primary': !$ctrl.listOrderBy.desc, 'btn-secondary': $ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = false"><i class="fa fa-sort-alpha-down"></i></button>
+			<button class="btn btn-sm" ng-class="{'btn-primary': $ctrl.listOrderBy.desc, 'btn-secondary': !$ctrl.listOrderBy.desc}" ng-click="$ctrl.listOrderBy.desc = true"><i class="fa fa-sort-alpha-up"></i></button>
 		</div>
 	</div>
 
@@ -93,8 +93,8 @@
 				<p class="mb-0"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 			</div>
 			<div class="media-flags">
-				<i title="Add to collection" class="fa fa-star-o" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
-				<i title="Remove from collection" class="fa fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
+				<i title="Add to collection" class="far fa-star" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
+				<i title="Remove from collection" class="fas fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 			</div>
 		</li>
@@ -111,7 +111,7 @@
 			<p class="card-text"><i>{{img.author || 'unknown'}} - {{img.date || 'unknown' | imageDate}}</i></p>
 		</div>
 		<div class="media-flags">
-			<i title="Memorize" class="fa fa-star-o"></i>
+			<i title="Memorize" class="far fa-star"></i>
 			<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
 		</div>
 	</div>

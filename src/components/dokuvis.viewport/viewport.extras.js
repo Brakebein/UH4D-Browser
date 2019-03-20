@@ -313,68 +313,73 @@ angular.module('dokuvis.viewport')
 
 		var source, camera, controls;
 
-		this.$onInit = function () {
-			source = this.source = $scope.$parent.source;
-			camera = this.camera = $scope.$parent.camera;
+		$ctrl.$onInit = function () {
+			source = $ctrl.source = $scope.$parent.source;
+			camera = $ctrl.camera = $scope.$parent.camera;
 			controls = $scope.$parent.controls;
 
-			this.opacity = 50;
-			this.moveStep = 0.2;
+			$ctrl.opacity = 50;
+			// this.moveStep = 0.2;
+			$ctrl.moveFactor = controls.moveFactor || 1.0;
 		};
 
-		this.transformView = function (dir) {
-			var up = new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);
-			var forward = new THREE.Vector3().subVectors(controls.center, camera.position).normalize();
+		// this.transformView = function (dir) {
+		// 	var up = new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);
+		// 	var forward = new THREE.Vector3().subVectors(controls.center, camera.position).normalize();
+		//
+		// 	var cameraV, centerV;
+		//
+		// 	switch (dir) {
+		// 		case 'up':
+		// 			cameraV = new THREE.Vector3(0,$ctrl.moveStep,0);
+		// 			centerV = up;
+		// 			break;
+		// 		case 'down':
+		// 			cameraV = new THREE.Vector3(0,-$ctrl.moveStep,0);
+		// 			centerV = up.negate();
+		// 			break;
+		// 		case 'left':
+		// 			cameraV = new THREE.Vector3(-$ctrl.moveStep,0,0);
+		// 			centerV = up.cross(forward);
+		// 			break;
+		// 		case 'right':
+		// 			cameraV = new THREE.Vector3($ctrl.moveStep,0,0);
+		// 			centerV = up.cross(forward).negate();
+		// 			break;
+		// 		case 'forward':
+		// 			cameraV = new THREE.Vector3(0,0,-$ctrl.moveStep);
+		// 			break;
+		// 		case 'backward':
+		// 			cameraV = new THREE.Vector3(0,0,$ctrl.moveStep);
+		// 			break;
+		// 		case 'tilt-up':
+		// 			centerV = new THREE.Vector3(0,$ctrl.moveStep,0);
+		// 			break;
+		// 		case 'tilt-down':
+		// 			centerV = new THREE.Vector3(0,-$ctrl.moveStep,0);
+		// 			break;
+		// 	}
+		//
+		// 	if (cameraV)
+		// 		camera.translateOnAxis(cameraV, $ctrl.moveStep);
+		// 	if (centerV) {
+		// 		centerV.setLength($ctrl.moveStep);
+		// 		controls.center.add(centerV);
+		// 	}
+		//
+		// 	$scope.$parent.animate();
+		// };
 
-			var cameraV, centerV;
-
-			switch (dir) {
-				case 'up':
-					cameraV = new THREE.Vector3(0,$ctrl.moveStep,0);
-					centerV = up;
-					break;
-				case 'down':
-					cameraV = new THREE.Vector3(0,-$ctrl.moveStep,0);
-					centerV = up.negate();
-					break;
-				case 'left':
-					cameraV = new THREE.Vector3(-$ctrl.moveStep,0,0);
-					centerV = up.cross(forward);
-					break;
-				case 'right':
-					cameraV = new THREE.Vector3($ctrl.moveStep,0,0);
-					centerV = up.cross(forward).negate();
-					break;
-				case 'forward':
-					cameraV = new THREE.Vector3(0,0,-$ctrl.moveStep);
-					break;
-				case 'backward':
-					cameraV = new THREE.Vector3(0,0,$ctrl.moveStep);
-					break;
-				case 'tilt-up':
-					centerV = new THREE.Vector3(0,$ctrl.moveStep,0);
-					break;
-				case 'tilt-down':
-					centerV = new THREE.Vector3(0,-$ctrl.moveStep,0);
-					break;
-			}
-
-			if (cameraV)
-				camera.translateOnAxis(cameraV, $ctrl.moveStep);
-			if (centerV) {
-				centerV.setLength($ctrl.moveStep);
-				controls.center.add(centerV);
-			}
-
-			$scope.$parent.animate();
-		};
-
-		this.changeFOV = function () {
+		$ctrl.changeFOV = function () {
 			camera.updateProjectionMatrix();
-			$scope.$parent.animate();
 		};
 
-		this.save = function () {
+		$ctrl.changeFactor = function () {
+			controls.rollSpeed = $ctrl.moveFactor * 0.1;
+			controls.moveFactor = $ctrl.moveFactor;
+		};
+
+		$ctrl.save = function () {
 			if (!source || !camera) return;
 
 			source.spatialize = {
@@ -385,26 +390,31 @@ angular.module('dokuvis.viewport')
 
 			source.$spatialize({ method: 'manual' })
 				.then(function (result) {
-					console.log(result);
-					$rootScope.$broadcast('searchUpdate');
+					// console.log(result);
+					// $rootScope.$broadcast('searchUpdate');
+					return $scope.$parent.onAfterSave(result);
+				})
+				.then(function () {
+					console.log('linkToObjects done');
+					$ctrl.close();
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('#Source.spatialize', reason);
 				});
 		};
 
-		$scope.$on('spatialImageLoadSuccess' , function () {
-			$scope.$parent.linkToObjects(source)
-				.then(function () {
-					console.log('linkToObjects done');
-					$ctrl.close();
-				})
-				.catch(function (reason) {
-					Utilities.throwApiException('#Source.setLinksToObjects', reason);
-				});
-		});
+		// $scope.$on('spatialImageLoadSuccess' , function () {
+		// 	$scope.$parent.linkToObjects(source)
+		// 		.then(function () {
+		// 			console.log('linkToObjects done');
+		// 			$ctrl.close();
+		// 		})
+		// 		.catch(function (reason) {
+		// 			Utilities.throwApiException('#Source.setLinksToObjects', reason);
+		// 		});
+		// });
 
-		this.close = function () {
+		$ctrl.close = function () {
 			$scope.$parent.close();
 		};
 

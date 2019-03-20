@@ -12,7 +12,7 @@
 					  data-e-form="eTitleForm"
 					  data-e-formclass="editable-cover-width"
 					  data-onbeforesave="$ctrl.updateImage('title', $data)">{{$ctrl.image.title}}</span>
-				<button class="btn btn-secondary btn-sm" ng-click="eTitleForm.$show()" ng-hide="eTitleForm.$visible"><i class="fa fa-pencil"></i></button>
+				<button class="btn btn-secondary btn-sm" ng-click="eTitleForm.$show()" ng-hide="eTitleForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 			</h3>
 			<hr/>
 		</div>
@@ -28,7 +28,7 @@
 							  data-e-form="eDescForm"
 							  data-e-formclass="editable-cover-width"
 							  data-onbeforesave="$ctrl.updateImage('description', $data)">{{$ctrl.image.description || 'not specified'}}</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eDescForm.$show()" ng-hide="eDescForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eDescForm.$show()" ng-hide="eDescForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -42,7 +42,7 @@
 							  data-e-uib-typeahead="name for name in $ctrl.queryPersons($viewValue)"
 							  data-e-typeahead-min-length="3"
 							  data-e-typeahead-wait-ms="500">{{$ctrl.image.author || 'unknown'}}</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eAuthorForm.$show()" ng-hide="eAuthorForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eAuthorForm.$show()" ng-hide="eAuthorForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -53,7 +53,7 @@
 						<span data-editable-text="$ctrl.image.date.value"
 							  data-e-form="eDateForm"
 							  data-onbeforesave="$ctrl.updateImage('date', $data)">{{$ctrl.image.date.value || 'unknown'}}</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eDateForm.$show()" ng-hide="eDateForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eDateForm.$show()" ng-hide="eDateForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -67,7 +67,7 @@
 							  data-e-uib-typeahead="name for name in $ctrl.queryLegalBodies($viewValue)"
 							  data-e-typeahead-min-length="3"
 							  data-e-typeahead-wait-ms="500">{{$ctrl.image.owner || 'unknown'}}</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eOwnerForm.$show()" ng-hide="eOwnerForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eOwnerForm.$show()" ng-hide="eOwnerForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -79,7 +79,7 @@
 							  data-e-form="eMiscForm"
 							  data-e-formclass="editable-cover-width"
 							  data-onbeforesave="$ctrl.updateImage('misc', $data)">{{$ctrl.image.misc || 'not specified'}}</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eMiscForm.$show()" ng-hide="eMiscForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eMiscForm.$show()" ng-hide="eMiscForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -91,7 +91,7 @@
 							{{$ctrl.image.tags.join(', ')}}
 							<editable-tags-input-auto-complete source="$ctrl.queryTags($query)"></editable-tags-input-auto-complete>
 						</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eTagsForm.$show()" ng-hide="eTagsForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eTagsForm.$show()" ng-hide="eTagsForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -102,7 +102,7 @@
 						<span data-editable-text="$ctrl.image.captureNumber"
 							  data-e-form="eCNoForm"
 							  data-onbeforesave="$ctrl.updateImage('captureNumber', $data)">{{$ctrl.image.captureNumber}}</span>
-						<button class="btn btn-secondary btn-sm" ng-click="eCNoForm.$show()" ng-hide="eCNoForm.$visible"><i class="fa fa-pencil"></i></button>
+						<button class="btn btn-secondary btn-sm" ng-click="eCNoForm.$show()" ng-hide="eCNoForm.$visible"><i class="fa fa-pencil-alt"></i></button>
 					</p>
 				</div>
 
@@ -133,8 +133,8 @@
 </div>
 
 <div class="modal-footer">
-	<button class="btn btn-secondary" ng-show="!$ctrl.image.inCollection" ng-click="$ctrl.addToCollection()"><i class="fa fa-star"></i> Add to collection</button>
-	<button class="btn btn-secondary ng-hide" ng-show="$ctrl.image.inCollection" ng-click="$ctrl.removeFromCollection()"><i class="fa fa-star-o"></i> Remove from collection</button>
+	<button class="btn btn-secondary" ng-show="!$ctrl.image.inCollection" ng-click="$ctrl.addToCollection()"><i class="fas fa-star"></i> Add to collection</button>
+	<button class="btn btn-secondary ng-hide" ng-show="$ctrl.image.inCollection" ng-click="$ctrl.removeFromCollection()"><i class="far fa-star"></i> Remove from collection</button>
 	<button class="btn btn-secondary" ng-show="$root.editableMode" ng-click="$ctrl.startSpatialize()">Spatialize</button>
 	<button class="btn btn-secondary" ng-click="$ctrl.close()">Close</button>
 </div>

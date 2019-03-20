@@ -49,7 +49,7 @@ angular.module('dokuvis.viewport',[
 		// general
 		var SCREEN_WIDTH, SCREEN_HEIGHT,
 			canvas,
-			renderer, scene, controls, transformControls,
+			renderer, scene, controls, transformControls, flyControls, clock,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
 			octree, rbushTree, clusterTree,
@@ -226,6 +226,9 @@ angular.module('dokuvis.viewport',[
 			// });
 
 			scene.add(transformControls);
+
+			// flyControls = new THREE.FlyControls(camera, renderer.domElement);
+			// flyControls.dragToLook = false;
 
 			// // collada
 			// new THREE.ColladaLoader().load('data/temp/taschenberg_ruine.DAE', function (collada) {
@@ -507,15 +510,37 @@ angular.module('dokuvis.viewport',[
 			if (angular.element(element).find('viewport-spatialize-manual').length)
 				return;
 
+			// remove images
+			setSelected(null);
+			clusterTree.clean();
+			spatialImages.forEach(function (value) {
+				spatialImages.remove(value);
+				value.dispose();
+			});
+			// enable flyControls
+			flyControls = new THREE.FlyControls(camera, renderer.domElement);
+			flyControls.movementSpeed = 100;
+			flyControls.rollSpeed = 0.1;
+			flyControls.moveFactor = 1.0;
+			flyControls.dragToLook = true;
+			startAnimation();
+
+			// create scope and element
 			spatializeManualScope = scope.$new(false);
 			spatializeManualScope.source = src;
 			spatializeManualScope.camera = camera;
-			spatializeManualScope.controls = controls;
-			spatializeManualScope.animate = animateThrottle20;
+			spatializeManualScope.controls = flyControls;
 			spatializeManualScope.close = closeSpatializeManual;
-			spatializeManualScope.linkToObjects = function (src) {
-				var entry = spatialImages.getByName(src.spatial.id);
-				return linkObjectsInSight(entry);
+			// spatializeManualScope.linkToObjects = function (src) {
+			// 	var entry = spatialImages.getByName(src.spatial.id);
+			// 	return linkObjectsInSight(entry);
+			// };
+			spatializeManualScope.onAfterSave = function (src) {
+				return loadSpatialImage(src)
+					.then(function (entry) {
+						entry.object.updateMatrixWorld(true);
+						return linkObjectsInSight(entry);
+					});
 			};
 
 			spatializeManualElement = $compile('<viewport-spatialize-manual></viewport-spatialize-manual>')(spatializeManualScope);
@@ -525,6 +550,21 @@ angular.module('dokuvis.viewport',[
 		}
 
 		function closeSpatializeManual() {
+			// dispose flyControls
+			flyControls.dispose();
+			flyControls = null;
+			stopAnimation();
+
+			// set new controls target/anchor
+			var end =  new THREE.Vector3(0,0,-100);
+			end.applyQuaternion(camera.quaternion);
+			end.add(camera.position);
+			controls.target.copy(end);
+
+			// perform search
+			$rootScope.$broadcast('searchUpdate');
+
+			// delete scope and element
 			if (spatializeManualScope) {
 				spatializeManualScope.$destroy();
 				spatializeManualScope = null;
@@ -588,6 +628,7 @@ angular.module('dokuvis.viewport',[
 			if (!isAnimating) {
 				controls.removeEventListener('change', onControlsChange);
 				isAnimating = true;
+				clock = new THREE.Clock();
 				animate();
 			}
 		}
@@ -597,6 +638,7 @@ angular.module('dokuvis.viewport',[
 			if (isAnimating) {
 				controls.addEventListener('change', onControlsChange);
 				isAnimating = false;
+				clock.stop();
 			}
 		}
 
@@ -622,6 +664,12 @@ angular.module('dokuvis.viewport',[
 				if (TWEEN.getAll().length || windMap) {
 					requestAnimationFrame(animate);
 				}
+				else if (flyControls) {
+					flyControls.movementSpeed = Math.max(10, Math.abs(camera.position.y)) * flyControls.moveFactor;
+					flyControls.update(clock.getDelta());
+					// clusterTree.update(camera);
+					requestAnimationFrame(animate);
+				}
 				// if no Tweens -> stop animation loop
 				else {
 					stopAnimation();
@@ -636,7 +684,7 @@ angular.module('dokuvis.viewport',[
 					clusterTree.update(camera);
 			}
 
-			if (controls) controls.update();
+			if (controls && !flyControls) controls.update();
 
 			if (viewportCache.grid) {
 				var gridResolution = viewportSettings.defaults.gridSize / viewportSettings.defaults.gridDivisions;
@@ -1184,6 +1232,9 @@ angular.module('dokuvis.viewport',[
 					var intersection = raycast(testObjects, true);
 					if (intersection) {
 						var objEntry = intersection.object.entry;
+						while (objEntry.parent) {
+							objEntry = objEntry.parent;
+						}
 						if (objEntry && selected.indexOf(objEntry) === -1) {
 							selectEntry(objEntry);
 							selected.push(objEntry);
@@ -1428,6 +1479,9 @@ angular.module('dokuvis.viewport',[
 			mouseDownCoord = mouseToViewportCoords(event);
 			mouseDownEvent = event;
 
+			if (flyControls)
+				return;
+
 			if (dummyCreationMode && event.button === 0) {
 				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
 				prepareRaycaster(mouseDownCoord);
@@ -1481,6 +1535,9 @@ angular.module('dokuvis.viewport',[
 
 			//exitHover();
 				closeTooltip();
+
+			if (flyControls)
+				return;
 
 			if (dummyCreationMode && dummyOrigin) {
 				var plane = new THREE.Plane(new THREE.Vector3(0,1,0), -3);
@@ -1561,6 +1618,9 @@ angular.module('dokuvis.viewport',[
 
 			isMouseDown = -1;
 			var mouse = mouseToViewportCoords(event);
+
+			if (flyControls)
+				return;
 
 			if (dummyCreationMode && dummyOrigin) {
 				if (dummyArrow) {
@@ -1667,6 +1727,11 @@ angular.module('dokuvis.viewport',[
 			setHighlighted();
 			hoverDebounce.cancel();
 
+			if (flyControls) {
+				flyControls.mouseup(event.originalEvent);
+				return;
+			}
+
 			if (navigation.default) {
 				// complete navigation
 				if (isRotatingView) {
@@ -1724,6 +1789,10 @@ angular.module('dokuvis.viewport',[
 
 			closeTooltip();
 
+			// console.log(event);
+			if (flyControls)
+				return;
+
 			//if (camera.inPerspectiveMode) {
 			controls.onMouseWheel(event.originalEvent);
 			// }
@@ -1751,12 +1820,19 @@ angular.module('dokuvis.viewport',[
 		// keydown event handler
 		function keydown(event) {
 			if (['INPUT', 'TEXTAREA'].indexOf(event.target.tagName) !== -1) return;
+
+			if (flyControls)
+				return;
+
 			controls.onKeyDown(event.originalEvent);
 		}
 
 		// keyup event handler
 		function keyup(event) {
 			if (['INPUT', 'TEXTAREA'].indexOf(event.target.tagName) !== -1) return;
+
+			if (flyControls)
+				return;
 
 			// TODO: update key usage
 			// switch (event.keyCode) {
@@ -2327,6 +2403,9 @@ angular.module('dokuvis.viewport',[
 
 			setSelected(null);
 
+			if (flyControls)
+				return;
+
 			isLoading = true;
 
 			var toBeCreated = [],
@@ -2497,8 +2576,8 @@ angular.module('dokuvis.viewport',[
 
 			// update near clipping plane
 			var imageDistance = Math.abs(obj.image.position.z * obj.scale.z);
-			if (camera.cameraP.near > imageDistance * 0.8) {
-				camera.cameraP.near = imageDistance * 0.8;
+			if (camera.near > imageDistance * 0.8) {
+				camera.near = imageDistance * 0.8;
 				camera.updateProjectionMatrix();
 			}
 
@@ -3235,6 +3314,8 @@ angular.module('dokuvis.viewport',[
 
 			controls.dispose();
 			transformControls.dispose();
+			if (flyControls)
+				flyControls.dispose();
 
 			renderer.forceContextLoss();
 			renderer.dispose();

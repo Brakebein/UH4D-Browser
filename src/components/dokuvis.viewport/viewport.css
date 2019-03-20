@@ -173,13 +173,17 @@ viewport .ctrl-btn, viewport-object-tree .ctrl-btn, image-viewer .ctrl-btn {
     border-bottom-color: #ddd; }
 viewport .ctrl-slider, viewport-object-tree .ctrl-slider, image-viewer .ctrl-slider {
   padding: 2px;
-  display: inline-block; }
+  width: 250px;
+  display: flex; }
   viewport .ctrl-slider > *, viewport-object-tree .ctrl-slider > *, image-viewer .ctrl-slider > * {
     vertical-align: middle; }
   viewport .ctrl-slider > input[type=range], viewport-object-tree .ctrl-slider > input[type=range], image-viewer .ctrl-slider > input[type=range] {
-    width: 200px;
-    margin: 0 5px;
+    margin: 0 5px !important;
     display: inline-block; }
+  viewport .ctrl-slider > span:first-of-type, viewport-object-tree .ctrl-slider > span:first-of-type, image-viewer .ctrl-slider > span:first-of-type {
+    flex: 0 0 auto; }
+  viewport .ctrl-slider > span:last-of-type, viewport-object-tree .ctrl-slider > span:last-of-type, image-viewer .ctrl-slider > span:last-of-type {
+    flex: 0 0 25px; }
 
 viewport-navigation {
   transition: top 0.5s; }

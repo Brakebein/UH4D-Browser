@@ -34,7 +34,8 @@ module.exports = function (grunt) {
 				files: [
 					{expand: true, cwd: 'src/', src: 'index.html', dest: 'dist/'},
 					{expand: true, cwd: 'src/', src: 'fonts/**/*', dest: 'dist/'},
-					{expand: true, cwd: 'src/', src: 'bower_components/font-awesome/fonts/*', dest: 'dist/fonts/', flatten: true},
+					// {expand: true, cwd: 'src/', src: 'bower_components/font-awesome/fonts/*', dest: 'dist/fonts/', flatten: true},
+					{expand: true, src: 'node_modules/@fortawesome/fontawesome-free/webfonts/*', dest: 'dist/fonts/', flatten: true},
 					{expand: true, cwd: 'src/', src: 'img/**/*.{png,jpg,svg,gif}', dest: 'dist/'}
 				]
 			}
@@ -146,6 +147,9 @@ module.exports = function (grunt) {
 					replacements: [{
 						pattern: /url\((?:\.\.\/)*((?!\.\.\/)[^:'"()]+)\)/ig,
 						replacement: 'url(../$1)'
+					}, {
+						pattern: /\/webfonts\//g,
+						replacement: '/fonts/'
 					}]
 				}
 			}

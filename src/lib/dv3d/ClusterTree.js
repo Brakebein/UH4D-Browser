@@ -86,9 +86,11 @@ DV3D.ClusterTree.prototype = {
 
 		if (!this.root) return;
 
-		this.root.traverse(function (node) {
-			node.dispose();
-		});
+		if (this.root instanceof DV3D.ClusterObject) {
+			this.root.traverse(function (node) {
+				node.dispose();
+			});
+		}
 
 		this.root = null;
 	},
@@ -131,13 +133,19 @@ DV3D.ClusterTree.prototype = {
 
 		var tmp = [];
 
-		this.root.traverse(function (node) {
-			if (!(node instanceof DV3D.ClusterObject) || node.position.distanceTo(position) > node.distance * 10) {
-				tmp.push(node);
-				return false;
-			}
-
-		}, true);
+		if (this.root instanceof DV3D.ClusterObject) {
+			// traverse tree
+			this.root.traverse(function (node) {
+				if (!(node instanceof DV3D.ClusterObject) || node.position.distanceTo(position) > node.distance * 10) {
+					tmp.push(node);
+					return false;
+				}
+			}, true);
+		}
+		else {
+			// there is only one single object in tree
+			tmp.push(this.root);
+		}
 
 		return tmp;
 
