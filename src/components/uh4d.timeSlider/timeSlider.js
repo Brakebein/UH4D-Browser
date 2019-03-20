@@ -22,7 +22,7 @@ angular.module('uh4d.timeSlider', [])
 			el = $element.find('svg');
 			svg = d3.select(el[0]);
 
-			$ctrl.includeUndated = $state.params.undated === 'true';
+			$ctrl.includeUndated = $state.params.undated ? $state.params.undated === 'true' : true;
 
 			$scope.$on('resizeLayout', resize);
 			angular.element($window).on('resize', resize);
@@ -55,6 +55,8 @@ angular.module('uh4d.timeSlider', [])
 						element: null
 					};
 					initSvg();
+
+					$rootScope.$broadcast('timeSliderReady', moment(from.date).format('YYYY-MM-DD'), moment(to.date).format('YYYY-MM-DD'), moment(modelHandle.date).format('YYYY-MM-DD'), $ctrl.includeUndated);
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.getDateExtent() in timeSlider component', reason);

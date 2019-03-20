@@ -15,15 +15,7 @@ image-list
 			&:hover, &.active
 				background-color: $light
 
-	& > .list-ctrls
-		flex: 0 0 auto
-		display: flex
-		align-items: baseline
-		justify-content: space-evenly
-		flex-wrap: wrap
-		& > div
-			padding: 0 8px
-			margin-top: 4px
+
 
 	& > .list-selection
 		flex: 0 1 0
@@ -88,9 +80,41 @@ image-list
 			&.dndDragover > li.media > .media-compare-btn
 				display: none
 
-	& > .list-body
-		flex: 1 1 0
-		overflow-y: scroll
+
+	& > .results-container
+		flex: 1 1 auto
+		display: flex
+		flex-direction: column
+
+		& > .list-ctrls
+			flex: 0 0 auto
+			display: flex
+			align-items: baseline
+			justify-content: space-evenly
+			flex-wrap: wrap
+			padding: 0.25rem
+			& > div
+				padding: 0 8px
+				//margin-top: 4px
+
+		& > .list-body
+			flex: 1 1 0
+			overflow-y: scroll
+
+		& > .list-pagination
+			flex: 0 0 auto
+			padding: 0.25rem
+			& > ul
+				margin: 0
+				& > li
+					& > a:focus
+						color: $pagination-color
+						background-color: $pagination-bg
+						border-color: $pagination-border-color
+					& > a:hover
+						color: $pagination-hover-color
+						background-color: $pagination-hover-bg
+						border-color: $pagination-hover-border-color
 
 	.list-media
 		& > ul
@@ -154,19 +178,7 @@ image-list
 					&:hover
 						color: $gray-100
 
-	& > .list-pagination
-		flex: 0 0 auto
-		& > ul
-			margin: 4px
-			& > li
-				& > a:focus
-					color: $pagination-color
-					background-color: $pagination-bg
-					border-color: $pagination-border-color
-				& > a:hover
-					color: $pagination-hover-color
-					background-color: $pagination-hover-bg
-					border-color: $pagination-hover-border-color
+
 
 // image modal
 $imageVWidth: 60%
@@ -216,7 +228,7 @@ $imageBorder: 1px solid #333
 	flex-direction: column
 
 	.captions
-		flex: 0
+		flex: 0 0 auto
 		display: flex
 		font-size: 13px
 		& > div

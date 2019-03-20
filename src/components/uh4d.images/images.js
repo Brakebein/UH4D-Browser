@@ -72,7 +72,7 @@ angular.module('uh4d.images', [
 		$ctrl.itemsPerPage = 20;
 
 		$ctrl.$onInit = function () {
-			$ctrl.listTab = 'selection';
+			$ctrl.listTab = 'results';
 			$ctrl.listMode = 'list';
 			$ctrl.listOrderBy = {
 				prop: 'date.from',

@@ -3,15 +3,13 @@ angular.module('uh4dApp')
 	
 	templateUrl: 'app/search/search.tpl.html',
 	
-	controller: ['$scope', '$rootScope', '$state', '$uiRouterGlobals', 'Image', 'DigitalObject', 'Utilities', function ($scope, $rootScope, $state, $uiRouterGlobals, Image, DigitalObject, Utilities) {
+	controller: ['$scope', '$rootScope', '$state', '$uiRouterGlobals', '$timeout', 'Image', 'DigitalObject', 'Utilities', function ($scope, $rootScope, $state, $uiRouterGlobals, $timeout, Image, DigitalObject, Utilities) {
 
 		var ctrl = this;
 
 		console.log('search component', $scope);
 
 		function performSearch(term) {
-			// $state.go($state.$current, { query: ctrl.searchTerm });
-
 			Image.query({
 				query: term || $state.params.query,
 				from: $state.params.from,
@@ -30,17 +28,17 @@ angular.module('uh4dApp')
 				});
 		}
 
-		ctrl.loadModel = function () {
-			DigitalObject.query().$promise
-				.then(function (values) {
-					console.log(values);
-					$rootScope.showModelLoadPanel = false;
-					modelQuerySuccess(values);
-				})
-				.catch(function (reason) {
-					Utilities.throwApiException('DigitalObject.query', reason);
-				});
-		};
+		// ctrl.loadModel = function () {
+		// 	DigitalObject.query().$promise
+		// 		.then(function (values) {
+		// 			console.log(values);
+		// 			$rootScope.showModelLoadPanel = false;
+		// 			modelQuerySuccess(values);
+		// 		})
+		// 		.catch(function (reason) {
+		// 			Utilities.throwApiException('DigitalObject.query', reason);
+		// 		});
+		// };
 
 		function queryObjects() {
 			DigitalObject.query({
@@ -80,6 +78,11 @@ angular.module('uh4dApp')
 			});
 			spatialImageLoadStart(spatials);
 		}
+
+		$scope.$on('timeSliderReady', function (event, from, to, modelDate, undated) {
+			$state.go('root.search', { from: from, to: to, modelDate: modelDate, undated: undated });
+			$timeout(setWatchers, 0, true);
+		});
 
 		$scope.$on('filterByDate', function (event, from, to, modelDate, undated) {
 			$state.go('root.search', { from: from, to: to, modelDate: modelDate, undated: undated });
@@ -128,25 +131,26 @@ angular.module('uh4dApp')
 
 		});
 
-		// watch for state/url params change and perform image search
-		$scope.$watchGroup([
-			function () { return $state.params.query; },
-			function () { return $state.params.from; },
-			function () { return $state.params.to; },
-			function () { return $state.params.undated; },
-			function () { return $state.params.filterObjIncl.length; },
-			function () { return $state.params.filterObjExcl.length; }
-		], function () {
-			performSearch();
-		});
+		function setWatchers() {
+			// watch for state/url params change and perform image search
+			$scope.$watchGroup([
+				function () { return $state.params.query; },
+				function () { return $state.params.from; },
+				function () { return $state.params.to; },
+				function () { return $state.params.undated; },
+				function () { return $state.params.filterObjIncl.length; },
+				function () { return $state.params.filterObjExcl.length; }
+			], function () {
+				performSearch();
+			});
 
-		// watch for state/url params change and query objects
-		$scope.$watchGroup([
-			function () { return $state.params.modelDate }
-		], function () {
-			queryObjects();
-		});
-
+			// watch for state/url params change and query objects
+			$scope.$watchGroup([
+				function () { return $state.params.modelDate }
+			], function () {
+				queryObjects();
+			});
+		}
 
 	}]
 	

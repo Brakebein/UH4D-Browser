@@ -9,15 +9,6 @@ image-list {
       cursor: pointer; }
       image-list > .list-tabs > div:hover, image-list > .list-tabs > div.active {
         background-color: #8d9dad; }
-  image-list > .list-ctrls {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-evenly;
-    flex-wrap: wrap; }
-    image-list > .list-ctrls > div {
-      padding: 0 8px;
-      margin-top: 4px; }
   image-list > .list-selection {
     flex: 0 1 0;
     padding: 4px 9px; }
@@ -74,9 +65,35 @@ image-list {
             background-color: rgba(78, 93, 108, 0.5); }
       image-list > .list-selection > ul.dndDragover > li.media > .media-compare-btn {
         display: none; }
-  image-list > .list-body {
-    flex: 1 1 0;
-    overflow-y: scroll; }
+  image-list > .results-container {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column; }
+    image-list > .results-container > .list-ctrls {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-evenly;
+      flex-wrap: wrap;
+      padding: 0.25rem; }
+      image-list > .results-container > .list-ctrls > div {
+        padding: 0 8px; }
+    image-list > .results-container > .list-body {
+      flex: 1 1 0;
+      overflow-y: scroll; }
+    image-list > .results-container > .list-pagination {
+      flex: 0 0 auto;
+      padding: 0.25rem; }
+      image-list > .results-container > .list-pagination > ul {
+        margin: 0; }
+        image-list > .results-container > .list-pagination > ul > li > a:focus {
+          color: #fff;
+          background-color: #4E5D6C;
+          border-color: transparent; }
+        image-list > .results-container > .list-pagination > ul > li > a:hover {
+          color: #fff;
+          background-color: rgba(255, 255, 255, 0.4);
+          border-color: transparent; }
   image-list .list-media > ul {
     width: 100%; }
     image-list .list-media > ul > li.media {
@@ -134,18 +151,6 @@ image-list {
           color: #868e96; }
           image-list .list-card > .card > .media-flags > i:hover {
             color: #EBEBEB; }
-  image-list > .list-pagination {
-    flex: 0 0 auto; }
-    image-list > .list-pagination > ul {
-      margin: 4px; }
-      image-list > .list-pagination > ul > li > a:focus {
-        color: #fff;
-        background-color: #4E5D6C;
-        border-color: transparent; }
-      image-list > .list-pagination > ul > li > a:hover {
-        color: #fff;
-        background-color: rgba(255, 255, 255, 0.4);
-        border-color: transparent; }
 
 .image-modal-body {
   display: flex;
@@ -184,7 +189,7 @@ image-list {
   display: flex;
   flex-direction: column; }
   .compare-modal-body .captions {
-    flex: 0;
+    flex: 0 0 auto;
     display: flex;
     font-size: 13px; }
     .compare-modal-body .captions > div {
