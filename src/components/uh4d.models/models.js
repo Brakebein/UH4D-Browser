@@ -30,8 +30,11 @@ angular.module('uh4d.models', [
 			},
 			deleteTemp: {
 				url: 'api/model/temp',
-				method: 'POST',
-				hasBody: true
+				method: 'POST'
+			},
+			duplicate: {
+				url: 'api/model/:id/duplicate',
+				method: 'PUT'
 			}
 		});
 
@@ -216,6 +219,16 @@ angular.module('uh4d.models', [
 		// function objectUpdate(item) {
 		// 	$rootScope.$broadcast('objectUpdate', item);
 		// }
+
+		$ctrl.duplicate = function () {
+			$ctrl.object.$duplicate()
+				.then(function () {
+					Utilities.successAlert('Duplication successful.')
+				})
+				.catch(function (reason) {
+					Utilities.throwApiException('DigitalObject.duplicate', reason);
+				});
+		};
 
 		$ctrl.close = function () {
 			$state.go('^');

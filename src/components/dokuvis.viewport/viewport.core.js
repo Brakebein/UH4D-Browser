@@ -1085,6 +1085,9 @@ angular.module('dokuvis.viewport',[
 			}
 		}
 
+		/**
+		 * @deprecated
+		 */
 		function highlightObject(obj) {
 			// if object is marked, do nothing
 			if (marked.indexOf(obj) !== -1) return;
@@ -2860,11 +2863,14 @@ angular.module('dokuvis.viewport',[
 
 
 
-			// update still existing images
-			// toBeUpdated.forEach(function (value) {
-			// 	value.entry.source = value.resource;
-			// 	value.entry.object.userData.source = value.resource;
-			// });
+			// update still existing objects
+			toBeUpdated.forEach(function (value) {
+				value.entry.label = value.resource.name;
+				value.entry.traverse(function (e) {
+					e.node = value.resource.object.node;
+					e.object.userData.node = value.resource.object.node;
+				});
+			});
 
 			// viewportLoadProgress('init', 0, 1);
 

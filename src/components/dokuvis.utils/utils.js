@@ -82,13 +82,21 @@ angular.module('dokuvis.utils', [
 
 		///// ALERTS
 
+		f.successAlert = function (message) {
+			$alert({
+				content: message,
+				type: 'success',
+				duration: 5
+			});
+		};
+
 		/**
 		 * Shows a danger alert for 5 seconds.
 		 * @ngdoc method
 		 * @name Utilities#dangerAlert
 		 * @param message {string} Message to show
 		 */
-		f.dangerAlert = function(message) {
+		f.dangerAlert = function (message) {
 			$alert({
 				content: message,
 				type: 'danger',
@@ -106,14 +114,14 @@ angular.module('dokuvis.utils', [
 		 * @param message {string} Message to show
 		 * @param data {*=} Addtional data to be shown within the console
 		 */
-		f.throwException = function(title, message, data) {
+		f.throwException = function (title, message, data) {
 			$alert({
 				title: title+':',
 				content: message,
 				type: 'danger',
 				duration: 5
 			});
-			console.error(title+': '+message, data, "\n"+(new Error).stack.split("\n")[2]);
+			console.error(title + ': ' + message, data, "\n" + (new Error).stack.split("\n")[2]);
 		};
 
 		/**
@@ -123,7 +131,7 @@ angular.module('dokuvis.utils', [
 		 * @param message {string} Message to show
 		 * @param data {*} Addtional data to be shown within the console
 		 */
-		f.throwApiException = function(message, data) {
+		f.throwApiException = function (message, data) {
 			if (data.status === 403)
 				message = 'Access denied ' + message + ' (' + data.statusText + ' ' + data.status + ')';
 			$alert({

@@ -3,7 +3,7 @@
 		<li class="list-group-item bg-primary" title="{{$ctrl.entry.label}}"><span>{{$ctrl.entry.label}}</span></li>
 
 		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isImage" ng-click="$ctrl.openImageDetails()"><i class="fa fa-info-circle"></i> Open details...</a>
-		<a class="list-group-item list-group-item-action" ng-show="$ctrl.isObject" ng-click="$ctrl.openObjectDetails()"><i class="fa fa-info-circle"></i> Open details...</a>
+		<a class="list-group-item list-group-item-action" ng-show="$root.editableMode && $ctrl.isObject" ng-click="$ctrl.openObjectDetails()"><i class="fa fa-info-circle"></i> Open details...</a>
 
 		<a class="list-group-item list-group-item-action" ng-click="$ctrl.focus()"><i class="fa fa-search"></i> Focus</a>
 
