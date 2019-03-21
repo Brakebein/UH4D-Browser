@@ -12,6 +12,8 @@ DV3D.ClusterTree = function (sceneParam, octreeParam) {
 
 	this._activeClusters = [];
 
+	this._distanceMultiplier = 10;
+
 };
 
 // TODO: clean code
@@ -129,14 +131,19 @@ DV3D.ClusterTree.prototype = {
 
 	},
 
+	setDistanceMultiplier: function (value) {
+		this._distanceMultiplier = value;
+	},
+
 	getObjectsByDistance: function (position) {
 
-		var tmp = [];
+		var scope = this,
+			tmp = [];
 
-		if (this.root instanceof DV3D.ClusterObject) {
+		if (scope.root instanceof DV3D.ClusterObject) {
 			// traverse tree
-			this.root.traverse(function (node) {
-				if (!(node instanceof DV3D.ClusterObject) || node.position.distanceTo(position) > node.distance * 10) {
+			scope.root.traverse(function (node) {
+				if (!(node instanceof DV3D.ClusterObject) || node.position.distanceTo(position) > node.distance * scope._distanceMultiplier) {
 					tmp.push(node);
 					return false;
 				}
@@ -144,7 +151,7 @@ DV3D.ClusterTree.prototype = {
 		}
 		else {
 			// there is only one single object in tree
-			tmp.push(this.root);
+			tmp.push(scope.root);
 		}
 
 		return tmp;
@@ -171,6 +178,20 @@ DV3D.ClusterTree.prototype = {
 			return c.collisionObject;
 		});
 
+	},
+
+	hide: function () {
+		this._activeClusters.forEach(function (c) {
+			if (c instanceof DV3D.ClusterObject) {
+				c.toggle(false);
+			}
+			else {
+				// remove ImagePane
+				scene.remove(c);
+				octree.remove(c.collisionObject);
+				c.entry.visible = false;
+			}
+		});
 	},
 
 	update: function (camera) {

@@ -21,5 +21,15 @@
 			</div>
 		</div>
 
+		<div class="row">
+			<div class="ctrl-group">
+				<div class="ctrl-slider">
+					<span>Cluster distance</span>
+					<input class="dvSlider" type="range" min="1" max="100" step="1" ng-model="$ctrl.clusterDistance" ng-change="$ctrl.setClusterDistanceMultiplier()"/>
+					<span>{{ $ctrl.clusterDistance }}</span>
+				</div>
+			</div>
+		</div>
+
 	</div>
 </div>

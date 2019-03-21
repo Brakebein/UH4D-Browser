@@ -16,12 +16,16 @@ angular.module('dokuvis.viewport')
 
 		var $ctrl = this;
 
-		this.$onInit = function () {
-			this.navigation = {'default': true, rotate: false, pan: false, zoom: false};
-			this.vpSettings = viewportSettings;
+		$ctrl.$onInit = function () {
+			$ctrl.navigation = {'default': true, rotate: false, pan: false, zoom: false};
+			$ctrl.vpSettings = viewportSettings;
 		};
 
-		this.focus = function (mode) {
+		$ctrl.flyHome = function () {
+			$scope.$parent.flyHome();
+		};
+
+		$ctrl.focus = function (mode) {
 			$scope.$parent.focus(mode);
 		};
 
@@ -39,7 +43,7 @@ angular.module('dokuvis.viewport')
 			$scope.$applyAsync();
 		}
 
-		this.setNavigationMode = function (mode) {
+		$ctrl.setNavigationMode = function (mode) {
 			$scope.$emit('viewportNavigationChange', mode);
 		};
 
@@ -496,25 +500,30 @@ angular.module('dokuvis.viewport')
 
 	templateUrl: 'components/dokuvis.viewport/viewportImageCtrls.tpl.html',
 
-	controller: ['viewportCache', 'viewportSettings', function (viewportCache, viewportSettings) {
+	controller: ['$scope', 'viewportCache', 'viewportSettings', function ($scope, viewportCache, viewportSettings) {
 
 		var $ctrl = this;
 
-		this.$onInit = function () {
-			this.opacity = viewportSettings.images.opacity * 100;
-			this.scale = viewportSettings.images.scale;
+		$ctrl.$onInit = function () {
+			$ctrl.opacity = viewportSettings.images.opacity * 100;
+			$ctrl.scale = viewportSettings.images.scale;
+			$ctrl.clusterDistance = viewportSettings.images.clusterDistance;
 		};
 
-		this.setOpacity = function () {
+		$ctrl.setOpacity = function () {
 			viewportCache.spatialImages.setOpacity($ctrl.opacity / 100);
 			viewportSettings.images.opacity = $ctrl.opacity / 100;
 		};
 
-		this.setScale = function () {
+		$ctrl.setScale = function () {
 			viewportCache.spatialImages.forEach(function (image) {
 				image.setScale($ctrl.scale);
 			});
 			viewportSettings.images.scale = $ctrl.scale;
+		};
+
+		$ctrl.setClusterDistanceMultiplier = function () {
+			$scope.$parent.setClusterDistanceMultiplier($ctrl.clusterDistance);
 		};
 
 	}]

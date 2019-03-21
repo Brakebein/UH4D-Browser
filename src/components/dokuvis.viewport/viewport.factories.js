@@ -8,8 +8,8 @@ angular.module('dokuvis.viewport')
 			{ value: 'grey', label: 'Grey' },
 			{ value: 'transparent', label: 'Transparent' },
 			{ value: 'onlyEdges', label: 'Only edges' },
-			{ value: 'xray', label: 'X-Ray' },
-			{ value: 'custom', label: 'Custom' }];
+			{ value: 'xray', label: 'X-Ray' }];
+			// { value: 'custom', label: 'Custom' }];
 		var cameras = [
 			{ value: 'perspective', label: 'Perspective' },
 			{ value: 'top', label: 'Top' },
@@ -47,7 +47,8 @@ angular.module('dokuvis.viewport')
 
 			images: {
 				opacity: 1.0,
-				scale: 3
+				scale: 3,
+				clusterDistance: 10
 			}
 		};
 
@@ -122,8 +123,8 @@ angular.module('dokuvis.viewport')
 		materials['defaultMat'] = new THREE.MeshLambertMaterial({
 			name: 'defaultMat',
 			color: DV3D.Defaults.objectColor });
-		materials['defaultDoublesideMat'] = new THREE.MeshLambertMaterial({
-			name: 'defaultDoublesideMat',
+		materials['defaultDoubleSideMat'] = new THREE.MeshLambertMaterial({
+			name: 'defaultDoubleSideMat',
 			color: DV3D.Defaults.objectColor,
 			side: THREE.DoubleSide });
 		materials['defaultUnsafeMat'] = new THREE.MeshLambertMaterial({

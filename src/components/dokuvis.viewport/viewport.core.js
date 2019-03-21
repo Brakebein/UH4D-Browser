@@ -83,7 +83,7 @@ angular.module('dokuvis.viewport',[
 
 		var currentMarker;
 
-		var inIsolationMode = true;
+		var inIsolationMode = false;
 
 		var dummyCreationMode = false;
 		var dummyOrigin, dummyDir, dummyArrow;
@@ -195,6 +195,7 @@ angular.module('dokuvis.viewport',[
 
 			// clusterTree
 			clusterTree = new DV3D.ClusterTree(scene, octree);
+			clusterTree.setDistanceMultiplier(viewportSettings.images.clusterDistance);
 
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
 			// ground.rotation.x = -Math.PI / 2;
@@ -211,7 +212,7 @@ angular.module('dokuvis.viewport',[
 				map.material.map = texture;
 				map.material.depthTest = false;
 				map.material.depthWrite = false;
-				map.material.renderOrder = -95;
+				map.renderOrder = -95;
 			}, function () {}, function (error) {
 				console.error(error);
 			});
@@ -284,6 +285,7 @@ angular.module('dokuvis.viewport',[
 						default: focusAll();
 					}
 				};
+				elScope.flyHome = setHomeView;
 
 				el = $compile('<viewport-navigation></viewport-navigation>')(elScope);
 				$animate.enter(el, element);
@@ -307,6 +309,10 @@ angular.module('dokuvis.viewport',[
 			// <viewport-image-controls> component
 			if ('imageControls' in attrs) {
 				elScope = scope.$new(false);
+				elScope.setClusterDistanceMultiplier = function (value) {
+					clusterTree.setDistanceMultiplier(value);
+					animateAsync();
+				};
 				el = $compile('<viewport-image-controls></viewport-image-controls>')(elScope);
 				$animate.enter(el, element);
 			}
@@ -314,7 +320,10 @@ angular.module('dokuvis.viewport',[
 			// <viewport-selection-display> component
 			if ('selectionDisplay' in attrs) {
 				elScope = scope.$new(false);
-				elScope.exitIsolation = exitIsolation;
+				elScope.exitIsolation = function () {
+					exitIsolation();
+					animateAsync();
+				};
 
 				el = $compile('<viewport-selection-display></viewport-selection-display>')(elScope);
 				$animate.enter(el, element);
@@ -637,8 +646,10 @@ angular.module('dokuvis.viewport',[
 		function stopAnimation() {
 			if (isAnimating) {
 				controls.addEventListener('change', onControlsChange);
+				viewportCameraMove(camera);
 				isAnimating = false;
 				clock.stop();
+				animateAsync();
 			}
 		}
 
@@ -658,8 +669,13 @@ angular.module('dokuvis.viewport',[
 		 * animation loop
 		 */
 		function animate() {
+
 			if (isAnimating) {
 				TWEEN.update();
+
+				if (!flyControls)
+					controls.update();
+
 				// only if there are active Tweens
 				if (TWEEN.getAll().length || windMap) {
 					requestAnimationFrame(animate);
@@ -676,15 +692,17 @@ angular.module('dokuvis.viewport',[
 				}
 			}
 			else {
-				// update image resolution
-				// spatialImages.forEach(function (img) {
-				// 	img.updateTextureByDistance(camera.position, 30);
-				// }, true);
-				if (!isLoading)
-					clusterTree.update(camera);
-			}
+				if (controls) controls.update();
 
-			if (controls && !flyControls) controls.update();
+				if (!isLoading && !inIsolationMode)
+					clusterTree.update(camera);
+
+				if (!isLoading)
+					// update image resolution
+					spatialImages.forEach(function (img) {
+						img.updateTextureByDistance(camera.position, 30);
+					}, true);
+			}
 
 			if (viewportCache.grid) {
 				var gridResolution = viewportSettings.defaults.gridSize / viewportSettings.defaults.gridDivisions;
@@ -1147,20 +1165,11 @@ angular.module('dokuvis.viewport',[
 			if (obj.entry.type !== 'object') return;
 
 			// be sure not to dispose standard or original material
-			// if (obj.material === materials.get(obj.userData.originalMat) /*||
-			// 	viewportCache.standardMaterials.indexOf(obj.material.name) !== -1*/) {
-				materials.remove(obj.material);
-				// if (Array.isArray(obj.material))
-				// 	obj.material.forEach(function (value) {
-				// 		value.dispose();
-				// 	});
-				// else
-				// 	obj.material.dispose();
-			// }
+			materials.remove(obj.material);
 
 			switch (viewportSettings.shading) {
 				case 'grey':
-					obj.material = materials.get('defaultDoublesideMat');
+					obj.material = materials.get('defaultDoubleSideMat');
 					break;
 				case 'transparent':
 					obj.material = materials.get('transparentMat');
@@ -1284,7 +1293,7 @@ angular.module('dokuvis.viewport',[
 			var unhideObj = lastMode === 'onlyEdges' && mode !== 'onlyEdges';
 			var hideEdges = mode === 'xray' && lastMode !== 'xray';
 			var unhideEdges = viewportSettings.showEdges && lastMode === 'xray';
-			if (lastMode === 'custom') categoryDeactivate();
+			// if (lastMode === 'custom') categoryDeactivate();
 
 			objects.forEach(function (obj) {
 				if (obj.visible) {
@@ -1308,7 +1317,7 @@ angular.module('dokuvis.viewport',[
 					// 	obj.object.material = materials[obj.object.userData.originalMat];
 					// 	break;
 					case 'grey':
-						obj.object.material = materials.get('defaultDoublesideMat');
+						obj.object.material = materials.get('defaultDoubleSideMat');
 						break;
 					case 'transparent':
 						obj.object.material = materials.get('transparentMat');
@@ -2568,9 +2577,8 @@ angular.module('dokuvis.viewport',[
 		 * @param obj {DV3D.ImagePane} ImagePane object
 		 */
 		function setImageView(obj) {
-			// TODO: update considering clusterTree
 			exitIsolation();
-			enterIsolation(obj, false);
+			enterIsolation(obj);
 
 			// new controls/rotation anchor
 			var end =  new THREE.Vector3(0,0,-100);
@@ -2588,11 +2596,6 @@ angular.module('dokuvis.viewport',[
 				.to(obj.position, 500)
 				.easing(TWEEN.Easing.Quadratic.InOut)
 				.onUpdate(function () { camera.position.copy(this); })
-				.onComplete(function () {
-					$timeout(function () {
-						inIsolationMode = true;
-					}, 50);
-				})
 				.start();
 			new TWEEN.Tween(controls.target.clone())
 				.to(end, 500)
@@ -2611,34 +2614,22 @@ angular.module('dokuvis.viewport',[
 			startAnimation();
 		}
 
-		function enterIsolation(obj, setFlag) {
-			spatialImages.forEach(function (item) {
-				if (item.object !== obj)
-					item.toggle(false);
-			}, true);
-			if (setFlag !== false)
-				inIsolationMode = true;
+		function enterIsolation(obj) {
+			clusterTree.hide();
+			octree.update();
+
+			obj.entry.toggle(true);
+
+			inIsolationMode = true;
 			scope.$broadcast('viewportIsolationEnter');
 		}
 
 		function exitIsolation() {
 			if (!inIsolationMode) return;
-			// spatialImages.forEach(function (item) {
-			// 	item.toggle(true);
-			// });
+
 			inIsolationMode = false;
 			scope.$broadcast('viewportIsolationExit');
 		}
-
-		// if (scope.hud.spatialize) {
-		// 	SpatializeInterface.callFunc[cfId].loadSpatializeImage = loadSpatializeImage;
-		// 	SpatializeInterface.callFunc[cfId].setImageView = setImageView;
-		// 	scope.spatialize = {
-		// 		markers: SpatializeInterface.markers3D
-		// 	};
-		// 	scope.startMarking = startMarking;
-		// 	scope.clearMarkers = clearMarkers;
-		// }
 
 
 		///// PLANS
@@ -2726,7 +2717,7 @@ angular.module('dokuvis.viewport',[
 
 		// add or remove plan or spatialImage from scene
 		function toggleSourceHandler(event) {
-			console.log(event);
+			// TODO: octree
 			var target = event.target;
 			// add
 			if (event.visible) {
@@ -2976,6 +2967,11 @@ angular.module('dokuvis.viewport',[
 					.then(function (geometry) {
 						obj.geometry = geometry;
 
+						// consider current shading
+						if (viewportSettings.shading === 'onlyEdges') {
+							obj.parent.remove(obj);
+						}
+
 						animateThrottle500();
 					})
 					.catch(function (reason) {
@@ -2983,20 +2979,32 @@ angular.module('dokuvis.viewport',[
 					});
 
 				// set materials
-				// TODO: consider current shading
 				materials.setMaterial(entry.materials)
 					.then(function (material) {
 						obj.material = material;
 						obj.userData.originalMat = Array.isArray(material) ? material.map(function (mat) {
 							return mat.name;
 						}) : material.name;
-
-						animateThrottle500();
 					})
 					.catch(function (reason) {
 						console.error(reason);
 						obj.material = materials.assign('defaultDoubleSideMat');
 						obj.userData.originalMat = obj.material.name;
+					})
+					.then(function () {
+						// apply current shading
+						switch (viewportSettings.shading) {
+							case 'grey':
+								obj.material = materials.get('defaultDoubleSideMat');
+								break;
+							case 'transparent':
+								obj.material = materials.get('transparentMat');
+								break;
+							case 'xray':
+								obj.material = materials.get('xrayMat');
+						}
+
+						animateThrottle500();
 					});
 
 				// set edges
@@ -3009,8 +3017,11 @@ angular.module('dokuvis.viewport',[
 							edges.matrix = obj.matrixWorld;
 							edges.matrixAutoUpdate = false;
 
-							scene.add(edges);
 							objentry.addEdges(edges);
+
+							// consider current shading
+							if (viewportSettings.shading !== 'xray')
+								scene.add(edges);
 
 							animateThrottle500();
 						})
@@ -3035,7 +3046,8 @@ angular.module('dokuvis.viewport',[
 				removeObject(child);
 			});
 
-			entry.object.parent.remove(entry.object);
+			if (entry.object.parent)
+				entry.object.parent.remove(entry.object);
 
 			if (entry.type === 'object') {
 				geometries.remove(entry.object.geometry);
@@ -3268,6 +3280,34 @@ angular.module('dokuvis.viewport',[
 					camera.position.copy(new THREE.Vector3(controls.target.x, 0, controls.target.z)).add(offset);
 				})
 				.start();
+
+			startAnimation();
+		}
+
+		// tween camera to home/default view
+		function setHomeView() {
+			new TWEEN.Tween(camera.position.clone())
+				.to(viewportSettings.defaults.viewpoint.cameraPosition, 1000)
+				.easing(TWEEN.Easing.Cubic.InOut)
+				.onUpdate(function () { camera.position.copy(this); })
+				.start();
+
+			new TWEEN.Tween(controls.target.clone())
+				.to(viewportSettings.defaults.viewpoint.controlsTarget, 1000)
+				.easing(TWEEN.Easing.Cubic.InOut)
+				.onUpdate(function () { controls.target.copy(this); })
+				.start();
+
+			if (camera.fov !== 35) {
+				new TWEEN.Tween({fov: camera.fov})
+					.to({fov: 35}, 1000)
+					.easing(TWEEN.Easing.Quadratic.InOut)
+					.onUpdate(function () {
+						camera.fov = this.fov;
+						camera.updateProjectionMatrix();
+					})
+					.start();
+			}
 
 			startAnimation();
 		}

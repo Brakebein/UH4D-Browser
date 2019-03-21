@@ -60,7 +60,7 @@ DV3D.Plan = function ( fileUrl, imageUrl, scale, ctmloader ) {
 			var material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
 		}
 		else
-			material = THREE.DokuVisTray.materials['defaultDoublesideMat'].clone();
+			material = THREE.DokuVisTray.materials['defaultDoubleSideMat'].clone();
 
 		var mesh = new THREE.Mesh(geo, material);
 		var edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 24.0), THREE.DokuVisTray.materials['edgesMat'].clone());

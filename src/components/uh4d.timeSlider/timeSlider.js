@@ -50,7 +50,7 @@ angular.module('uh4d.timeSlider', [])
 						element: null
 					};
 					modelHandle = {
-						date: $state.params.modelDate ? Math.min(end.date, Math.max(start.date, new Date($state.params.modelDate))) : new Date(start.date.getTime() + (end.date.getTime() - start.date.getTime()) / 2),
+						date: $state.params.modelDate ? Math.min(end.date, Math.max(start.date, new Date($state.params.modelDate))) : new Date('1967-01-01'), //new Date(start.date.getTime() + (end.date.getTime() - start.date.getTime()) / 2),
 						x: 0,
 						element: null
 					};

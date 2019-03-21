@@ -108,11 +108,15 @@ angular.module('uh4dApp', [
 					}
 				},
 				resolve: {
-					imageModalInstance: ['$uibModal', function ($uibModal) {
-						return $uibModal.open({
+					imageModalInstance: ['$state', '$uibModal', function ($state, $uibModal) {
+						var modal =  $uibModal.open({
 							component: 'imageModal',
 							size: 'large'
 						});
+						modal.result.then(null, function () {
+							$state.go('^');
+						});
+						return modal;
 					}]
 				},
 				onExit: ['imageModalInstance', function (imageModalInstance) {
@@ -123,11 +127,15 @@ angular.module('uh4dApp', [
 				name: 'root.search.object',
 				url: '/object/:objectId',
 				resolve: {
-					objectModalInstance: ['$uibModal', function ($uibModal) {
-						return $uibModal.open({
+					objectModalInstance: ['$state', '$uibModal', function ($state, $uibModal) {
+						var modal = $uibModal.open({
 							component: 'objectModal',
 							size: 'large'
 						});
+						modal.result.then(null, function () {
+							$state.go('^');
+						});
+						return modal;
 					}]
 				},
 				onExit: ['objectModalInstance', function (objectModalInstance) {
@@ -138,10 +146,14 @@ angular.module('uh4dApp', [
 				name: 'root.search.uploadModel',
 				url: '/uploadModel',
 				resolve: {
-					uploadModalInstance: ['$uibModal', function ($uibModal) {
-						return $uibModal.open({
+					uploadModalInstance: ['$state', '$uibModal', function ($state, $uibModal) {
+						var modal = $uibModal.open({
 							component: 'uploadModal'
 						});
+						modal.result.then(null, function () {
+							$state.go('^');
+						});
+						return modal;
 					}]
 				},
 				onExit: ['uploadModalInstance', 'ModelUploader', function (uploadModalInstance, ModelUploader) {
@@ -157,26 +169,19 @@ angular.module('uh4dApp', [
 						return 'root.search';
 				},
 				resolve: {
-					compareModalInstance: ['$uibModal', function ($uibModal) {
-						return $uibModal.open({
+					compareModalInstance: ['$state', '$uibModal', function ($state, $uibModal) {
+						var modal = $uibModal.open({
 							component: 'compareModal',
 							size: 'xlarge'
 						});
-						// return $modal({
-						// 	templateUrl: 'partials/modals/_modalXlarge.tpl.html',
-						// 	contentTemplate: 'components/uh4d.images/compareModal.tpl.html',
-						// 	controller: 'compareModalCtrl',
-						// 	show: false
-						// });
+						modal.result.then(null, function () {
+							$state.go('^');
+						});
+						return modal;
 					}]
 				},
-				// onEnter: ['compareModalInstance', function (compareModalInstance) {
-				// 	compareModalInstance.$promise.then(compareModalInstance.show);
-				// }],
 				onExit: ['compareModalInstance', function (compareModalInstance) {
 					compareModalInstance.close();
-					// compareModalInstance.hide();
-					// compareModalInstance.destroy();
 				}]
 			})
 			.state({
@@ -198,7 +203,7 @@ angular.module('uh4dApp', [
 
 		angular.extend($uibModalProvider.options, {
 			animation: false,
-			backdrop: 'static',
+			backdrop: true, //'static',
 			keyboard: false
 		});
 
