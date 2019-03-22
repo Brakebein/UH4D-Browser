@@ -218,7 +218,6 @@ angular.module('uh4dApp', [
 	function ($rootScope, $state) {
 
 		$rootScope.showModelLoadPanel = true;
-		//$state.go('root.home');
 
 		$rootScope.$watch(function () {
 			return $state.params.edit;

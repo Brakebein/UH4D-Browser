@@ -110,128 +110,6 @@ angular.module('dokuvis.viewport')
 
 		scene.add(skyMesh);
 
-		///// GEOMETRIES
-
-		var geometries = {};
-		geometries['initGeo'] = new THREE.Geometry();
-
-		///// MATERIALS
-
-		var materials = {};
-
-		// default mat
-		materials['defaultMat'] = new THREE.MeshLambertMaterial({
-			name: 'defaultMat',
-			color: DV3D.Defaults.objectColor });
-		materials['defaultDoubleSideMat'] = new THREE.MeshLambertMaterial({
-			name: 'defaultDoubleSideMat',
-			color: DV3D.Defaults.objectColor,
-			side: THREE.DoubleSide });
-		materials['defaultUnsafeMat'] = new THREE.MeshLambertMaterial({
-			name: 'defaultUnsafeMat',
-			color: 0xaaaaaa,
-			transparent: true,
-			opacity: 0.5,
-			depthWrite: false });
-
-		// default selection mat
-		materials['selectionMat'] = new THREE.MeshLambertMaterial({
-			name: 'selectionMat',
-			color: DV3D.Defaults.selectionColor,
-			side: THREE.DoubleSide });
-
-		// transparent mat
-		materials['transparentMat'] = new THREE.MeshLambertMaterial({
-			name: 'transparentMat',
-			color: 0xcccccc,
-			transparent: true,
-			opacity: 0.5,
-			depthWrite: false });
-		materials['transparentSelectionMat'] = new THREE.MeshLambertMaterial({
-			name: 'transparentSelectionMat',
-			color: DV3D.Defaults.selectionColor,
-			transparent: true,
-			opacity: 0.5,
-			depthWrite: false });
-
-		// wireframe mat
-		materials['wireframeMat'] = new THREE.MeshBasicMaterial({
-			name: 'wireframeMat',
-			color: DV3D.Defaults.edgeColor,
-			wireframe: true });
-		materials['wireframeSelectionMat'] = new THREE.MeshBasicMaterial({
-			name: 'wireframeSelectionMat',
-			color: DV3D.Defaults.selectionColor,
-			wireframe: true });
-
-		// highlight mat
-		materials['highlightMat'] = new THREE.MeshLambertMaterial({
-			name: 'highlightMat',
-			color: new THREE.Color().lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3).getHex() });
-		materials['transparentHighlightMat'] = new THREE.MeshLambertMaterial({
-			name: 'transparentHighlightMat',
-			color: new THREE.Color().lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.3).getHex(),
-			transparent: true,
-			opacity: 0.5 });
-
-		// xray mat
-		materials['xrayMat'] = new THREE.ShaderMaterial({
-			name: 'xrayMat',
-			side: THREE.DoubleSide,
-			transparent: true,
-			depthWrite: false,
-			depthTest: false,
-			uniforms: {
-				"ambient":{type:"f",value:0.05},
-				"edgefalloff":{type:"f",value:0.1},
-				"intensity":{type:"f",value:1.0},
-				"vColor":{type:"c",value:new THREE.Color(0x000000)} },
-			vertexShader: THREE.XRayShader.vertexShader,
-			fragmentShader: THREE.XRayShader.fragmentShader });
-		materials['xraySelectionMat'] = new THREE.ShaderMaterial({
-			name: 'xraySelectionMat',
-			side: THREE.DoubleSide,
-			transparent: true,
-			depthWrite: false,
-			depthTest: false,
-			uniforms: {
-				"ambient": { type: "f", value: 0.05 },
-				"edgefalloff": {type: "f", value: 0.3 },
-				"intensity": {type: "f", value: 1.5},
-				"vColor": {type: "c" , value: new THREE.Color(DV3D.Defaults.selectionColor) } },
-			vertexShader: THREE.XRayShader.vertexShader,
-			fragmentShader: THREE.XRayShader.fragmentShader });
-		materials['xrayHighlightMat'] = new THREE.ShaderMaterial({
-			name: 'xrayHighlightMat',
-			side: THREE.DoubleSide,
-			transparent: true,
-			depthWrite: false,
-			depthTest: false,
-			uniforms: {
-				"ambient": { type: "f", value: 0.05 },
-				"edgefalloff": {type: "f", value: 0.3 },
-				"intensity": {type: "f", value: 1.5},
-				"vColor": {type: "c" , value: new THREE.Color(DV3D.Defaults.highlightColor) } },
-			vertexShader: THREE.XRayShader.vertexShader,
-			fragmentShader: THREE.XRayShader.fragmentShader });
-
-		// edges mat
-		materials['edgesMat'] = new THREE.LineBasicMaterial({
-			name: 'edgesMat',
-			color: DV3D.Defaults.edgeColor });
-		materials['edgesSelectionMat'] = new THREE.LineBasicMaterial({
-			name: 'edgesSelectionMat',
-			color: DV3D.Defaults.selectionColor });
-		materials['edgesHighlightMat'] = new THREE.LineBasicMaterial({
-			name: 'edgesHighlightMat',
-			color: 0xffff44 });
-
-		// slice mat
-		// materials['invisibleMat'] = new THREE.MeshLambertMaterial({color: 0xdddddd, visible: false, name: 'invisibleMat'});
-		// materials['sliceMultiMat'] = [ materials['defaultMat'], materials['invisibleMat'], materials['defaultMat'], materials['invisibleMat'] ];
-		// materials['sliceLineMat'] = new THREE.LineBasicMaterial({color: 0xff0000, name: 'sliceLineMat'});
-		// materials['sliceMultiMat_debug'] = [new THREE.MeshLambertMaterial({color: 0xdd4444}), new THREE.MeshLambertMaterial({color: 0x44dd44}), new THREE.MeshLambertMaterial({color: 0x4444dd}), new THREE.MeshLambertMaterial({color: 0x44dddd})];
-
 		///// FONTS
 
 		var fontLoader = new THREE.FontLoader(),
@@ -248,16 +126,12 @@ angular.module('dokuvis.viewport')
 			grid: grid,
 			directionalLight: directionalLight,
 
-			// geometries: geometries,
 			geometries: new DV3D.GeometryManager(loadingManager, {
 				pathPrefix: 'data/'
 			}),
-			// materials: materials,
 			materials: new DV3D.MaterialManager(loadingManager, {
 				pathPrefix: 'data/'
 			}),
-			// standardGeometries: Object.keys(geometries),
-			// standardMaterials: Object.keys(materials),
 			loadingManager: loadingManager,
 
 			fonts: fonts,

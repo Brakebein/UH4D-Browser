@@ -54,11 +54,11 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 	 * Apply selection color to the material of the pyramid.
 	 */
 	select: function () {
-		// console.log('select');
 		if (!this.pyramid)
 			createPyramid.call(this);
 		if (!this.pyramid.parent !== this)
 			this.add(this.pyramid);
+
 		this.pyramid.material.color.setHex(DV3D.Defaults.selectionColor);
 		this.pyramid.material.opacity = 1.0;
 		this.pyramid.material.transparent = false;
@@ -80,7 +80,11 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 			createPyramid.call(this);
 		if (!this.pyramid.parent !== this)
 			this.add(this.pyramid);
-		this.pyramid.material.color.setHex(customColor || DV3D.Defaults.highlightColor);
+
+		if (customColor === undefined)
+			this.pyramid.material.color.setHex(customColor);
+		else
+			this.pyramid.material.color.setHex(customColor);
 	},
 
 	dehighlight: function () {

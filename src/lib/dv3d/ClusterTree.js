@@ -158,20 +158,6 @@ DV3D.ClusterTree.prototype = {
 
 	},
 
-	// traverse: function (callback, element) {
-	// 	function t(node) {
-	// 		if (callback(node) !== false && node instanceof DV3D.ClusterObject) {
-	// 			node.children.forEach(function (child) {
-	// 				t(child);
-	// 			});
-	// 		}
-	// 	}
-	// 	if (element && element instanceof DV3D.ClusterObject)
-	// 		t(element);
-	// 	else
-	// 		t(this.root);
-	// },
-
 	getCollisionObjects: function () {
 
 		return this._activeClusters.map(function (c) {
@@ -212,12 +198,6 @@ DV3D.ClusterTree.prototype = {
 				c.entry.visible = false;
 			}
 		});
-
-		// scope._activeClusters = [];
-		//
-		// scope.getObjectsByThreshold(40, function (obj) {
-		// 	scope._activeClusters.push(obj);
-		// });
 
 		scope._activeClusters = scope.getObjectsByDistance(camera.position);
 
@@ -428,6 +408,7 @@ DV3D.ClusterObject.prototype = {
 
 	getLeaves: function () {
 		var tmp = [];
+
 		this.traverse(function (cluster) {
 			cluster.children.forEach(function (child) {
 				if (!(child instanceof DV3D.ClusterObject))
@@ -437,10 +418,11 @@ DV3D.ClusterObject.prototype = {
 					});
 			});
 		});
+
 		tmp.sort(function (a, b) {
 			return b.parent.depth - a.parent.depth;
 		});
-		// console.log(tmp);
+
 		return tmp.map(function (value) {
 			return value.leaf;
 		});
@@ -463,7 +445,8 @@ DV3D.ClusterObject.prototype = {
 			if (!(leaf.parent instanceof THREE.Scene)) {
 				scene.add(leaf);
 				leaf.entry.visible = true;
-				leaf.highlight(0xaaaaaa);
+				leaf.highlight(0x000000);
+				// leaf.highlight(0xaaaaaa);
 				// leaf.highlight(new THREE.Color(0xaaaaaa).lerp(new THREE.Color(DV3D.Defaults.selectionColor), 0.5).getHex());
 			}
 			// var pos = leaf.position.clone().sub(obj.position);
@@ -475,7 +458,7 @@ DV3D.ClusterObject.prototype = {
 			var lineGeo = new THREE.BufferGeometry();
 			lineGeo.addAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVertices), 3));
 			var line = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
-				color: 0xaaaaaa,
+				color: 0x000000, //0xaaaaaa,
 				transparent: true,
 				opacity: 0.5,
 				depthTest: true,
@@ -542,18 +525,6 @@ DV3D.ClusterObject.prototype = {
 				img.material.color.setHex(0xffffff);
 			}
 		});
-		// if (bool)
-		// 	this.object.children.forEach(function (child) {
-		// 		if (/image\d+/.test(child.name)) {
-		// 			child.material.color.lerp(new THREE.Color(DV3D.Defaults.selectionColor), 0.3);
-		// 		}
-		// 	});
-		// else
-		// 	this.object.children.forEach(function (child) {
-		// 		if (/image\d+/.test(child.name)) {
-		// 			child.material.color.setHex(0xffffff);
-		// 		}
-		// 	});
 	},
 
 	deselect: function () {
@@ -571,10 +542,6 @@ DV3D.ClusterObject.prototype = {
 			else
 				img.material.color.setHex(0xffffff);
 		});
-	},
-
-	unhighlight: function () {
-
 	},
 
 	dispose: function () {

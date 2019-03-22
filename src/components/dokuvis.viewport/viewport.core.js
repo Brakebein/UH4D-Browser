@@ -52,13 +52,14 @@ angular.module('dokuvis.viewport',[
 			renderer, scene, controls, transformControls, flyControls, clock,
 			camera, dlight,
 			raycaster = new THREE.Raycaster(),
-			octree, rbushTree, clusterTree,
-			ctmloader, textureLoader;
+			octree, clusterTree;
 
 		// lists
 		var selected = [], highlighted = null, marked = [],
 			hoverObject = null,
 			transformObject = null;
+
+		var tiledMap;
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
@@ -160,10 +161,6 @@ angular.module('dokuvis.viewport',[
 				//focusAll();
 			};
 
-			// objloader = new THREE.OBJMTLLoader(manager);
-			// ctmloader = new THREE.CTMLoader(manager);
-			// textureLoader = new THREE.TextureLoader(manager);
-
 			// bind event listeners
 			canvas.on('mousedown', mousedown);
 			canvas.on('mousemove', mousemove);
@@ -191,8 +188,6 @@ angular.module('dokuvis.viewport',[
 				//undeferred: true
 			});
 
-			// rbushTree = rbush(2, ['.x', '.y', '.x', '.y']);
-
 			// clusterTree
 			clusterTree = new DV3D.ClusterTree(scene, octree);
 			clusterTree.setDistanceMultiplier(viewportSettings.images.clusterDistance);
@@ -201,42 +196,15 @@ angular.module('dokuvis.viewport',[
 			// ground.rotation.x = -Math.PI / 2;
 			// scene.add(ground);
 
-			// plan
-			new THREE.OBJLoader().load('data/plans/citymap_1911_2.obj', function (object) {
-				console.log(object);
-				var map = object.getObjectByName('Citymap_1911');
-				scene.add(map);
-
-				var texture = new THREE.TextureLoader().load('data/plans/citymap_1911_2.jpg');
-				texture.anisotropy = 8;
-				map.material.map = texture;
-				map.material.depthTest = false;
-				map.material.depthWrite = false;
-				map.renderOrder = -95;
-			}, function () {}, function (error) {
-				console.error(error);
-			});
 
 			transformControls = new THREE.TransformControls(camera, renderer.domElement);
 			transformControls.addEventListener('change', onControlsChange);
 			transformControls.addEventListener('dragging-changed', function (event) {
 				controls.enabled = ! event.value;
 			});
-			// transformControls.addEventListener('objectChange', function (event) {
-			// 	console.log('objectChange', event);
-			// });
 
 			scene.add(transformControls);
 
-			// flyControls = new THREE.FlyControls(camera, renderer.domElement);
-			// flyControls.dragToLook = false;
-
-			// // collada
-			// new THREE.ColladaLoader().load('data/temp/taschenberg_ruine.DAE', function (collada) {
-			// 	console.log(collada);
-			// 	scene.add(collada.scene);
-			// 	transformControls.attach(collada.scene);
-			// });
 
 			// Gizmo
 			gizmoMove = new DV3D.GizmoMove(10, 2.5, 1.2);
@@ -2478,30 +2446,13 @@ angular.module('dokuvis.viewport',[
 			$q.all(promises)
 				.then(function () {
 					$rootScope.$broadcast('spatialImageLoadSuccess');
-					console.log(octree);
-					//console.log(rbushTree);
-					// addRBushGraph();
-					// $timeout(addOctreeGraph, 500);
-					// buildCluster();
+
 					clusterTree.bulkInsert(spatialImages.get().map(function (si) {
 						return si.object;
 					}));
-					// clusterTree.drawDebugGraph();
 
 					isLoading = false;
 
-					// clusterTree.update(camera);
-
-					// clusterTree.getObjectsByThreshold(50, function (obj) {
-					// 	console.log(obj.count);
-					// 	var sphere;
-					// 	if (obj instanceof DV3D.ClusterObject)
-					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(5), new THREE.MeshLambertMaterial({color: 0xffff00}));
-					// 	else
-					// 		sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(3), new THREE.MeshLambertMaterial({color: 0xff0000}));
-					// 	sphere.position.copy(obj.position);
-					// 	scene.add(sphere);
-					// });
 					animateAsync();
 				})
 				.catch(function (reason) {
@@ -2545,16 +2496,10 @@ angular.module('dokuvis.viewport',[
 
 			// scene.add(imagepane);
 
-			defer.promise.then(function () {
+			// defer.promise.then(function () {
 				// octree.add(imagepane.collisionObject);
 				// updateOctreeAsync();
-
-				// rbushTree.insert({
-				// 	x: imagepane.position.x,
-				// 	y: imagepane.position.z,
-				// 	image: imagepane
-				// });
-			});
+			// });
 
 			imagepane.name = img.spatial.id;
 			imagepane.userData.source = img;
@@ -2755,6 +2700,26 @@ angular.module('dokuvis.viewport',[
 			if (gizmo)
 				gizmo.attachToObject(obj, refs);
 		}
+
+		// load tiled map
+		scope.$on('mapLoad', function (event, year) {
+			if (tiledMap) {
+				scene.remove(tiledMap);
+				tiledMap.dispose();
+				tiledMap = null;
+			}
+
+			if (year) {
+				tiledMap = new DV3D.TiledMap('data/plans/' + year);
+				tiledMap.promise.then(function () {
+					scene.add(tiledMap);
+					animateAsync();
+				});
+			}
+			else {
+				animateAsync();
+			}
+		});
 
 
 		///// LOADING
@@ -3341,10 +3306,36 @@ angular.module('dokuvis.viewport',[
 			if (scope.spatialize)
 				clearMarkers();
 
-			// TODO: cleanup all visualizations
+			// cleanup map tiles
+			if (tiledMap) {
+				scene.remove(tiledMap);
+				tiledMap.dispose();
+			}
+
+			// cleanup any visualizations
 			if (heatMap) {
 				scene.remove(heatMap);
 				heatMap.dispose();
+			}
+			if (objHeatMap) {
+				// scene.remove(objHeatMap);
+				objHeatMap.dispose();
+			}
+			if (vectorField) {
+				scene.remove(vectorField);
+				vectorField.dispose();
+			}
+			if (windMap) {
+				scene.remove(windMap);
+				windMap.dispose();
+			}
+			if (radarChart) {
+				scene.remove(radarChart);
+				radarChart.dispose();
+			}
+			if (radialFan) {
+				scene.remove(radialFan);
+				radialFan.dispose();
 			}
 
 			// unbind functions from callFunc

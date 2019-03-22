@@ -15,6 +15,7 @@ angular.module('uh4d.timeSlider', [])
 			zoom,
 			from, to, start, end,
 			modelHandle,
+			mapHandles, activeMap,
 			yearSpan,
 			getDateYear = d3.timeFormat("%Y");
 		
@@ -50,13 +51,23 @@ angular.module('uh4d.timeSlider', [])
 						element: null
 					};
 					modelHandle = {
-						date: $state.params.modelDate ? Math.min(end.date, Math.max(start.date, new Date($state.params.modelDate))) : new Date('1967-01-01'), //new Date(start.date.getTime() + (end.date.getTime() - start.date.getTime()) / 2),
+						date: $state.params.modelDate ? Math.min(end.date, Math.max(start.date, new Date($state.params.modelDate))) : new Date('1930-01-01'), //new Date(start.date.getTime() + (end.date.getTime() - start.date.getTime()) / 2),
 						x: 0,
 						element: null
 					};
+					mapHandles = ['1849', '1911', '1967', '1994'].map(function (value) {
+						return {
+							date: new Date(value),
+							x: 0,
+							element: null,
+							year: value
+						};
+					});
+
 					initSvg();
 
 					$rootScope.$broadcast('timeSliderReady', moment(from.date).format('YYYY-MM-DD'), moment(to.date).format('YYYY-MM-DD'), moment(modelHandle.date).format('YYYY-MM-DD'), $ctrl.includeUndated);
+					toggleMap(mapHandles[1]);
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.getDateExtent() in timeSlider component', reason);
@@ -183,6 +194,25 @@ angular.module('uh4d.timeSlider', [])
 					.on('end', triggerFilterByDate)
 				);
 
+			mapHandles.forEach(function (m) {
+				m.element = container.append('g')
+					.attr('class', 'map-handle');
+				m.element.append('path')
+					.attr('d', 'M -2 16 V 46 H 4 V 16 Z');
+				m.element.append('text')
+					.attr('text-anchor', 'middle')
+					.attr('x', 0)
+					.attr('y', 12)
+					.text(getDateYear(m.date));
+				m.element.append('rect')
+					.attr('x', -10)
+					.attr('width', 20)
+					.attr('height', '100%')
+					.on('click', function () {
+						toggleMap(m);
+					});
+			});
+
 			tickContainer = container.append('g')
 				.attr('class', 'tick-container')
 				.attr('transform', 'translate(0,25)')
@@ -222,6 +252,7 @@ angular.module('uh4d.timeSlider', [])
 
 			updateTimeSpan();
 			updateModelHandle();
+			updateMapHandles();
 		}
 
 		function updateTimeSpan(calcPosition) {
@@ -261,6 +292,28 @@ angular.module('uh4d.timeSlider', [])
 			modelHandle.element.attr('transform', 'translate(' + modelHandle.x + ',0)');
 			modelHandle.element.select('text')
 				.text(getDateYear(modelHandle.date));
+		}
+
+		function updateMapHandles() {
+			mapHandles.forEach(function (m) {
+				m.x = timeScale(m.date);
+				m.element.attr('transform', 'translate(' + m.x + ',0)');
+			});
+		}
+
+		function toggleMap(map) {
+			if (activeMap)
+				activeMap.element.classed('active', false);
+
+			if (map === activeMap) {
+				activeMap = null;
+				$rootScope.$broadcast('mapLoad');
+			}
+			else {
+				map.element.classed('active', true);
+				activeMap = map;
+				$rootScope.$broadcast('mapLoad', map.year);
+			}
 		}
 
 		function triggerFilterByDate() {

@@ -1,19 +1,72 @@
 @import "../../style/variables"
 
+$imageColor: $primary
+$modelColor: $cyan
+$mapColor: #77b837
+
 time-slider
 	position: absolute
 	width: 100%
 	height: 100%
 	display: flex
 
-	svg
+	.time-panel
+		background-color: rgba(#000, 0.8)
+		display: flex
+
+		& > .time-panel-header
+			min-width: 0
+			width: 20px
+			flex: 0 0 auto
+			display: flex
+			justify-content: center
+			align-items: center
+			& > span
+				font-size: 10px
+				text-transform: uppercase
+				opacity: 0.6
+				transform: rotate(-90deg)
+
+		& > .time-panel-body
+			flex: 1
+
+
+	.time-legend
+		flex: 0 0 auto
+		border-right: 2px solid $secondary
+		padding-right: 0.25rem
+
+		& > .time-panel-body > div
+			margin-right: 0.25rem
+			font-size: 11px
+			text-align: right
+			&:nth-child(1)
+				color: $imageColor
+			&:nth-child(2)
+				color: $modelColor
+			&:nth-child(3)
+				color: $mapColor
+
+	.time-slider
 		flex: 1
+
+	.time-options
+		flex: 0 0 auto
+		border-left: 2px solid $secondary
+
+		& > .time-panel-body
+			margin-right: 0.25rem
+			display: flex
+			align-items: center
+
+
+	svg
 		width: 100%
 		height: 100%
 
 		rect.background
-			fill: #000
-			opacity: 0.8
+			fill: transparent //#000
+			//opacity: 0.8
 
 		rect.track
 			fill: $light
@@ -31,17 +84,17 @@ time-slider
 				font-size: 12px
 
 		rect.image-span
-			fill: $primary
+			fill: $imageColor
 			opacity: 0.3
 			cursor: grab
 
 		.from-handle, .to-handle
 			& > path
 				fill: none
-				stroke: $primary
+				stroke: $imageColor
 				stroke-width: 2px
 			& > text
-				fill: $primary
+				fill: $imageColor
 				font-size: 12px
 			& > rect
 				fill: transparent
@@ -50,26 +103,25 @@ time-slider
 		.obj-handle
 			& > path
 				fill: none
-				stroke: $cyan
+				stroke: $modelColor
 				stroke-width: 2px
 			& > text
-				fill: $cyan
+				fill: $modelColor
 				font-size: 12px
 			& > rect
 				fill: transparent
 				cursor: w-resize
 
-	.time-options
-		flex: 0 0 auto
-		background-color: rgba(#000, 0.8)
-		border-left: 2px solid $secondary
-
-		& > span
-			display: block
-			text-align: center
-			text-transform: uppercase
-			font-size: 10px
-			opacity: 0.6
-
-		& > div
-			margin: 0 0.25rem
+		.map-handle
+			& > path
+				fill: none
+				stroke: $mapColor
+				stroke-width: 2px
+			& > text
+				fill: $mapColor
+				font-size: 12px
+			& > rect
+				fill: transparent
+				cursor: pointer
+			&.active > path
+				fill: $mapColor

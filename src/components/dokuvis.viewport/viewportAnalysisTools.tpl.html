@@ -19,7 +19,7 @@
 
 		<div class="row">
 			<div class="ctrl-group">
-				<input type="checkbox" ng-model="$ctrl.analysis.visible" ng-change="$ctrl.analysis.toggle()"/> Show Visualization of Orientation
+				<input type="checkbox" ng-model="$ctrl.analysis.visible" ng-change="$ctrl.analysis.toggle()"/> Show Visualizations
 			</div>
 		</div>
 
@@ -27,8 +27,8 @@
 			<div class="ctrl-group">
 				<input type="radio" title="Heat Map" value="heatMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Heat Map<br/>
 				<input type="radio" title="Radar Chart" value="radarChart" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Radar Chart<br/>
-				<input type="radio" title="Radial Fan" value="radialFan" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Radial Fan <button class="btn btn-default btn-sm" ng-click="$ctrl.setRadarChartResolution(16)">16</button> <button class="btn btn-default btn-sm" ng-click="$ctrl.setRadarChartResolution(32)">32</button> <button class="btn btn-default btn-sm" ng-click="$ctrl.incrementRadarChartAngle(2)">Rotate +</button> {{$ctrl.analysis.radarChartAngle | number:3}}<br/>
-				<input type="radio" title="Object Heat Map" value="objectHeatMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/>Object Heat Map<br/>
+				<input type="radio" title="Radial Fan" value="radialFan" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Radial Fan <!--<button class="btn btn-default btn-sm" ng-click="$ctrl.setRadarChartResolution(16)">16</button> <button class="btn btn-default btn-sm" ng-click="$ctrl.setRadarChartResolution(32)">32</button> <button class="btn btn-default btn-sm" ng-click="$ctrl.incrementRadarChartAngle(2)">Rotate +</button> {{$ctrl.analysis.radarChartAngle | number:3}}--><br/>
+				<!--<input type="radio" title="Object Heat Map" value="objectHeatMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/>Object Heat Map<br/>-->
 				<input type="radio" title="Vector Field" value="vectorField" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Vector Field<br/>
 				<input type="radio" title="Moving Particles" value="windMap" ng-model="$ctrl.analysis.type" ng-change="$ctrl.analysis.changeType()"/> Moving Particles <input type="checkbox" title="useWeight" ng-model="$ctrl.analysis.disWeight" ng-change="$ctrl.analysis.changeSetting()"/> disWeight
 			</div>
