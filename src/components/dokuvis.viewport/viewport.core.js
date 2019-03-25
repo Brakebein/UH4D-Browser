@@ -1197,6 +1197,8 @@ angular.module('dokuvis.viewport',[
 			var defer = $q.defer(),
 				resolution = 20;
 
+			entry.object.updateMatrixWorld(true);
+
 			var testObjects = getRaycastTestObjects('objects');
 
 			for (var i = 0; i < resolution; i++) {
@@ -1696,6 +1698,8 @@ angular.module('dokuvis.viewport',[
 					selected[0].focus();
 				else if (selected[0] instanceof DV3D.ObjectEntry)
 					selected[0].focus();
+				else if (selected[0] instanceof DV3D.ClusterObject)
+					focusCluster(selected[0]);
 			}
 		}
 
@@ -3192,9 +3196,9 @@ angular.module('dokuvis.viewport',[
 			var boundingSphere = boundingBox.getBoundingSphere();
 
 			// calculate new camera.position and controls.target
-			var s = new THREE.Vector3().subVectors(camera.position, controls.target);
-			var h = boundingSphere.radius / Math.tan( camera.fov / 2 * THREE.Math.DEG2RAD );
-			var newpos = new THREE.Vector3().addVectors(boundingSphere.center, s.setLength(h));
+			var s = new THREE.Vector3().subVectors(camera.position, controls.target),
+				h = boundingSphere.radius / Math.tan( camera.fov / 2 * THREE.Math.DEG2RAD ),
+				pos = new THREE.Vector3().addVectors(boundingSphere.center, s.setLength(h));
 
 			// adjust camera frustum (near, far)
 			camera.near = boundingSphere.radius / 100;
@@ -3203,7 +3207,7 @@ angular.module('dokuvis.viewport',[
 
 			// animate camera.position and controls.target
 			new TWEEN.Tween(camera.position.clone())
-				.to(newpos, 500)
+				.to(pos, 500)
 				.easing(TWEEN.Easing.Cubic.InOut)
 				.onUpdate(function () { camera.position.copy(this); })
 				.start();
@@ -3223,6 +3227,35 @@ angular.module('dokuvis.viewport',[
 			// 	orthocam.position.set(M.x, M.y, 50);
 			// else if (scope.camera === 'left')
 			// 	orthocam.position.set(-50, M.y, M.z);
+		}
+
+		function focusCluster(cluster) {
+			// compute bounding sphere
+			var geometry = new THREE.Geometry();
+			cluster.getLeaves().forEach(function (leaf) {
+				geometry.vertices.push(leaf.position);
+			});
+			geometry.computeBoundingSphere();
+
+			// calculate new camera.position and controls.target
+			var s = new THREE.Vector3().subVectors(camera.position, controls.target),
+				h = geometry.boundingSphere.radius / Math.tan( camera.fov / 2 * THREE.Math.DEG2RAD ),
+				pos = new THREE.Vector3().addVectors(geometry.boundingSphere.center, s.setLength(h));
+
+			// animate camera.position and controls.target
+			new TWEEN.Tween(camera.position.clone())
+				.to(pos, 500)
+				.easing(TWEEN.Easing.Cubic.InOut)
+				.onUpdate(function () { camera.position.copy(this); })
+				.start();
+
+			new TWEEN.Tween(controls.target.clone())
+				.to(geometry.boundingSphere.center, 500)
+				.easing(TWEEN.Easing.Cubic.InOut)
+				.onUpdate(function () { controls.target.copy(this); })
+				.start();
+
+			startAnimation();
 		}
 
 		// tween camera facing north

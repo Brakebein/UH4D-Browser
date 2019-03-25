@@ -81,10 +81,10 @@ DV3D.ImagePane.prototype = Object.assign( Object.create( THREE.Object3D.prototyp
 		if (!this.pyramid.parent !== this)
 			this.add(this.pyramid);
 
-		if (customColor === undefined)
+		if (customColor !== undefined)
 			this.pyramid.material.color.setHex(customColor);
 		else
-			this.pyramid.material.color.setHex(customColor);
+			this.pyramid.material.color = new THREE.Color(0x000000).lerp(new THREE.Color(DV3D.Defaults.highlightColor), 0.5);
 	},
 
 	dehighlight: function () {
