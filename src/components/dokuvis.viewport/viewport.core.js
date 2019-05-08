@@ -63,7 +63,7 @@ angular.module('dokuvis.viewport',[
 
 		// Gizmo, Slice, Messen
 		var gizmo, gizmoMove, gizmoRotate;
-		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radialFan;
+		var measureTool, pin, heatMap, objHeatMap, vectorField, windMap, radarChart, radialFan, radialFan3D;
 		var heatMapRadius = 0;
 
 		var isAnimating = false,
@@ -2144,6 +2144,11 @@ angular.module('dokuvis.viewport',[
 					radialFan.dispose();
 					radialFan = null;
 				}
+				if (radialFan3D && (options.type !== 'radialFan3D' || !options.visible)) {
+					scene.remove(radialFan3D);
+					radialFan3D.dispose();
+					radialFan3D = null;
+				}
 
 				if (options.visible) {
 					switch (options.type) {
@@ -2176,6 +2181,10 @@ angular.module('dokuvis.viewport',[
 							// radialFan = new DV3D.RadarChart2();
 							radialFan = new DV3D.RadialFan();
 							scene.add(radialFan);
+							break;
+						case 'radialFan3D':
+							radialFan3D = new DV3D.RadialFan3D();
+							scene.add(radialFan3D);
 							break;
 					}
 
@@ -2248,6 +2257,10 @@ angular.module('dokuvis.viewport',[
 				radialFan.update(camera, clusterTree.getActiveClusters());
 
 				animateAsync();
+			}
+
+			if (radialFan3D) {
+				radialFan3D.update(camera, clusterTree.getActiveClusters());
 			}
 
 			if (objHeatMap) {
