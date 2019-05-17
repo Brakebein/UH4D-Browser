@@ -6,9 +6,72 @@
 
 	<!--<link rel="stylesheet" href="src/bower_components/font-awesome/css/font-awesome.css" />-->
 
-	<link rel="stylesheet" href="style/vendor.4fdbbcf3.css">
+	<link rel="stylesheet" href="style/vendor.6e630887.css">
 
 	<link rel="stylesheet" href="style/app.cfb372ef.css">
+
+
+	<!-- Matomo -->
+	<script type="text/javascript">
+		var _paq = window._paq || [];
+		_paq.push(['requireConsent']);
+
+		(function() {
+			var u="//4dbrowser.urbanhistory4d.org/analytics/";
+			_paq.push(['setTrackerUrl', u+'matomo.php']);
+			_paq.push(['setSiteId', '1']);
+			var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+			g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+
+			var currentHash = '',
+				currentQuery = {};
+
+			// initial call
+			if (window.location.hash.length > 0)
+				onUrlChange();
+
+			window.addEventListener('hashchange', onUrlChange);
+
+			function onUrlChange() {
+				var matches = /#([^#?\s]*)(?:\?([^#?]+))?/.exec(window.location.hash);
+				var hash = matches[1],
+					query = matches[2];
+
+				if (hash !== currentHash)
+					onStateChange(hash);
+
+				if (query)
+					onQueryChange(query);
+			}
+
+			function onStateChange(hash) {
+				_paq.push(['setCustomUrl', '/' + hash]);
+				_paq.push(['enableHeartBeatTimer']);
+				// _paq.push(['deleteCustomVariables', 'page']);
+				_paq.push(['trackPageView']);
+				_paq.push(['enableLinkTracking']);
+
+				currentHash = hash;
+			}
+
+			function onQueryChange(query) {
+				var queryObject = JSON.parse('{"' + decodeURI(query).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
+
+				Object.keys(queryObject).forEach(function (key) {
+					// if parameter is date, only save year
+					if (/\d{4}-\d{2}-\d{2}/.test(queryObject[key])) {
+						queryObject[key] = queryObject[key].substr(0, 4);
+					}
+					// track if parameter changed
+					if (!currentQuery[key] || currentQuery[key] !== queryObject[key]) {
+						_paq.push(['trackSiteSearch', queryObject[key], key, false]);
+						currentQuery[key] = queryObject[key];
+					}
+				});
+			}
+		})();
+	</script>
+	<!-- End Matomo Code -->
 
 </head>
 <body ng-app="uh4dApp">
@@ -25,7 +88,7 @@
 	<!--<script src="src/bower_components/angular-strap/dist/angular-strap.tpl.js"></script>-->
 	<!--<script src="src/bower_components/heatmap.js-amd/build/heatmap.js"></script>-->
 
-	<script src="script/vendor.70a52c88.js"></script>
+	<script src="script/vendor.2127d362.js"></script>
 
 	<!--<script src="src/lib/browserify.js"></script>-->
 	<!--<script src="node_modules/rbush/rbush.js"></script>-->
@@ -34,6 +97,39 @@
 	<script src="script/web3d-bundle.e2f3db3b.js"></script>
 
 	<script src="script/app.e7a32ae0.js"></script>
+
+	<!-- cookieconsent -->
+	<script>
+		window.cookieconsent.initialise({
+			container: document.getElementsByClassName('main-body')[0],
+			palette: {
+				popup: {background: '#fff'}
+			},
+			content: {
+				message: 'This site uses Matomo to analyze traffic and help us to improve your user experience. It is processing your IP address and store cookies on your browser. Those data are only processed by us.',
+				link: 'Learn more about our Privacy Policy',
+				href: '#!/legalnotice'
+			},
+			type: 'opt-out',
+			layout: 'basic',
+			compliance: {
+				'opt-out': '<div class="cc-compliance cc-highlight">{{deny}}{{dismiss}}</div>'
+			},
+			position: 'top-right',
+			onInitialise: function (status) {
+				if (status === 'dismiss')
+					window._paq.push(['rememberConsentGiven']);
+				else
+					window._paq.push(['forgetConsentGiven']);
+			},
+			onStatusChange: function (status) {
+				if (status === 'dismiss')
+					window._paq.push(['rememberConsentGiven']);
+				else
+					window._paq.push(['forgetConsentGiven']);
+			}
+		});
+	</script>
 
 </body>
 </html>
