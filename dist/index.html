@@ -6,7 +6,7 @@
 
 	<!--<link rel="stylesheet" href="src/bower_components/font-awesome/css/font-awesome.css" />-->
 
-	<link rel="stylesheet" href="style/vendor.c02ea8ff.css">
+	<link rel="stylesheet" href="style/vendor.4fc1651c.css">
 
 	<link rel="stylesheet" href="style/app.cfb372ef.css">
 
@@ -33,7 +33,7 @@
 			window.addEventListener('hashchange', onUrlChange);
 
 			function onUrlChange() {
-				var matches = /#([^#?\s]*)(?:\?([^#?]+))?/.exec(window.location.hash);
+				var matches = /#!\/([^#?\s]*)(?:\?([^#?]+))?/.exec(window.location.hash);
 				var hash = matches[1],
 					query = matches[2];
 
@@ -45,7 +45,8 @@
 			}
 
 			function onStateChange(hash) {
-				_paq.push(['setCustomUrl', '/' + hash]);
+				_paq.push(['setCustomUrl', '/#!/' + hash]);
+				_paq.push(['setDocumentTitle', hash ? hash : 'home']);
 				_paq.push(['enableHeartBeatTimer']);
 				// _paq.push(['deleteCustomVariables', 'page']);
 				_paq.push(['trackPageView']);
@@ -88,15 +89,15 @@
 	<!--<script src="src/bower_components/angular-strap/dist/angular-strap.tpl.js"></script>-->
 	<!--<script src="src/bower_components/heatmap.js-amd/build/heatmap.js"></script>-->
 
-	<script src="script/vendor.87b03171.js"></script>
+	<script src="script/vendor.1aa18ab6.js"></script>
 
 	<!--<script src="src/lib/browserify.js"></script>-->
 	<!--<script src="node_modules/rbush/rbush.js"></script>-->
 	<!--<script src="src/lib/rbush.js"></script>-->
 
-	<script src="script/web3d-bundle.e2f3db3b.js"></script>
+	<script src="script/web3d-bundle.ef0dc621.js"></script>
 
-	<script src="script/app.e7a32ae0.js"></script>
+	<script src="script/app.821fba9a.js"></script>
 
 	<!-- cookieconsent -->
 	<script>
