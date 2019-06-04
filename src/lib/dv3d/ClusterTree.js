@@ -3,7 +3,7 @@
 var scene = undefined,
 	octree = undefined;
 
-DV3D.ClusterTree = function (sceneParam, octreeParam) {
+DV3D.ClusterTree = function (sceneParam, octreeParam, config) {
 
 	this.root = null;
 
@@ -13,6 +13,14 @@ DV3D.ClusterTree = function (sceneParam, octreeParam) {
 	this._activeClusters = [];
 
 	this._distanceMultiplier = 10;
+	this._scale = 3;
+	this._opacity = 1.0;
+
+	if (config) {
+		if (config.distanceMultiplier) this._distanceMultiplier = config.distanceMultiplier;
+		if (config.scale) this._scale = config.scale;
+		if (config.opacity) this._opacity = config.opacity;
+	}
 
 };
 
@@ -25,6 +33,8 @@ DV3D.ClusterTree.prototype = {
 	},
 
 	bulkInsert: function (objects) {
+
+		var scope = this;
 
 		this.clean();
 
@@ -51,7 +61,7 @@ DV3D.ClusterTree.prototype = {
 				}
 			}
 
-			var cluster = new DV3D.ClusterObject([a, b], depth, tempDist);
+			var cluster = new DV3D.ClusterObject(scope, [a, b], depth, tempDist);
 
 			tmp.splice(tmp.indexOf(a), 1);
 			tmp.splice(tmp.indexOf(b), 1);
@@ -133,6 +143,14 @@ DV3D.ClusterTree.prototype = {
 
 	setDistanceMultiplier: function (value) {
 		this._distanceMultiplier = value;
+	},
+
+	setScale: function (value) {
+		this._scale = value;
+	},
+
+	setOpacity: function (value) {
+		this._opacity = Math.min(1.0, Math.max(0, value));
 	},
 
 	getObjectsByDistance: function (position) {
@@ -255,7 +273,7 @@ DV3D.ClusterTree.prototype = {
 };
 
 
-DV3D.ClusterObject = function (children, depth, distance) {
+DV3D.ClusterObject = function (tree, children, depth, distance) {
 
 	var scope = this;
 
@@ -283,7 +301,9 @@ DV3D.ClusterObject = function (children, depth, distance) {
 
 	scope.objectMap = {};
 	scope.object = new THREE.Group();
-	this.object.position.copy(this.position);
+	scope.object.position.copy(scope.position);
+
+	scope.tree = tree;
 
 };
 
@@ -367,6 +387,7 @@ DV3D.ClusterObject.prototype = {
 		}
 
 		if (visible && !this.active) {
+			this.setOpacity(this.tree._opacity);
 			scene.add(this.object);
 			octree.add(this.collisionObject);
 			this.active = true;
@@ -381,8 +402,23 @@ DV3D.ClusterObject.prototype = {
 
 	lookAt: function (position) {
 		this.object.lookAt(position);
-		var scale = this.position.distanceTo(position) / 25;
+		var scale = this.position.distanceTo(position) * this.tree._scale / 100;
 		this.object.scale.set(scale, scale, scale);
+	},
+
+	setOpacity: function (opacity) {
+		var transparentFlag = false;
+		if (opacity < 1.0)
+			transparentFlag = true;
+
+		this.objectMap.images.forEach(function (img) {
+			img.material.transparent = transparentFlag;
+			img.material.opacity = opacity;
+		});
+		this.objectMap.line.material.transparent = transparentFlag;
+		this.objectMap.line.material.opacity = opacity;
+		this.objectMap.text.material.transparent = transparentFlag;
+		this.objectMap.text.material.opacity = opacity;
 	},
 
 	/**

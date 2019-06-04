@@ -48,7 +48,8 @@ angular.module('dokuvis.viewport')
 			images: {
 				opacity: 1.0,
 				scale: 3,
-				clusterDistance: 10
+				clusterDistance: 10,
+				clusterEnabled: true
 			}
 		};
 

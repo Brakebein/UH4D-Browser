@@ -16,7 +16,7 @@ DV3D.ObjectHeatMap = function ( object, camera ) {
 		radius: 1.5,
 		baseColor: '#2b83ba',//'#' + this._originalMat.color.getHexString(),
 		gradient: {
-			//0.0: '#00ff32',
+			// 0.0: '#ffffff',
 			0.3: '#2b83ba', // blue
 			0.5: '#abdda4', // cyan
 			0.7: '#ffffbf', // green

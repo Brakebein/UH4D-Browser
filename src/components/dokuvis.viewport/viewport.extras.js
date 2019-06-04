@@ -29,6 +29,10 @@ angular.module('dokuvis.viewport')
 			$scope.$parent.focus(mode);
 		};
 
+		$ctrl.takeScreenshot = function () {
+			$scope.$parent.takeScreenshot();
+		};
+
 		function setNavigationMode(mode) {
 			$ctrl.navigation.default = false;
 			$ctrl.navigation.rotate = false;
@@ -500,7 +504,7 @@ angular.module('dokuvis.viewport')
 
 	templateUrl: 'components/dokuvis.viewport/viewportImageCtrls.tpl.html',
 
-	controller: ['$scope', 'viewportCache', 'viewportSettings', function ($scope, viewportCache, viewportSettings) {
+	controller: ['$scope', '$rootScope', 'viewportCache', 'viewportSettings', function ($scope, $rootScope, viewportCache, viewportSettings) {
 
 		var $ctrl = this;
 
@@ -508,11 +512,13 @@ angular.module('dokuvis.viewport')
 			$ctrl.opacity = viewportSettings.images.opacity * 100;
 			$ctrl.scale = viewportSettings.images.scale;
 			$ctrl.clusterDistance = viewportSettings.images.clusterDistance;
+			$ctrl.clusterEnabled = viewportSettings.images.clusterEnabled;
 		};
 
 		$ctrl.setOpacity = function () {
 			viewportCache.spatialImages.setOpacity($ctrl.opacity / 100);
 			viewportSettings.images.opacity = $ctrl.opacity / 100;
+			$scope.$parent.setOpacity(viewportSettings.images.opacity);
 		};
 
 		$ctrl.setScale = function () {
@@ -520,6 +526,12 @@ angular.module('dokuvis.viewport')
 				image.setScale($ctrl.scale);
 			});
 			viewportSettings.images.scale = $ctrl.scale;
+			$scope.$parent.setScale($ctrl.scale);
+		};
+
+		$ctrl.toggleCluster = function () {
+			viewportSettings.images.clusterEnabled = $ctrl.clusterEnabled;
+			$rootScope.$broadcast('searchUpdate');
 		};
 
 		$ctrl.setClusterDistanceMultiplier = function () {

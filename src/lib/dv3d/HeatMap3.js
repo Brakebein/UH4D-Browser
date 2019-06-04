@@ -30,12 +30,13 @@ DV3D.HeatMap3 = function (container0, canvas0) {
 		blur: 0.95,
 		radius: 1.5,
 		gradient: {
-			//0.0: '#00ff32',
+			// 0.0: '#ffffff',
 			0.3: '#2b83ba', // blue
 			0.5: '#abdda4', // cyan
 			0.7: '#ffffbf', // green
 			0.9: '#fdae61', // yellow
 			1.0: '#d7191c'  // red
+			// 1.0: '#ece10f'  // red
 		}
 	});
 

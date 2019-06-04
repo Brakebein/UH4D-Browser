@@ -189,8 +189,12 @@ angular.module('dokuvis.viewport',[
 			});
 
 			// clusterTree
-			clusterTree = new DV3D.ClusterTree(scene, octree);
-			clusterTree.setDistanceMultiplier(viewportSettings.images.clusterDistance);
+			clusterTree = new DV3D.ClusterTree(scene, octree, {
+				distanceMultiplier: viewportSettings.images.clusterDistance,
+				scale: viewportSettings.images.scale,
+				opacity: viewportSettings.images.opacity
+			});
+			// clusterTree.setDistanceMultiplier(viewportSettings.images.clusterDistance);
 
 			// var ground = new THREE.Mesh(new THREE.PlaneBufferGeometry(10000, 10000), new THREE.MeshLambertMaterial({ color: 0xaaaaaa }));
 			// ground.rotation.x = -Math.PI / 2;
@@ -229,9 +233,18 @@ angular.module('dokuvis.viewport',[
 				// octree.add(entry.object.collisionObject);
 			});
 
-			clusterTree.bulkInsert(spatialImages.get().map(function (si) {
-				return si.object;
-			}));
+			if (viewportSettings.images.clusterEnabled) {
+				clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+					return si.object;
+				}));
+			}
+			else {
+				spatialImages.get().forEach(function (si) {
+					octree.add(si.object.collisionObject);
+					scene.add(si.object);
+				});
+				updateOctreeAsync();
+			}
 
 			animate();
 			viewportCameraMove(camera);
@@ -254,6 +267,12 @@ angular.module('dokuvis.viewport',[
 					}
 				};
 				elScope.flyHome = setHomeView;
+				elScope.takeScreenshot = function () {
+					var data = getScreenshot();
+					console.log(data);
+					var newTab = $window.open('', '_blank');
+					newTab.document.body.innerHTML = '<img src="' + data.sData + '"/>';
+				};
 
 				el = $compile('<viewport-navigation></viewport-navigation>')(elScope);
 				$animate.enter(el, element);
@@ -277,6 +296,12 @@ angular.module('dokuvis.viewport',[
 			// <viewport-image-controls> component
 			if ('imageControls' in attrs) {
 				elScope = scope.$new(false);
+				elScope.setOpacity = function (value) {
+					clusterTree.setOpacity(value);
+				};
+				elScope.setScale = function (value) {
+					clusterTree.setScale(value);
+				};
 				elScope.setClusterDistanceMultiplier = function (value) {
 					clusterTree.setDistanceMultiplier(value);
 					animateAsync();
@@ -2425,6 +2450,10 @@ angular.module('dokuvis.viewport',[
 			});
 
 			clusterTree.clean();
+			spatialImages.get().forEach(function (si) {
+				octree.remove(si.object.collisionObject);
+				scene.remove(si.object);
+			});
 
 			// remove "missing" images
 			toBeRemoved.forEach(function (value) {
@@ -2451,9 +2480,18 @@ angular.module('dokuvis.viewport',[
 				.then(function () {
 					$rootScope.$broadcast('spatialImageLoadSuccess');
 
-					clusterTree.bulkInsert(spatialImages.get().map(function (si) {
-						return si.object;
-					}));
+					if (viewportSettings.images.clusterEnabled) {
+						clusterTree.bulkInsert(spatialImages.get().map(function (si) {
+							return si.object;
+						}));
+					}
+					else {
+						spatialImages.get().forEach(function (si) {
+							octree.add(si.object.collisionObject);
+							scene.add(si.object);
+						});
+						updateOctreeAsync();
+					}
 
 					isLoading = false;
 
