@@ -278,7 +278,9 @@ angular.module('dokuvis.imageViewer', [])
 						plane.position.set(0, 0, -z);
 						maxZoomOut = -z;
 					}
-					render();
+					if (renderer) {
+						render();
+					}
 				}
 
 				function startMarking() {

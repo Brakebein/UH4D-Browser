@@ -109,6 +109,7 @@
 					<i title="Add to collection" class="far fa-star" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
 					<i title="Remove from collection" class="fas fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 					<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
+					<i title="Meta checked: {{img.checked.user}} &ndash; {{img.checked.to | amCalendar}}" ng-show="$root.editableMode && img.checked" class="fa fa-check"></i>
 				</div>
 			</li>
 		</ul>
@@ -127,6 +128,7 @@
 				<i title="Add to collection" class="far fa-star" ng-show="!img.inCollection" ng-click="$ctrl.addToCollection($event, img)"></i>
 				<i title="Remove from collection" class="fas fa-star" ng-show="img.inCollection" ng-click="$ctrl.removeFromCollection($event, img)"></i>
 				<i title="Spatialized (Zoom in)" class="fa fa-cube" ng-show="img.spatial" ng-click="$ctrl.focusImage($event, img.spatial)"></i>
+				<i title="Meta checked: {{img.checked.user}} &ndash; {{img.checked.to | amCalendar}}" ng-show="$root.editableMode && img.checked" class="fa fa-check"></i>
 			</div>
 		</div>
 
