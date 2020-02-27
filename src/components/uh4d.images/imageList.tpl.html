@@ -75,6 +75,17 @@
 			</div>
 		</div>
 
+		<div class="input-group input-group-sm w-auto">
+			<div class="input-group-prepend">
+				<span class="input-group-text">#</span>
+			</div>
+			<select class="form-control" ng-model="$ctrl.itemsPerPage">
+				<option ng-value="20">20</option>
+				<option ng-value="50">50</option>
+				<option ng-value="100">100</option>
+			</select>
+		</div>
+
 		<div class="btn-group btn-group-sm">
 			<button class="btn btn-sm" ng-class="$ctrl.listMode === 'list' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setListMode('list')"><i class="fa fa-th-list"></i></button>
 			<button class="btn btn-sm" ng-class="$ctrl.listMode === 'cards' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setListMode('cards')"><i class="fa fa-th-large"></i></button>
