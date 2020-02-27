@@ -68,14 +68,22 @@
 <div class="ctrl-container ctrl-bottom-left">
 	<div>
 
-		<h6>Keyboard configuration</h6>
+		<div ng-show="$ctrl.controlMode === 'fly'" class="mb-2">
+			<h6>Keyboard configuration</h6>
 
-		<div><kbd>W</kbd>|<kbd>S</kbd> Forward | Backward</div>
-		<div><kbd>A</kbd>|<kbd>D</kbd> Left | Right</div>
-		<div><kbd>R</kbd>|<kbd>F</kbd> Up | Down</div>
-		<div><kbd>Q</kbd>|<kbd>E</kbd> Roll <i class="fa fa-undo-alt"></i> | <i class="fa fa-redo-alt"></i></div>
-		<div><kbd class="fa fa-long-arrow-alt-up"></kbd>|<kbd class="fa fa-long-arrow-alt-down"></kbd> Pitch Up | Down</div>
-		<div><kbd class="fa fa-long-arrow-alt-left"></kbd>|<kbd class="fa fa-long-arrow-alt-right"></kbd> Yaw Left | Right</div>
+			<div><kbd>W</kbd>|<kbd>S</kbd> Forward | Backward</div>
+			<div><kbd>A</kbd>|<kbd>D</kbd> Left | Right</div>
+			<div><kbd>R</kbd>|<kbd>F</kbd> Up | Down</div>
+			<div><kbd>Q</kbd>|<kbd>E</kbd> Roll <i class="fa fa-undo-alt"></i> | <i class="fa fa-redo-alt"></i></div>
+			<div><kbd class="fa fa-long-arrow-alt-up"></kbd>|<kbd class="fa fa-long-arrow-alt-down"></kbd> Pitch Up | Down</div>
+			<div><kbd class="fa fa-long-arrow-alt-left"></kbd>|<kbd class="fa fa-long-arrow-alt-right"></kbd> Yaw Left | Right</div>
+		</div>
+
+		<h6>Navigation Mode</h6>
+		<div class="btn-group btn-group-sm mb-2">
+			<button class="btn btn-sm" ng-class="$ctrl.controlMode !== 'fly' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setControlMode('default')"><i class="fa fa-satellite"></i> Default</button>
+			<button class="btn btn-sm" ng-class="$ctrl.controlMode === 'fly' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setControlMode('fly')"><i class="fa fa-helicopter"></i> Fly</button>
+		</div>
 
 	</div>
 </div>

@@ -326,6 +326,7 @@ angular.module('dokuvis.viewport')
 			camera = $ctrl.camera = $scope.$parent.camera;
 			controls = $scope.$parent.controls;
 
+			$ctrl.controlMode = 'fly';
 			$ctrl.opacity = 50;
 			// this.moveStep = 0.2;
 			$ctrl.moveFactor = controls.moveFactor || 1.0;
@@ -383,8 +384,15 @@ angular.module('dokuvis.viewport')
 		};
 
 		$ctrl.changeFactor = function () {
-			controls.rollSpeed = $ctrl.moveFactor * 0.1;
-			controls.moveFactor = $ctrl.moveFactor;
+			if (controls instanceof THREE.FlyControls) {
+				controls.rollSpeed = $ctrl.moveFactor * 0.1;
+				controls.moveFactor = $ctrl.moveFactor;
+			}
+		};
+
+		$ctrl.setControlMode = function (mode) {
+			$ctrl.controlMode = mode;
+			$scope.$parent.toggleFlyControls(mode);
 		};
 
 		$ctrl.save = function () {
