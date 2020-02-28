@@ -315,11 +315,12 @@ angular.module('dokuvis.viewport')
 
 	templateUrl: '/components/dokuvis.viewport/viewportSpatializeManual.tpl.html',
 
-	controller: ['$scope', '$rootScope', 'Utilities', function ($scope, $rootScope, Utilities) {
+	controller: ['$scope', '$rootScope', '$window', 'Utilities', function ($scope, $rootScope, $window, Utilities) {
 
 		var $ctrl = this;
 
 		var source, camera, controls;
+		var editStartTime = moment().format();
 
 		$ctrl.$onInit = function () {
 			source = $ctrl.source = $scope.$parent.source;
@@ -330,54 +331,9 @@ angular.module('dokuvis.viewport')
 			$ctrl.opacity = 50;
 			// this.moveStep = 0.2;
 			$ctrl.moveFactor = controls.moveFactor || 1.0;
-		};
 
-		// this.transformView = function (dir) {
-		// 	var up = new THREE.Vector3(0,1,0).applyQuaternion(camera.quaternion);
-		// 	var forward = new THREE.Vector3().subVectors(controls.center, camera.position).normalize();
-		//
-		// 	var cameraV, centerV;
-		//
-		// 	switch (dir) {
-		// 		case 'up':
-		// 			cameraV = new THREE.Vector3(0,$ctrl.moveStep,0);
-		// 			centerV = up;
-		// 			break;
-		// 		case 'down':
-		// 			cameraV = new THREE.Vector3(0,-$ctrl.moveStep,0);
-		// 			centerV = up.negate();
-		// 			break;
-		// 		case 'left':
-		// 			cameraV = new THREE.Vector3(-$ctrl.moveStep,0,0);
-		// 			centerV = up.cross(forward);
-		// 			break;
-		// 		case 'right':
-		// 			cameraV = new THREE.Vector3($ctrl.moveStep,0,0);
-		// 			centerV = up.cross(forward).negate();
-		// 			break;
-		// 		case 'forward':
-		// 			cameraV = new THREE.Vector3(0,0,-$ctrl.moveStep);
-		// 			break;
-		// 		case 'backward':
-		// 			cameraV = new THREE.Vector3(0,0,$ctrl.moveStep);
-		// 			break;
-		// 		case 'tilt-up':
-		// 			centerV = new THREE.Vector3(0,$ctrl.moveStep,0);
-		// 			break;
-		// 		case 'tilt-down':
-		// 			centerV = new THREE.Vector3(0,-$ctrl.moveStep,0);
-		// 			break;
-		// 	}
-		//
-		// 	if (cameraV)
-		// 		camera.translateOnAxis(cameraV, $ctrl.moveStep);
-		// 	if (centerV) {
-		// 		centerV.setLength($ctrl.moveStep);
-		// 		controls.center.add(centerV);
-		// 	}
-		//
-		// 	$scope.$parent.animate();
-		// };
+			$ctrl.editUser = $window.localStorage['metaEditor'] || '';
+		};
 
 		$ctrl.changeFOV = function () {
 			camera.updateProjectionMatrix();
@@ -398,10 +354,21 @@ angular.module('dokuvis.viewport')
 		$ctrl.save = function () {
 			if (!source || !camera) return;
 
+			if (!$ctrl.editUser) {
+				Utilities.dangerAlert('You need to set a name or acronym!');
+				return;
+			}
+			$window.localStorage['metaEditor'] = $ctrl.editUser;
+
 			source.spatialize = {
 				matrix: camera.matrixWorld.toArray(),
 				offset: [0,0],
-				ck: 1 / Math.tan((camera.fov / 2) * THREE.Math.DEG2RAD) * 0.5
+				ck: 1 / Math.tan((camera.fov / 2) * THREE.Math.DEG2RAD) * 0.5,
+				meta: {
+					user: $ctrl.editUser,
+					from: editStartTime,
+					to: moment().format()
+				}
 			};
 
 			source.$spatialize({ method: 'manual' })

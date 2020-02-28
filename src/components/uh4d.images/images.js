@@ -288,7 +288,7 @@ angular.module('uh4d.images', [
 				$ctrl.image[prop] = { value: data };
 			else if (prop === 'checked') {
 				if (!$ctrl.editUser) {
-					Utilities.dangerAlert('You need to set a name or acronym!')
+					Utilities.dangerAlert('You need to set a name or acronym!');
 					return;
 				}
 				$window.localStorage['metaEditor'] = $ctrl.editUser;

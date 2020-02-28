@@ -85,5 +85,14 @@
 			<button class="btn btn-sm" ng-class="$ctrl.controlMode === 'fly' ? 'btn-primary' : 'btn-secondary'" ng-click="$ctrl.setControlMode('fly')"><i class="fa fa-helicopter"></i> Fly</button>
 		</div>
 
+		<div class="mb-1 bg-warning p-1" style="width: 160px">
+			<div class="input-group input-group-sm">
+				<div class="input-group-prepend">
+					<span class="input-group-text">Acronym</span>
+				</div>
+				<input class="form-control form-control-sm" ng-model="$ctrl.editUser"/>
+			</div>
+		</div>
+
 	</div>
 </div>
