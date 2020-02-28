@@ -533,6 +533,15 @@ angular.module('dokuvis.viewport',[
 			spatializeManualScope.camera = camera;
 			spatializeManualScope.controls = flyControls;
 			spatializeManualScope.close = closeSpatializeManual;
+			spatializeManualScope.toggleFlyControls = function (type) {
+				if (type === 'fly') {
+					flyControls = spatializeManualScope.controls;
+					startAnimation();
+				} else {
+					flyControls = null;
+					stopAnimation();
+				}
+			};
 			// spatializeManualScope.linkToObjects = function (src) {
 			// 	var entry = spatialImages.getByName(src.spatial.id);
 			// 	return linkObjectsInSight(entry);
@@ -553,7 +562,7 @@ angular.module('dokuvis.viewport',[
 
 		function closeSpatializeManual() {
 			// dispose flyControls
-			flyControls.dispose();
+			(flyControls || spatializeManualScope.controls).dispose();
 			flyControls = null;
 			stopAnimation();
 

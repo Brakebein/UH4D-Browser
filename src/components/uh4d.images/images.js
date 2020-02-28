@@ -213,7 +213,7 @@ angular.module('uh4d.images', [
 	
 .component('imageModal', {
 	templateUrl: 'components/uh4d.images/imageModal.tpl.html',
-	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', 'Person', 'LegalBody', '$http', function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection, Person, LegalBody, $http) {
+	controller: ['$rootScope', '$state', '$timeout', 'Image', 'Utilities', 'ImageCollection', 'Person', 'LegalBody', '$http', '$window' , function ($rootScope, $state, $timeout, Image, Utilities, ImageCollection, Person, LegalBody, $http, $window) {
 
 		var $ctrl = this;
 
@@ -238,6 +238,9 @@ angular.module('uh4d.images', [
 
 					if ($rootScope.editableMode)
 						checkFileUpdate(id);
+
+					$ctrl.editStartTime = moment().format();
+					$ctrl.editUser = $window.localStorage['metaEditor'] || '';
 				})
 				.catch(function (reason) {
 					Utilities.throwApiException('Image.get', reason);
@@ -283,6 +286,18 @@ angular.module('uh4d.images', [
 				});
 			else if (prop === 'date')
 				$ctrl.image[prop] = { value: data };
+			else if (prop === 'checked') {
+				if (!$ctrl.editUser) {
+					Utilities.dangerAlert('You need to set a name or acronym!');
+					return;
+				}
+				$window.localStorage['metaEditor'] = $ctrl.editUser;
+				$ctrl.image[prop] = {
+					user: $ctrl.editUser,
+					from: $ctrl.editStartTime,
+					to: moment().format()
+				};
+			}
 			else
 				$ctrl.image[prop] = data;
 

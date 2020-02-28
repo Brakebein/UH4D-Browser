@@ -113,6 +113,17 @@
 				</div>
 
 				<div ng-if="$root.editableMode">
+					<div class="form-group mb-2 bg-warning text-dark p-2 mr-2">
+						<p ng-if="!$ctrl.image.checked">Last metadata check: none</p>
+						<p ng-if="$ctrl.image.checked">Last metadata check: {{$ctrl.image.checked.user}} &ndash; {{$ctrl.image.checked.to | amCalendar}}</p>
+						<div class="input-group input-group-sm" style="width: 200px">
+							<input class="form-control form-control-sm" placeholder="Acronym..." ng-model="$ctrl.editUser"/>
+							<div class="input-group-append">
+								<button class="input-group-btn btn btn-secondary" ng-click="$ctrl.updateImage('checked', true)"><i class="fa fa-thumbs-up"></i> Checked</button>
+							</div>
+						</div>
+					</div>
+
 					<button class="btn btn-warning" data-ng-disabled="!$ctrl.fileUpdate.updateAvailable || $ctrl.isSaving" ng-click="$ctrl.updateFile()">Update image file</button>
 					<div ng-show="$ctrl.fileUpdate.updateAvailable">
 						Current image: <b>{{$ctrl.image.file.width + ' x ' + $ctrl.image.file.height}}</b><br/>
