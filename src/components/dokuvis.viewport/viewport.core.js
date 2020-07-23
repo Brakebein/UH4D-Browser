@@ -2611,8 +2611,15 @@ angular.module('dokuvis.viewport',[
 		}
 
 		function enterIsolation(obj) {
-			clusterTree.hide();
-			octree.update();
+			if (viewportSettings.images.clusterEnabled) {
+				clusterTree.hide();
+				octree.update();
+			}
+			else {
+				spatialImages.forEach(function(img) {
+					img.toggle(false);
+				}, true);
+			}
 
 			obj.entry.toggle(true);
 
@@ -2622,6 +2629,12 @@ angular.module('dokuvis.viewport',[
 
 		function exitIsolation() {
 			if (!inIsolationMode) return;
+
+			if (!viewportSettings.images.clusterEnabled) {
+				spatialImages.forEach(function(img) {
+					img.toggle(true);
+				});
+			}
 
 			inIsolationMode = false;
 			scope.$broadcast('viewportIsolationExit');
@@ -2727,7 +2740,7 @@ angular.module('dokuvis.viewport',[
 				scene.remove(target.object);
 				setSelected(target, false, true);
 			}
-
+			updateOctreeAsync();
 			animateAsync();
 		}
 
