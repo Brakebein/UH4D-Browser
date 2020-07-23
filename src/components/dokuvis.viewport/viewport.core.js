@@ -2616,7 +2616,7 @@ angular.module('dokuvis.viewport',[
 				octree.update();
 			}
 			else {
-				spatialImages.forEach(img => {
+				spatialImages.forEach(function(img) {
 					img.toggle(false);
 				}, true);
 			}
@@ -2631,7 +2631,7 @@ angular.module('dokuvis.viewport',[
 			if (!inIsolationMode) return;
 
 			if (!viewportSettings.images.clusterEnabled) {
-				spatialImages.forEach(img => {
+				spatialImages.forEach(function(img) {
 					img.toggle(true);
 				});
 			}
