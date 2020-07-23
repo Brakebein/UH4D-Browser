@@ -38,5 +38,6 @@
     "jquery": "^3.5.0",
     "popper.js": "^1.14.4",
     "rbush": "^2.0.2"
-  }
+  },
+  "dependencies": {}
 }
