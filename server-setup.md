@@ -99,6 +99,17 @@ To prepare pm2 for startup, run following command and follow instructions.
 
     > apt install git
 
+### UH4D Data
+
+Since `unzip` has problems with big zip files, we use `7z` to unpack data.
+
+    > apt-get install p7zip p7zip-full p7zip-rar
+    > 7z x -ouh4d-data uh4d-data.zip
+
+Import database dump into Neo4j database:
+
+    > cypher-shell -u neo4j -p <password> -d neo4j -f uh4d-all.cypher
+
 ### UH4D-Server
 
     > cd ~
