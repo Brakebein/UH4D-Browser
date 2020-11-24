@@ -90,12 +90,12 @@ DV3D.RadialFan.prototype = Object.assign( Object.create(THREE.Object3D.prototype
 		});
 
 		// parameters
-		var canvasWidth = 500,
+		var canvasWidth = 250,
 			angleSteps = scope.angleResolution,
 			piAngle = 2 * Math.PI / angleSteps;
 		//angleOffset = piAngle * 1.5;
 
-		var maxArea = Math.pow(canvasWidth / 2, 2) * piAngle / Math.PI;
+		var maxArea = Math.pow(canvasWidth / 2 - 20, 2) * piAngle / Math.PI;
 
 		// set chart position
 		// scope.position.set(center.x, 0, center.z);
@@ -163,7 +163,7 @@ DV3D.RadialFan.prototype = Object.assign( Object.create(THREE.Object3D.prototype
 			canvas.setAttribute('height', canvasWidth.toString());
 
 			// var geometry = new THREE.PlaneBufferGeometry(150, 150);
-			var geometry = new THREE.PlaneBufferGeometry(minDistance * 1.5, minDistance * 1.5);
+			var geometry = new THREE.PlaneBufferGeometry(minDistance * 1.3, minDistance * 1.3);
 			geometry.rotateX(-Math.PI / 2);
 
 			var material = new THREE.MeshBasicMaterial({
@@ -212,20 +212,30 @@ DV3D.RadialFan.prototype = Object.assign( Object.create(THREE.Object3D.prototype
 				ctx.beginPath();
 				ctx.lineWidth = 1.0;
 				ctx.fillStyle = 'rgba(' + scope._palette[offset] + ',' + scope._palette[offset + 1] + ',' + scope._palette[offset + 2] + ', 0.7)';
-				arc({
-					outerRadius: radius, //vec.length(),
-					startAngle: angle - piAngle / 2 + Math.PI / 2 - viewAngleOffset,
-					endAngle: angle + piAngle / 2 + Math.PI / 2 - viewAngleOffset
-				});
+
+				var p1 = new THREE.Vector2(radius, 0).rotateAround(new THREE.Vector2(), angle - piAngle / 2 - viewAngleOffset);
+				var p2 = new THREE.Vector2(radius, 0).rotateAround(new THREE.Vector2(), angle + piAngle / 2 - viewAngleOffset);
+				var tip = new THREE.Vector2(radius + p1.distanceTo(p2) / 2, 0).rotateAround(new THREE.Vector2(), angle - viewAngleOffset);
+
+				ctx.moveTo(0, 0);
+				ctx.lineTo(p1.x, p1.y);
+				ctx.lineTo(tip.x, tip.y);
+				ctx.lineTo(p2.x, p2.y);
+				ctx.closePath();
+				// arc({
+				// 	outerRadius: radius, //vec.length(),
+				// 	startAngle: angle - piAngle / 2 + Math.PI / 2 - viewAngleOffset,
+				// 	endAngle: angle + piAngle / 2 + Math.PI / 2 - viewAngleOffset
+				// });
 				ctx.stroke();
 				ctx.fill();
 
-				var textPos = new THREE.Vector2(radius - 14,0).rotateAround(new THREE.Vector2(), angle - viewAngleOffset);
-				ctx.fillStyle = 'black';
-				ctx.font = '14px sans-serif';
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText(acc[index].toFixed(1), textPos.x, textPos.y);
+				// var textPos = new THREE.Vector2(radius - 14,0).rotateAround(new THREE.Vector2(), angle - viewAngleOffset);
+				// ctx.fillStyle = 'black';
+				// ctx.font = '14px sans-serif';
+				// ctx.textAlign = 'center';
+				// ctx.textBaseline = 'middle';
+				// ctx.fillText(acc[index].toFixed(1), textPos.x, textPos.y);
 			});
 
 		});
